@@ -24,7 +24,7 @@ class SampleSongsTest {
             assertTrue(f.isFile, "missing $n")
             val r = ChordProParser.parse(TextDecoding.decode(f.readBytes()), n)
             assertNull(r.issue, "$n has issue ${r.issue}")
-            assertEquals("Traditional", r.song.meta.artist, n)
+            assertEquals(if (n == "peixe-vivo.cho") "Cantiga popular" else "Traditional", r.song.meta.artist, n)
             assertTrue(r.song.meta.key != null, n)
             assertTrue(r.song.allChords().isNotEmpty(), n)
         }

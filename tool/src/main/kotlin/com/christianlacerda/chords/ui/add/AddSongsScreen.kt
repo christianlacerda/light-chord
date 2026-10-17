@@ -141,9 +141,9 @@ private fun Step(number: Int, text: String) {
     Row(Modifier.fillMaxWidth().padding(end = CONTENT_PADDING_UNITS.gridUnitsAsDp(), bottom = 0.6f.gridUnitsAsDp())) {
         LightText(
             text = number.toString(),
-            variant = LightTextVariant.Button,
+            variant = LightTextVariant.Subheading,
             modifier = Modifier.width(1.6f.gridUnitsAsDp()),
         )
-        LightText(text = text, variant = LightTextVariant.Copy, modifier = Modifier.weight(1f))
+        LightText(text = text, variant = LightTextVariant.Paragraph, modifier = Modifier.weight(1f))
     }
 }

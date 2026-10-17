@@ -34,6 +34,7 @@ import com.thelightphone.sdk.SealedLightActivity
 import com.thelightphone.sdk.SimpleLightScreen
 import com.thelightphone.sdk.ui.LightBarButton
 import com.thelightphone.sdk.ui.LightIcons
+import com.thelightphone.sdk.ui.LightScrollBarPosition
 import com.thelightphone.sdk.ui.LightScrollView
 import com.thelightphone.sdk.ui.LightText
 import com.thelightphone.sdk.ui.LightTextVariant
@@ -106,7 +107,10 @@ private fun ArtistsContent(
         when {
             artists == null -> Unit
             artists.isEmpty() -> EmptyLibrary()
-            else -> LightScrollView(Modifier.weight(1f).fillMaxWidth()) {
+            else -> LightScrollView(
+                Modifier.weight(1f).fillMaxWidth(),
+                scrollBarPosition = LightScrollBarPosition.Inside,
+            ) {
                 Column(Modifier.fillMaxWidth().padding(start = CONTENT_PADDING_UNITS.gridUnitsAsDp())) {
                     artists.forEach { ArtistRow(it, onOpenArtist) }
                 }
@@ -135,7 +139,7 @@ private fun ArtistRow(summary: ArtistSummary, onOpen: (ArtistSummary) -> Unit) {
             text = summary.count.toString(),
             variant = LightTextVariant.Detail,
             lighten = true,
-            modifier = Modifier.padding(start = 1f.gridUnitsAsDp(), end = CONTENT_PADDING_UNITS.gridUnitsAsDp()),
+            modifier = Modifier.padding(start = 1f.gridUnitsAsDp(), end = 1f.gridUnitsAsDp()),
         )
     }
 }
