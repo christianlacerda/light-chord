@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -26,7 +27,7 @@ import com.thelightphone.sdk.ui.lightClickable
 /** Progress line, then "[glyph] state ... (o) Speed N". Speed is tappable (fallback for the wheel). */
 @Composable
 internal fun SongBottomBar(
-    progress: Float,
+    progress: State<Float>,
     playState: PlayState,
     speed: Int,
     onSpeedTap: () -> Unit,
@@ -39,7 +40,7 @@ internal fun SongBottomBar(
         PlayState.Ended -> stringResource(R.string.state_end)
     }
     Column(Modifier.fillMaxWidth().padding(horizontal = 1f.gridUnitsAsDp())) {
-        LightProgressBar(colors, progress)
+        LightProgressBar(colors, progress.value)
         Row(
             modifier = Modifier.fillMaxWidth().height(3f.gridUnitsAsDp()),
             verticalAlignment = Alignment.CenterVertically,

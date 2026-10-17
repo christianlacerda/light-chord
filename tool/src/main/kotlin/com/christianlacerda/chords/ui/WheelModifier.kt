@@ -7,6 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
@@ -30,6 +31,12 @@ fun Modifier.wheelInput(wheel: WheelInput): Modifier {
     return this
         .focusRequester(requester)
         .focusable()
+        // Compose focus handling can swallow DPAD/wheel keys before Activity.onKeyDown sees them, so the wheel
+        // keys are also taken here. Only WheelKeys are consumed; the ViewModel's onKeyDown path stays as a backup.
+        .onPreviewKeyEvent { e ->
+            val n = e.nativeKeyEvent
+            wheel.onKey(n.keyCode, n.action, if (n.keyCode in WheelKeys.PRESS) n.repeatCount else 0)
+        }
         .onRotaryScrollEvent { wheel.onRotary(it.verticalScrollPixels) }
         .pointerInput(wheel) {
             awaitPointerEventScope {

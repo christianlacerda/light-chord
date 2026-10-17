@@ -43,6 +43,7 @@ import com.christianlacerda.chords.model.ChordName
 import com.christianlacerda.chords.model.Song
 import com.christianlacerda.chords.ui.ChordGridPainter
 import com.christianlacerda.chords.ui.ChordsTheme
+import com.christianlacerda.chords.ui.KeepScreenOn
 import com.christianlacerda.chords.ui.wheelInput
 import com.christianlacerda.chords.ui.chords.SongChordsScreen
 import com.christianlacerda.chords.ui.chordStyle
@@ -108,7 +109,8 @@ private fun SongContent(
     val speed by vm.speed.collectAsState()
     val flashToken by vm.flashToken.collectAsState()
     val speedPanel by vm.speedPanel.collectAsState()
-    val progress by remember(vm) {
+    // Held as State (not delegated) so only the bottom bar re-reads it every frame, not the whole screen.
+    val progress = remember(vm) {
         derivedStateOf {
             val max = vm.scrollState.maxValue
             if (max > 0 && max < Int.MAX_VALUE) (vm.scrollState.value.toFloat() / max).coerceIn(0f, 1f) else 0f
@@ -169,18 +171,6 @@ private fun SongContent(
             )
         }
     }
-}
-
-/**
- * Keeps the screen awake while this composable is in the composition. Modifier.keepScreenOn() would be
- * neater, but this works on any Compose version and never names a blocked Context/LocalView symbol.
- */
-@Composable
-private fun KeepScreenOn() {
-    AndroidView(
-        factory = { viewContext -> android.view.View(viewContext).apply { keepScreenOn = true } },
-        modifier = Modifier.size(1.dp),
-    )
 }
 
 @Composable
@@ -263,7 +253,7 @@ private fun SongBodyScroll(
                         blendMode = BlendMode.DstIn,
                     )
                 }
-                .lightClickable { vm.togglePlay() }
+                .lightClickable(hapticsEnabled = false) { vm.togglePlay() }
                 .verticalScroll(vm.scrollState)
                 .padding(horizontal = sidePad),
         ) {

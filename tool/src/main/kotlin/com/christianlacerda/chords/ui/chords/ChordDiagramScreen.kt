@@ -19,6 +19,7 @@ import androidx.compose.ui.text.style.TextAlign
 import com.christianlacerda.chords.R
 import com.christianlacerda.chords.chordpro.Transposer
 import com.christianlacerda.chords.ui.ChordsTheme
+import com.christianlacerda.chords.ui.KeepScreenOn
 import com.christianlacerda.chords.ui.WheelInput
 import com.christianlacerda.chords.ui.wheelInput
 import com.christianlacerda.chords.voicing.ChordShapes
@@ -76,7 +77,9 @@ class ChordDiagramScreen(
         val index by viewModel.index.collectAsState()
         ChordsTheme {
             val colors = LightThemeTokens.colors
-            Column(Modifier.fillMaxSize().background(colors.background).wheelInput(viewModel.wheel)) {
+            Box(Modifier.fillMaxSize().background(colors.background).wheelInput(viewModel.wheel)) {
+            KeepScreenOn()
+            Column(Modifier.fillMaxSize()) {
                 LightTopBar(
                     leftButton = LightBarButton.LightIcon(LightIcons.BACK, onClick = { goBack() }),
                     center = LightTopBarCenter.Text(songTitle),
@@ -130,6 +133,7 @@ class ChordDiagramScreen(
                         }
                     }
                 }
+            }
             }
         }
     }

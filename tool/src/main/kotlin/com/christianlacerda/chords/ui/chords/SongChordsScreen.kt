@@ -3,6 +3,7 @@ package com.christianlacerda.chords.ui.chords
 import android.view.KeyEvent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import com.christianlacerda.chords.R
 import com.christianlacerda.chords.ui.ChordsTheme
+import com.christianlacerda.chords.ui.KeepScreenOn
 import com.christianlacerda.chords.ui.WheelInput
 import com.christianlacerda.chords.ui.wheelInput
 import com.christianlacerda.chords.voicing.ChordShapes
@@ -82,7 +84,9 @@ class SongChordsScreen(
         val page by viewModel.page.collectAsState()
         ChordsTheme {
             val colors = LightThemeTokens.colors
-            Column(Modifier.fillMaxSize().background(colors.background).wheelInput(viewModel.wheel)) {
+            Box(Modifier.fillMaxSize().background(colors.background).wheelInput(viewModel.wheel)) {
+            KeepScreenOn()
+            Column(Modifier.fillMaxSize()) {
                 LightTopBar(
                     leftButton = LightBarButton.LightIcon(LightIcons.BACK, onClick = { goBack() }),
                     center = LightTopBarCenter.Text(stringResource(R.string.chords_in_song)),
@@ -126,6 +130,7 @@ class SongChordsScreen(
                 ) {
                     LightText(stringResource(R.string.page_of, page + 1, viewModel.pageCount), LightTextVariant.Fine)
                 }
+            }
             }
         }
     }

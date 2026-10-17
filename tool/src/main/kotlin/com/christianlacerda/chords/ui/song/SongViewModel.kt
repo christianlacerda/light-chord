@@ -202,6 +202,9 @@ class SongViewModel(
     }
 
     override fun onScreenHide(screen: SimpleLightScreen<Unit>) {
+        // Leaving for the chord sheet must not leave the song scrolling or resume on its own when we come back.
+        closeSpeedPanel()
+        pause()
         flush()
     }
 
