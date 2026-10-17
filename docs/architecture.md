@@ -477,7 +477,7 @@ Files go in `assets/samples/`, listed in `assets/samples/index.txt`, all with `{
 | File | Song | Key | Chords | Exercises |
 |---|---|---|---|---|
 | `amazing-grace.cho` | Amazing Grace (Newton 1779) | G | G G7 C D Em | Matches the mockup; verses 1–3 with `{comment: Verse 2}` labels |
-| `scarborough-fair.cho` | Scarborough Fair (traditional ballad text, not the Simon & Garfunkel "Canticle") | Am | Am G C D Em | `{capo: 2}`, a short `{sot}` riff block |
+| `home-on-the-range.cho` | Home on the Range (Higley/Kelley 1872 text; replaced Scarborough Fair, whose common wording is a copyrighted arrangement) | G | G C D7 | `{capo: 2}`, a short `{sot}` riff block |
 | `wayfaring-stranger.cho` | Wayfaring Stranger (1858 hymnal) | Dm | Dm Gm A7 F C Bb | `{soc}`/`{eoc}` and a `{chorus}` repeat |
 | `shenandoah.cho` | Shenandoah (traditional, 19th c.) | D | D G Bm A A7 D/F# Em | The slash chord path |
 | `peixe-vivo.cho` | Peixe Vivo (Brazilian folk) | C | C C7M Dm7 G7 A7 E7 Am | Brazilian names (`C7M`), `{comment: Refrão}` |
