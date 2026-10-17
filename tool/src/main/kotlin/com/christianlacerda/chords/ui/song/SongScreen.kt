@@ -79,13 +79,15 @@ class SongScreen(sealedActivity: SealedLightActivity, private val fileName: Stri
                 fileName = fileName,
                 onBack = { goBack() },
                 onOpenChords = { title ->
-                    val chords = viewModel.songChords()
                     val key = viewModel.songKey()
-                    navigateTo({ SongChordsScreen(it, title, key, chords) })
+                    viewModel.withSongChords { chords ->
+                        navigateTo({ SongChordsScreen(it, title, key, chords) })
+                    }
                 },
                 onChordTap = { chord, title ->
-                    val shapes = viewModel.shapesFor(chord)
-                    navigateTo({ ChordDiagramScreen(it, title, shapes) })
+                    viewModel.withShapes(chord) { shapes ->
+                        navigateTo({ ChordDiagramScreen(it, title, shapes) })
+                    }
                 },
             )
         }

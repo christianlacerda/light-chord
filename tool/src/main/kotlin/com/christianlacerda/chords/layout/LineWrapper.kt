@@ -119,6 +119,8 @@ object LineWrapper {
         chordWidth: (String) -> Float,
         chordGap: Float,
     ): List<Atom> {
+        // A chord-only (or blank) atom can't be split: let it overflow rather than vanish.
+        if (a.text.isBlank()) return listOf(a)
         val out = ArrayList<Atom>()
         var rest = a.text
         var first = true

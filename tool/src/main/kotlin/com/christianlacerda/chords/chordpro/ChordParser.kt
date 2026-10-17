@@ -42,6 +42,21 @@ object ChordParser {
         "9" to Quality.DOM9,
         "maj9" to Quality.MAJ9,
         "m9" to Quality.MIN9,
+        "#5" to Quality.AUG,
+        "+5" to Quality.AUG,
+        "mb5" to Quality.DIM,
+    )
+
+    /** Brazilian "slash extension" suffixes. A slash followed by a digit is never a bass note. */
+    private val SLASH_EXTENSIONS: Map<String, String> = mapOf(
+        "7/4" to "7sus4",
+        "4/7" to "7sus4",
+        "7/9" to "9",
+        "7/9-" to "7b9",
+        "7/9+" to "7#9",
+        "7/13" to "7",
+        "7M/9" to "maj9",
+        "m7/9" to "m9",
     )
 
     fun parse(raw: String): ChordName? {
@@ -91,6 +106,7 @@ object ChordParser {
 
     /** Returns the normalised suffix, or null for text that cannot be a chord suffix at all. */
     internal fun normalizeSuffix(input: String): String? {
+        SLASH_EXTENSIONS[input]?.let { return it }
         var t = input
         if (t.any { it == ',' || it == ';' || it == '*' || it == '!' || it == '?' }) return null
         t = t.replace("ø7", "m7b5").replace("ø", "m7b5")
@@ -102,16 +118,17 @@ object ChordParser {
         t = t.replace(Regex("(?i)maj"), "maj").replace(Regex("(?i)min"), "m")
         t = t.replace("7M9", "maj9").replace("M9", "maj9")
             .replace("7M", "maj7").replace("M7", "maj7")
+        if (t == "M") t = "" // bare CM is a major triad; only 7M, M7 and maj7 mean a major seventh
         t = t.replace('M', '\u0000').let { s0 ->
             // remaining standalone M means major seventh
             s0.replace("\u0000", "maj7")
         }
         t = t.lowercase()
         t = t.replace("maj7maj7", "maj7")
-        if (t == "maj") t = "maj7"
+        if (t == "maj") t = ""
         if (t.startsWith("-5")) t = "b5" + t.substring(2) else if (t.startsWith("-")) t = "m" + t.substring(1)
         if (t.startsWith("+")) t = "aug" + t.substring(1)
-        t = t.replace("5-", "b5").replace("5+", "#5").replace("9-", "b9").replace("9+", "#9")
+        t = t.replace("-5", "b5").replace("5-", "b5").replace("5+", "#5").replace("9-", "b9").replace("9+", "#9")
         if (t.endsWith("+")) t = t.dropLast(1) + "#5"
         // parenthesised extensions
         t = Regex("^(m?)\\(9\\)$").replace(t) { it.groupValues[1] + "add9" }

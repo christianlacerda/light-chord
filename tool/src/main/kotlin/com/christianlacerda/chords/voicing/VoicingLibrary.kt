@@ -89,19 +89,38 @@ class VoicingLibrary(entries: List<ShapeEntry>) {
         open.filter { it.chord.root == root && it.chord.quality == quality && it.chord.bass == null }
             .forEach { out.add(build(it, 0)) }
         val shifted = movable.filter { it.chord.quality == quality }
-            .map { build(it, (root - it.chord.root).mod(12)) }
+            .flatMap { m -> candidateDeltas(m, root, quality).map { build(m, it) } }
             .filter { it.baseFret <= MAX_MOVABLE_BASE_FRET }
             .sortedBy { it.baseFret }
         out.addAll(shifted)
         return dedupe(out)
     }
 
+    /**
+     * Shifts that put [m] on [root]: the plain shift up the neck, the same shape one octave lower when no
+     * fretted note drops below the nut (strings landing on fret 0 become open, e.g. Adim = x0121x), and, for
+     * the symmetric chords (dim7 repeats every 3 frets, aug every 4), every equivalent position.
+     */
+    private fun candidateDeltas(m: Parsed, root: Int, quality: Quality): List<Int> {
+        val d0 = (root - m.chord.root).mod(12)
+        val minFret = m.entry.frets.filterNotNull().minOrNull() ?: 0
+        val step = when (quality) {
+            Quality.DIM7 -> 3
+            Quality.AUG -> 4
+            else -> 0
+        }
+        val raw = if (step == 0) listOf(d0, d0 - 12) else (-12..12).filter { (it - d0).mod(step) == 0 }
+        return raw.filter { minFret + it >= 0 }
+    }
+
     private fun dedupe(list: List<Voicing>): List<Voicing> = list.distinctBy { it.frets }
 
     private fun build(p: Parsed, delta: Int): Voicing {
         val frets = p.entry.frets.map { f -> f?.let { it + delta } }
-        val barre = p.entry.barre?.let { Barre(it.fret + delta, it.from, it.to, it.finger) }
-        return Voicing(frets, p.entry.fingers, computeBaseFret(frets), barre)
+        // strings that became open need no finger; a barre on fret 0 is just open strings
+        val fingers = p.entry.fingers.mapIndexed { i, f -> if (frets[i] == 0) 0 else f }
+        val barre = p.entry.barre?.takeIf { it.fret + delta > 0 }?.let { Barre(it.fret + delta, it.from, it.to, it.finger) }
+        return Voicing(frets, fingers, computeBaseFret(frets), barre)
     }
 
     companion object {

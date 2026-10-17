@@ -61,12 +61,12 @@ class ArtistsViewModel(private val repository: LibraryRepository) : LightViewMod
             LibraryEvents.index.filterNotNull().collect { _artists.value = LibraryIndexer.groupByArtist(it, artistCollator()) }
         }
         viewModelScope.launch {
-            LibraryEvents.filesChanged.drop(1).collect { repository.refresh() }
+            LibraryEvents.filesChanged.drop(1).collect { repository.refreshSafely() }
         }
     }
 
     override fun onScreenShow(screen: SimpleLightScreen<Unit>) {
-        viewModelScope.launch { repository.refresh() }
+        viewModelScope.launch { repository.refreshSafely() }
     }
 }
 

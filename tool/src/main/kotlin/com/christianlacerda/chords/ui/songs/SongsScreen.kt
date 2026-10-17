@@ -69,8 +69,12 @@ class SongsViewModel(
     /** Removes the file from the phone, then re-indexes (the screen goes back if the artist is now empty). */
     fun delete(entry: SongEntry) {
         viewModelScope.launch {
-            repository.delete(entry.file)
-            repository.refresh()
+            try {
+                repository.delete(entry.file)
+            } catch (e: SecurityException) {
+                // file vanished or path rejected: the refresh below shows the truth
+            }
+            repository.refreshSafely()
         }
     }
 
@@ -85,12 +89,12 @@ class SongsViewModel(
             }
         }
         viewModelScope.launch {
-            LibraryEvents.filesChanged.drop(1).collect { repository.refresh() }
+            LibraryEvents.filesChanged.drop(1).collect { repository.refreshSafely() }
         }
     }
 
     override fun onScreenShow(screen: SimpleLightScreen<Unit>) {
-        viewModelScope.launch { repository.refresh() }
+        viewModelScope.launch { repository.refreshSafely() }
     }
 }
 

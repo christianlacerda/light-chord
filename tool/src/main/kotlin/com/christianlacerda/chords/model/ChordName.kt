@@ -42,7 +42,7 @@ enum class Quality(val intervals: Set<Int>, val canonical: String) {
             SUS4 -> MAJOR
             SUS2 -> MAJOR
             DIM7 -> DIM
-            DIM -> MINOR
+            DIM -> null // a diminished triad is not a minor chord: show "no shape" instead
             HALF_DIM7 -> DIM
             AUG -> MAJOR
             MAJOR, MINOR, OTHER -> null

@@ -45,8 +45,8 @@ class SampleSongsTest {
 
     @Test fun featuresPresent() {
         fun parse(n: String) = ChordProParser.parse(File(dir, n).readText(), n).song
-        assertEquals(2, parse("scarborough-fair.cho").meta.capo)
-        assertTrue(parse("scarborough-fair.cho").sections.any { it.kind == com.christianlacerda.chords.model.SectionKind.TAB })
+        assertEquals(2, parse("home-on-the-range.cho").meta.capo)
+        assertTrue(parse("home-on-the-range.cho").sections.any { it.kind == com.christianlacerda.chords.model.SectionKind.TAB })
         assertTrue(parse("wayfaring-stranger.cho").sections.count { it.kind == com.christianlacerda.chords.model.SectionKind.CHORUS } == 2)
         assertTrue(parse("shenandoah.cho").allChords().any { it.bass != null })
         assertTrue(parse("peixe-vivo.cho").allChords().any { it.raw == "C7M" })

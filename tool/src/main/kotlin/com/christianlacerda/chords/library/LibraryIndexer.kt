@@ -23,10 +23,11 @@ object LibraryIndexer {
         parseHeader: (String) -> SongEntryHeader,
     ): LibraryIndex {
         val byName = old.entries.associateBy { it.file }
+        val reusable = old.parserVersion == PARSER_VERSION // otherwise re-parse everything (firstSeen is kept)
         val entries = files.map { f ->
             val prev = byName[f.name]
             val isBundled = f.name in bundled
-            if (prev != null && prev.modified == f.lastModified) {
+            if (reusable && prev != null && prev.modified == f.lastModified) {
                 if (prev.bundled == isBundled) prev else prev.copy(bundled = isBundled)
             } else {
                 val h = parseHeader(f.name)
@@ -43,7 +44,7 @@ object LibraryIndexer {
                 )
             }
         }
-        return LibraryIndex(entries)
+        return LibraryIndex(entries, PARSER_VERSION)
     }
 
     /** Case-insensitive grouping; unknown artist last; songs sorted by title. */

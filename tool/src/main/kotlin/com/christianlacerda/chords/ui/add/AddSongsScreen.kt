@@ -62,12 +62,12 @@ class AddSongsViewModel(private val repository: LibraryRepository) : LightViewMo
             LibraryEvents.index.filterNotNull().collect { _recent.value = it.countAddedSince(startOfToday()) }
         }
         viewModelScope.launch {
-            LibraryEvents.filesChanged.drop(1).collect { repository.refresh() }
+            LibraryEvents.filesChanged.drop(1).collect { repository.refreshSafely() }
         }
     }
 
     override fun onScreenShow(screen: SimpleLightScreen<Unit>) {
-        viewModelScope.launch { repository.refresh() }
+        viewModelScope.launch { repository.refreshSafely() }
     }
 }
 

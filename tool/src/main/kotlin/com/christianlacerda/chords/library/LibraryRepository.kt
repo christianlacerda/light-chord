@@ -12,6 +12,7 @@ import com.christianlacerda.chords.chordpro.TextDecoding
 import com.christianlacerda.chords.voicing.VoicingLibrary
 import com.thelightphone.sdk.LightFileShare
 import java.io.InputStreamReader
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
@@ -67,6 +68,15 @@ class LibraryRepository(
             LibraryEvents.index.value = index
             index
         }
+    }
+
+    /** [refresh] that can't take the app down: an I/O or DataStore failure just leaves the old index. */
+    suspend fun refreshSafely(): LibraryIndex? = try {
+        refresh()
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        null
     }
 
     suspend fun seedSamplesIfNeeded() = withContext(Dispatchers.IO) {
@@ -155,8 +165,13 @@ class LibraryRepository(
         fileShare.delete("$SONGS_DIR/$file")
     }
 
-    suspend fun allSettings(): Map<String, SongSettings> =
+    suspend fun allSettings(): Map<String, SongSettings> = try {
         decodeSettings(dataStore.data.first()[SETTINGS_KEY])
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        emptyMap()
+    }
 
     suspend fun settings(file: String): SongSettings = allSettings()[file] ?: SongSettings()
 
@@ -168,11 +183,13 @@ class LibraryRepository(
         }
     }
 
-    fun voicings(): VoicingLibrary {
+    /** Loads assets/chords.json (once, cached) off the main thread. */
+    suspend fun voicings(): VoicingLibrary {
         LibraryEvents.voicingCache?.let { return it }
-        val lib = VoicingLibrary.fromJson(readAsset("chords.json").toString(Charsets.UTF_8))
-        LibraryEvents.voicingCache = lib
-        return lib
+        return withContext(Dispatchers.IO) {
+            LibraryEvents.voicingCache ?: VoicingLibrary.fromJson(readAsset("chords.json").toString(Charsets.UTF_8))
+                .also { LibraryEvents.voicingCache = it }
+        }
     }
 
     private fun decodeIndex(s: String?): LibraryIndex =

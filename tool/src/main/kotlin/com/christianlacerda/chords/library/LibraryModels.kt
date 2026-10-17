@@ -23,8 +23,15 @@ data class SongEntry(
     val error: String? = null,
 )
 
+/** Bump whenever the ChordPro/chord parsing changes so stored headers are rebuilt on the next refresh. */
+const val PARSER_VERSION = 2
+
 @Serializable
-data class LibraryIndex(val entries: List<SongEntry> = emptyList())
+data class LibraryIndex(
+    val entries: List<SongEntry> = emptyList(),
+    /** The [PARSER_VERSION] that produced [entries]; 0 for indexes written before it existed. */
+    val parserVersion: Int = 0,
+)
 
 @Serializable
 data class SongSettings(

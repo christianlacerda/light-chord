@@ -12,7 +12,7 @@ enum class ParseIssue { NOT_CHORDPRO, EMPTY }
 data class ParseResult(val song: Song, val issue: ParseIssue?)
 
 object ChordProParser {
-    private val DIRECTIVE = Regex("""^\s*\{\s*([A-Za-z_]+)\s*(?:[:\s]\s*(.*?))?\s*\}\s*$""")
+    private val DIRECTIVE = Regex("""^\s*\{\s*([A-Za-z_][\w-]*)\s*(?:[:\s]\s*(.*?))?\s*\}\s*$""")
     private val CHORD = Regex("""\[([^\]]*)\]""")
 
     private class Builder(var label: String?, val kind: SectionKind, val keepEmpty: Boolean = false) {
@@ -55,30 +55,30 @@ object ChordProParser {
             val m = DIRECTIVE.matchEntire(line)
             if (m != null) {
                 sawDirective = true
-                val name = m.groupValues[1].lowercase()
+                val name = m.groupValues[1].lowercase().substringBefore('-') // drop a "-selector" suffix
                 val arg = m.groups[2]?.value?.trim()?.takeIf { it.isNotEmpty() }
                 when (name) {
-                    "title", "t" -> title = arg
-                    "subtitle", "st" -> subtitle = arg
-                    "artist" -> artist = arg
-                    "key" -> key = arg
-                    "capo" -> capo = arg?.toIntOrNull()
+                    "title", "t" -> if (arg != null) title = arg
+                    "subtitle", "st" -> if (arg != null) subtitle = arg
+                    "artist" -> if (arg != null) artist = arg
+                    "key" -> if (arg != null) key = arg
+                    "capo" -> arg?.toIntOrNull()?.let { capo = it }
                     "meta" -> {
                         val parts = arg?.split(Regex("\\s+"), limit = 2)
                         if (parts != null && parts.size == 2) {
                             val v = parts[1].trim().takeIf { it.isNotEmpty() }
                             when (parts[0].lowercase()) {
-                                "title" -> title = v
-                                "artist" -> artist = v
-                                "key" -> key = v
-                                "capo" -> capo = v?.toIntOrNull()
-                                "subtitle" -> subtitle = v
+                                "title" -> if (v != null) title = v
+                                "artist" -> if (v != null) artist = v
+                                "key" -> if (v != null) key = v
+                                "capo" -> v?.toIntOrNull()?.let { capo = it }
+                                "subtitle" -> if (v != null) subtitle = v
                             }
                         }
                     }
                     "comment", "c", "comment_italic", "ci", "comment_box", "cb", "highlight" -> {
                         if (current.lines.isEmpty()) {
-                            current.label = arg ?: current.label
+                            current.label = current.label ?: arg
                         } else {
                             val kind = if (inEnv) current.kind else SectionKind.PLAIN
                             open(arg, kind)
@@ -91,8 +91,8 @@ object ChordProParser {
                     "end_of_verse", "eov", "end_of_chorus", "eoc", "end_of_bridge", "eob",
                     "end_of_tab", "eot" -> { open(null, SectionKind.PLAIN); inEnv = false; inTab = false }
                     "chorus" -> {
+                        finish() // an unclosed chorus counts as the most recent one
                         val last = sections.lastOrNull { it.kind == SectionKind.CHORUS }
-                        finish()
                         if (last != null) {
                             sections.add(if (arg != null) last.copy(label = arg) else last)
                         } else {

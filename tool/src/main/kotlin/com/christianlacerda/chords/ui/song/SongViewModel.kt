@@ -14,6 +14,7 @@ import com.christianlacerda.chords.model.Song
 import com.christianlacerda.chords.ui.WheelInput
 import com.christianlacerda.chords.ui.WheelKeys
 import com.christianlacerda.chords.voicing.ChordShapes
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.NonCancellable
@@ -78,7 +79,15 @@ class SongViewModel(
         // onResume re-invokes this: only ever load once, never reset the play position.
         if (loadStarted) return
         loadStarted = true
-        viewModelScope.launch { loadSong() }
+        viewModelScope.launch {
+            try {
+                loadSong()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                _load.value = SongLoad.Failed(SongError.UNREADABLE)
+            }
+        }
     }
 
     private suspend fun loadSong() {
@@ -94,15 +103,24 @@ class SongViewModel(
             result.issue == ParseIssue.EMPTY -> SongLoad.Failed(SongError.EMPTY)
             else -> SongLoad.Ready(result.song)
         }
-        withContext(Dispatchers.IO) { repository.voicings() } // warm the cache so a chord tap is instant
+        repository.voicings() // warm the cache (loaded on IO) so a chord tap is instant
     }
 
-    fun shapesFor(chord: ChordName): ChordShapes = repository.voicings().shapesFor(chord)
+    /** Looks the shapes up (chords.json is read on IO the first time) and hands them to [onReady] on the main thread. */
+    fun withShapes(chord: ChordName, onReady: (ChordShapes) -> Unit) {
+        viewModelScope.launch {
+            val lib = repository.voicings()
+            onReady(lib.shapesFor(chord))
+        }
+    }
 
     /** Distinct chords of the song in order of first use, each with its shapes. */
-    fun songChords(): List<ChordShapes> {
-        val song = (_load.value as? SongLoad.Ready)?.song ?: return emptyList()
-        return song.allChords().distinctBy { it.canonicalName(false) }.map { shapesFor(it) }
+    fun withSongChords(onReady: (List<ChordShapes>) -> Unit) {
+        val song = (_load.value as? SongLoad.Ready)?.song ?: return
+        viewModelScope.launch {
+            val lib = repository.voicings()
+            onReady(song.allChords().distinctBy { it.canonicalName(false) }.map { lib.shapesFor(it) })
+        }
     }
 
     fun songKey(): String? = (_load.value as? SongLoad.Ready)?.song?.meta?.key
@@ -164,6 +182,16 @@ class SongViewModel(
     }
 
     private suspend fun saveNow() {
+        try {
+            saveSettingsNow()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            // a failed settings write must never crash the song view
+        }
+    }
+
+    private suspend fun saveSettingsNow() {
         repository.saveSettings(fileName, SongSettings(speed = _speed.value, transpose = 0, lastProgress = progress()))
     }
 
