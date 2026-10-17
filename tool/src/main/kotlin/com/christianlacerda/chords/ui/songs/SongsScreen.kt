@@ -24,6 +24,7 @@ import com.christianlacerda.chords.ui.ChordsTheme
 import com.christianlacerda.chords.ui.artistCollator
 import com.christianlacerda.chords.ui.errorText
 import com.christianlacerda.chords.ui.libraryRepositoryFor
+import com.christianlacerda.chords.ui.song.SongScreen
 import com.thelightphone.sdk.LightScreen
 import com.thelightphone.sdk.LightViewModel
 import com.thelightphone.sdk.SealedLightActivity
@@ -103,7 +104,7 @@ class SongsScreen(sealedActivity: SealedLightActivity, private val artist: Strin
                         Column(Modifier.fillMaxWidth().padding(start = CONTENT_PADDING_UNITS.gridUnitsAsDp())) {
                             s.songs.forEach { entry ->
                                 SongRow(entry, s.settings[entry.file], onOpen = {
-                                    // Song view arrives in milestone 3.
+                                    navigateTo({ SongScreen(it, entry.file) })
                                 })
                             }
                         }
