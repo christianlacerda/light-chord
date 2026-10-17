@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tool_name">Chords</string>
+    <string name="artists_title">Artists</string>
+    <string name="unknown_artist">Unknown artist</string>
+    <string name="library_empty_title">No songs yet</string>
+    <string name="library_empty_body">Tap + to see how to add songs from your computer.</string>
+    <string name="detail_key">Key %1$s</string>
+    <string name="detail_capo">capo %1$d</string>
+    <string name="detail_speed">Speed %1$d</string>
+    <string name="edit">Edit</string>
+    <string name="done">Done</string>
+    <string name="error_not_chordpro">Not a ChordPro file</string>
+    <string name="error_empty">Empty file</string>
+    <string name="error_too_large">File too large</string>
+    <string name="error_unreadable">Couldn\'t read this file</string>
+    <string name="song_missing">This song is no longer on the phone</string>
+    <string name="state_ready">Tap the lyrics to start</string>
+    <string name="state_scrolling">Scrolling</string>
+    <string name="state_paused">Paused · tap a chord to see it</string>
+    <string name="state_end">End</string>
+    <string name="speed_short">Speed %1$d</string>
+    <string name="speed_label">SPEED</string>
+    <string name="section_verse">Verse</string>
+    <string name="section_chorus">Chorus</string>
+    <string name="section_bridge">Bridge</string>
+    <string name="section_tab">Tab</string>
+    <string name="chords_in_song">Chords in this song</string>
+    <string name="page_of">%1$d / %2$d</string>
+    <string name="shape_of">Shape %1$d of %2$d</string>
+    <string name="no_shape">No diagram for this chord yet</string>
+    <string name="closest_shape">Closest shape: %1$s</string>
+    <string name="bass_note">%1$s in the bass</string>
+    <string name="add_title">Add songs</string>
+    <string name="add_from_computer">From your computer</string>
+    <string name="add_step1">Open Tool Manager on this phone</string>
+    <string name="add_step2">Go to the link it shows, on your computer</string>
+    <string name="add_step3">Open %1$s › %2$s and drop your ChordPro files</string>
+    <string name="add_note">Songs appear here by artist as soon as they finish uploading. Files: .cho, .chopro or .txt.</string>
+    <string name="add_missing">Don\'t see %1$s in Tool Manager? Your LightOS may need an update.</string>
+    <string name="delete_title">Delete song?</string>
+    <string name="delete_body">\"%1$s\" will be removed from this phone.</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <plurals name="chord_count">
+        <item quantity="one">%d chord</item>
+        <item quantity="other">%d chords</item>
+    </plurals>
+    <plurals name="add_recent">
+        <item quantity="one">%d song added from Tool Manager today</item>
+        <item quantity="other">%d songs added from Tool Manager today</item>
+    </plurals>
+</resources>
