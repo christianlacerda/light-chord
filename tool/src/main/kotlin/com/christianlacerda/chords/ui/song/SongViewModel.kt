@@ -17,7 +17,7 @@ import com.christianlacerda.chords.voicing.ChordShapes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.flow.BufferOverflow
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
