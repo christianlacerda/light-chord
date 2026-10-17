@@ -1,5 +1,6 @@
 package com.christianlacerda.chords.ui.song
 
+import android.view.KeyEvent
 import androidx.compose.foundation.ScrollState
 import androidx.lifecycle.viewModelScope
 import com.christianlacerda.chords.chordpro.ParseIssue
@@ -10,6 +11,8 @@ import com.christianlacerda.chords.library.SongError
 import com.christianlacerda.chords.library.SongSettings
 import com.christianlacerda.chords.model.ChordName
 import com.christianlacerda.chords.model.Song
+import com.christianlacerda.chords.ui.WheelInput
+import com.christianlacerda.chords.ui.WheelKeys
 import com.christianlacerda.chords.voicing.ChordShapes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
@@ -56,6 +59,13 @@ class SongViewModel(
     private val _flashToken = MutableStateFlow(0)
     val flashToken: StateFlow<Int> = _flashToken.asStateFlow()
 
+    /** True while the speed overlay was opened by tapping "Speed N" (it then has - / + tap zones). */
+    private val _speedPanel = MutableStateFlow(false)
+    val speedPanel: StateFlow<Boolean> = _speedPanel.asStateFlow()
+
+    /** Wheel steps change the speed; a wheel press (319) toggles play/pause. */
+    val wheel = WheelInput(onStep = { changeSpeed(it) }, onPress = { togglePlay() })
+
     private var loadStarted = false
     private val saveRequests = MutableSharedFlow<Unit>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
@@ -89,6 +99,26 @@ class SongViewModel(
 
     fun shapesFor(chord: ChordName): ChordShapes = repository.voicings().shapesFor(chord)
 
+    /** Distinct chords of the song in order of first use, each with its shapes. */
+    fun songChords(): List<ChordShapes> {
+        val song = (_load.value as? SongLoad.Ready)?.song ?: return emptyList()
+        return song.allChords().distinctBy { it.canonicalName(false) }.map { shapesFor(it) }
+    }
+
+    fun songKey(): String? = (_load.value as? SongLoad.Ready)?.song?.meta?.key
+
+    // ---- hardware keys ----------------------------------------------------------------------
+
+    // A held wheel press must toggle once, so its repeat count is passed through; steps repeat per event.
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean =
+        wheel.onKey(keyCode, WheelInput.ACTION_DOWN, if (keyCode in WheelKeys.PRESS) event.repeatCount else 0)
+
+    override fun onKeyMultiple(keyCode: Int, repeatCount: Int, event: KeyEvent): Boolean =
+        wheel.onKey(keyCode, WheelInput.ACTION_DOWN, repeatCount)
+
+    // Swallow the matching UP so a stray UP isn't forwarded to LightOS.
+    override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean = wheel.onKey(keyCode, WheelInput.ACTION_UP, 0)
+
     // ---- play state -------------------------------------------------------------------------
 
     fun togglePlay() {
@@ -117,6 +147,15 @@ class SongViewModel(
         _speed.value = next
         _flashToken.value = _flashToken.value + 1
         saveRequests.tryEmit(Unit)
+    }
+
+    fun openSpeedPanel() {
+        _speedPanel.value = true
+        _flashToken.value = _flashToken.value + 1
+    }
+
+    fun closeSpeedPanel() {
+        _speedPanel.value = false
     }
 
     private fun progress(): Float {

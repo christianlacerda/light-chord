@@ -34,7 +34,10 @@ import com.christianlacerda.chords.layout.ScrollSpeed
 import com.christianlacerda.chords.layout.buildRenderItems
 import com.christianlacerda.chords.model.ChordName
 import com.christianlacerda.chords.model.Song
+import com.christianlacerda.chords.ui.ChordGridPainter
 import com.christianlacerda.chords.ui.ChordsTheme
+import com.christianlacerda.chords.ui.wheelInput
+import com.christianlacerda.chords.ui.chords.SongChordsScreen
 import com.christianlacerda.chords.ui.chordStyle
 import com.christianlacerda.chords.ui.chords.ChordDiagramScreen
 import com.christianlacerda.chords.ui.errorText
@@ -68,6 +71,11 @@ class SongScreen(sealedActivity: SealedLightActivity, private val fileName: Stri
                 vm = viewModel,
                 fileName = fileName,
                 onBack = { goBack() },
+                onOpenChords = { title ->
+                    val chords = viewModel.songChords()
+                    val key = viewModel.songKey()
+                    navigateTo({ SongChordsScreen(it, title, key, chords) })
+                },
                 onChordTap = { chord, title ->
                     val shapes = viewModel.shapesFor(chord)
                     navigateTo({ ChordDiagramScreen(it, title, shapes) })
@@ -83,11 +91,14 @@ private fun SongContent(
     fileName: String,
     onBack: () -> Unit,
     onChordTap: (ChordName, String) -> Unit,
+    onOpenChords: (String) -> Unit,
 ) {
     val colors = LightThemeTokens.colors
     val load by vm.load.collectAsState()
     val playState by vm.playState.collectAsState()
     val speed by vm.speed.collectAsState()
+    val flashToken by vm.flashToken.collectAsState()
+    val speedPanel by vm.speedPanel.collectAsState()
     val progress by remember(vm) {
         derivedStateOf {
             val max = vm.scrollState.maxValue
@@ -97,12 +108,21 @@ private fun SongContent(
     val loaded = load as? SongLoad.Ready
     val title = loaded?.song?.meta?.title ?: fileName.substringBeforeLast('.')
 
-    Box(Modifier.fillMaxSize().background(colors.background)) {
+    Box(Modifier.fillMaxSize().background(colors.background).wheelInput(vm.wheel)) {
         KeepScreenOn()
         Column(Modifier.fillMaxSize()) {
             LightTopBar(
                 leftButton = LightBarButton.LightIcon(LightIcons.BACK, onClick = onBack),
                 center = LightTopBarCenter.Text(title),
+                rightButton = if (loaded != null) {
+                    LightBarButton.Icon(
+                        painter = remember(colors.content) { ChordGridPainter(colors.content) },
+                        onClick = { onOpenChords(title) },
+                        contentDescription = stringResource(R.string.chords_in_song),
+                    )
+                } else {
+                    null
+                },
             )
             when (val l = load) {
                 is SongLoad.Loading -> Spacer(Modifier.weight(1f))
@@ -125,9 +145,19 @@ private fun SongContent(
                         speed = speed,
                         onChordTap = { onChordTap(it, title) },
                     )
-                    SongBottomBar(progress, playState, speed, onSpeedTap = { })
+                    SongBottomBar(progress, playState, speed, onSpeedTap = { vm.openSpeedPanel() })
                 }
             }
+        }
+        if (loaded != null) {
+            SpeedOverlay(
+                speed = speed,
+                flashToken = flashToken,
+                interactive = speedPanel,
+                onMinus = { vm.changeSpeed(-1) },
+                onPlus = { vm.changeSpeed(1) },
+                onHidden = { vm.closeSpeedPanel() },
+            )
         }
     }
 }
