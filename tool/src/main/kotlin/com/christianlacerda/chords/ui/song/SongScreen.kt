@@ -19,6 +19,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -197,6 +204,7 @@ private fun SongBodyScroll(
         val chordLineH = with(density) { chord.lineHeight.toPx() }
         val lyricLineH = with(density) { lyric.lineHeight.toPx() }
         val gapPx = lyricLineH * 0.35f
+        val fadePx = with(density) { 1.5f.gridUnitsAsDp().toPx() }
 
         val items = remember(song, widthPx, lyric, chord, chordGapPx) {
             val lyricCache = HashMap<String, Float>()
@@ -243,11 +251,22 @@ private fun SongBodyScroll(
         Column(
             Modifier
                 .fillMaxSize()
+                .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+                .drawWithContent {
+                    drawContent()
+                    // soft top edge: lines fade out as they leave the reading area
+                    drawRect(
+                        brush = Brush.verticalGradient(listOf(Color.Transparent, Color.Black), startY = 0f, endY = fadePx),
+                        size = Size(size.width, fadePx),
+                        blendMode = BlendMode.DstIn,
+                    )
+                }
                 .lightClickable { vm.togglePlay() }
                 .verticalScroll(vm.scrollState)
                 .padding(horizontal = sidePad),
         ) {
-            Spacer(Modifier.height(0.5f.gridUnitsAsDp()))
+            // room for the top fade, so the first line is fully visible before scrolling starts
+            Spacer(Modifier.height(1.5f.gridUnitsAsDp()))
             items.forEach { RenderItemView(it, palette, onChordTap) }
             // Lets the last line climb into the upper reading area before the song ends.
             Spacer(Modifier.height(with(density) { (viewportPx * 0.55f).toDp() }))
