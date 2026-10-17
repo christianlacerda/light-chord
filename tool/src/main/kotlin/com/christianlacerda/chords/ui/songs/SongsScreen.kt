@@ -94,10 +94,22 @@ class SongsViewModel(
         viewModelScope.launch {
             LibraryEvents.filesChanged.drop(1).collect { repository.refreshSafely() }
         }
+        // A song's speed is saved when leaving it; show the new "Speed N" as soon as the write lands.
+        viewModelScope.launch {
+            LibraryEvents.settingsChanged.drop(1).collect { reloadSettings() }
+        }
+    }
+
+    private suspend fun reloadSettings() {
+        val current = _state.value ?: return
+        _state.value = current.copy(settings = repository.allSettings())
     }
 
     override fun onScreenShow(screen: SimpleLightScreen<Unit>) {
-        viewModelScope.launch { repository.refreshSafely() }
+        viewModelScope.launch {
+            repository.refreshSafely()
+            reloadSettings() // an unchanged index doesn't re-emit, so settings are re-read explicitly
+        }
     }
 }
 

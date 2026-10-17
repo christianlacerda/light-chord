@@ -105,7 +105,11 @@ class VoicingLibraryTest {
 
     @Test fun baseFretRules() {
         assertEquals(1, computeBaseFret(listOf(null, 3, 2, 0, 1, 0)))
-        assertEquals(1, computeBaseFret(listOf(3, 5, 5, 4, 3, 3)))
+        assertEquals(3, computeBaseFret(listOf(3, 5, 5, 4, 3, 3))) // no open strings, so a 3fr label, not a nut
+        assertEquals(3, computeBaseFret(listOf(null, 3, 5, 5, 5, 3)))
+        assertEquals(1, computeBaseFret(listOf(3, 2, 0, 0, 0, 1))) // open strings keep the nut
+        assertEquals(1, computeBaseFret(listOf(1, 3, 3, 2, 1, 1)))
+        assertEquals(2, computeBaseFret(listOf(null, 2, 2, 2, 2, 2)))
         assertEquals(6, computeBaseFret(listOf(6, 8, 8, 7, 6, 6)))
         assertEquals(1, computeBaseFret(listOf(null, null, null, null, null, null)))
     }
@@ -116,5 +120,11 @@ class VoicingLibraryTest {
             assertFalse(s.approximate, e.chord)
             assertTrue(s.voicings.isNotEmpty(), e.chord)
         }
+    }
+
+    @Test fun g7BarreShapeHasBaseFretThree() {
+        val v = lib.shapesFor(c("G7")).voicings[1]
+        assertEquals(3, v.baseFret)
+        assertEquals(3, v.barre!!.fret)
     }
 }

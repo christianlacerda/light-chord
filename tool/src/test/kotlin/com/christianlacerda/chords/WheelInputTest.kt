@@ -25,6 +25,13 @@ class WheelInputTest {
         assertEquals(1, presses); assertTrue(steps.isEmpty())
     }
 
+    @Test fun dpadCenterAndEnterTogglePlay() {
+        assertTrue(w.onKey(23, WheelInput.ACTION_DOWN, 0))
+        assertTrue(w.onKey(66, WheelInput.ACTION_DOWN, 0))
+        assertTrue(w.onKey(66, WheelInput.ACTION_DOWN, 1)) // held: consumed, no extra toggle
+        assertEquals(2, presses)
+    }
+
     @Test fun dpadFallbacksAndRepeat() {
         w.onKey(20, WheelInput.ACTION_DOWN, 2)
         assertEquals(listOf(-1, -1, -1), steps)

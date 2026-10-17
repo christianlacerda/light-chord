@@ -85,7 +85,7 @@ class ChordProParserTest {
     }
 
     @Test fun hashCommentsUnknownDirectivesCrlfBom() {
-        val r = parse("﻿# a comment\r\n{title: X}\r\n{define: G base-fret 1}\r\n{weird}\r\n[G]hi\r\n")
+        val r = parse("\uFEFF# a comment\r\n{title: X}\r\n{define: G base-fret 1}\r\n{weird}\r\n[G]hi\r\n")
         assertNull(r.issue)
         assertEquals("X", r.song.meta.title)
         assertEquals(1, r.song.sections.single().lines.size)

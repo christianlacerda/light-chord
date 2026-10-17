@@ -105,6 +105,7 @@ private fun MusicRowView(row: WrappedRow, palette: SongPalette, onChordTap: (Cho
     val slopH = with(density) { 0.4f.gridUnitsAsDp().roundToPx() }
     val underlineInset = with(density) { 3.dp.toPx() }
     val dash = with(density) { 3.dp.toPx() }
+    val chordHDp = with(density) { palette.chordLineHeightPx.toDp() }
 
     Box(
         Modifier
@@ -120,6 +121,8 @@ private fun MusicRowView(row: WrappedRow, palette: SongPalette, onChordTap: (Cho
                 val chordModifier = Modifier
                     .wrapContentWidth(Alignment.Start, unbounded = true)
                     .offset { IntOffset(x - slopH, 0) }
+                    // exactly the chord row's height, so the tap target never reaches into the lyric below
+                    .height(chordHDp)
                     .let { m -> if (tappable && chord != null) m.lightClickable { onChordTap(chord) } else m }
                     .padding(horizontal = 0.4f.gridUnitsAsDp())
                     .drawBehind {

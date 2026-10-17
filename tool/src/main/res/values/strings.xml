@@ -18,7 +18,7 @@
     <string name="state_ready">Tap the lyrics to start</string>
     <string name="state_scrolling">Scrolling</string>
     <string name="state_paused">Paused · tap a chord to see it</string>
-    <string name="state_end">End</string>
+    <string name="state_end">End · tap to start over</string>
     <string name="speed_short">Speed %1$d</string>
     <string name="speed_label">SPEED</string>
     <string name="section_verse">Verse</string>

@@ -18,7 +18,7 @@
     <string name="state_ready">Toque na letra para começar</string>
     <string name="state_scrolling">Rolando</string>
     <string name="state_paused">Pausado · toque num acorde para vê-lo</string>
-    <string name="state_end">Fim</string>
+    <string name="state_end">Fim · toque para recomeçar</string>
     <string name="speed_short">Vel. %1$d</string>
     <string name="speed_label">VELOCIDADE</string>
     <string name="section_verse">Verso</string>

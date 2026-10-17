@@ -20,7 +20,7 @@ object ChordProParser {
     }
 
     fun parse(text: String, fileName: String): ParseResult {
-        val cleaned = text.removePrefix("﻿").replace("\r\n", "\n").replace('\r', '\n')
+        val cleaned = text.removePrefix("\uFEFF").replace("\r\n", "\n").replace('\r', '\n')
         var title: String? = null
         var subtitle: String? = null
         var artist: String? = null

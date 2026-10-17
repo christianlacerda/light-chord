@@ -181,6 +181,7 @@ class LibraryRepository(
             map[file] = s
             p[SETTINGS_KEY] = json.encodeToString(settingsSerializer, map)
         }
+        LibraryEvents.settingsChanged.value = LibraryEvents.settingsChanged.value + 1
     }
 
     /** Loads assets/chords.json (once, cached) off the main thread. */

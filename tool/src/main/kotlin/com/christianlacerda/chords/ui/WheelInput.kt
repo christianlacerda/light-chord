@@ -10,6 +10,8 @@ object WheelKeys {
     const val WHEEL_B = 318
     const val WHEEL_PRESS = 319
 
+    private const val KEYCODE_DPAD_CENTER = 23
+    private const val KEYCODE_ENTER = 66
     private const val KEYCODE_DPAD_UP = 19
     private const val KEYCODE_DPAD_DOWN = 20
     private const val KEYCODE_PAGE_UP = 92
@@ -25,7 +27,8 @@ object WheelKeys {
     val DOWN: Set<Int> = setOf(
         WHEEL_B, KEYCODE_DPAD_DOWN, KEYCODE_SYSTEM_NAVIGATION_DOWN, KEYCODE_NAVIGATE_NEXT, KEYCODE_PAGE_DOWN,
     )
-    val PRESS: Set<Int> = setOf(WHEEL_PRESS)
+    /** 317-319 don't pass through the stock emulator, so DPAD centre / Enter also act as the wheel press. */
+    val PRESS: Set<Int> = setOf(WHEEL_PRESS, KEYCODE_DPAD_CENTER, KEYCODE_ENTER)
 }
 
 /**

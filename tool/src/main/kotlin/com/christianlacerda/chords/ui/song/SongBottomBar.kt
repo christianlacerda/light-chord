@@ -1,6 +1,8 @@
 package com.christianlacerda.chords.ui.song
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,7 +19,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import com.christianlacerda.chords.R
 import com.thelightphone.sdk.ui.LightIcon
 import com.thelightphone.sdk.ui.LightIcons
-import com.thelightphone.sdk.ui.LightProgressBar
 import com.thelightphone.sdk.ui.LightText
 import com.thelightphone.sdk.ui.LightTextVariant
 import com.thelightphone.sdk.ui.LightThemeTokens
@@ -40,7 +41,7 @@ internal fun SongBottomBar(
         PlayState.Ended -> stringResource(R.string.state_end)
     }
     Column(Modifier.fillMaxWidth().padding(horizontal = 1f.gridUnitsAsDp())) {
-        LightProgressBar(colors, progress.value)
+        ProgressLine(progress)
         Row(
             modifier = Modifier.fillMaxWidth().height(3f.gridUnitsAsDp()),
             verticalAlignment = Alignment.CenterVertically,
@@ -73,5 +74,28 @@ internal fun SongBottomBar(
                 )
             }
         }
+    }
+}
+
+/**
+ * Thin dim track with a solid filled part. (LightProgressBar draws its track in the content colour, which
+ * reads as "complete" at 0%.) The progress State is read here so only this line recomposes per frame.
+ */
+@Composable
+private fun ProgressLine(progress: State<Float>) {
+    val colors = LightThemeTokens.colors
+    Box(Modifier.fillMaxWidth().height(0.5f.gridUnitsAsDp()), contentAlignment = Alignment.CenterStart) {
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .height(0.1f.gridUnitsAsDp())
+                .background(colors.contentSecondary.copy(alpha = 0.35f)),
+        )
+        Box(
+            Modifier
+                .fillMaxWidth(progress.value.coerceIn(0f, 1f))
+                .height(0.5f.gridUnitsAsDp())
+                .background(colors.content),
+        )
     }
 }
