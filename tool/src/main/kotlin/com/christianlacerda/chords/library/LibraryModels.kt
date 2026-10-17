@@ -48,3 +48,6 @@ data class SongEntryHeader(
     val capo: Int?,
     val error: String?,
 )
+
+/** Directory (under the shared files root) where Tool Manager uploads land. */
+const val SONGS_DIR = "songs"

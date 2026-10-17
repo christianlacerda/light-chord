@@ -68,3 +68,7 @@ object LibraryIndexer {
         }
     }
 }
+
+/** Songs the user added (not bundled) whose first sighting is at or after [startOfDayMillis]. */
+fun LibraryIndex.countAddedSince(startOfDayMillis: Long): Int =
+    entries.count { !it.bundled && it.firstSeen >= startOfDayMillis }

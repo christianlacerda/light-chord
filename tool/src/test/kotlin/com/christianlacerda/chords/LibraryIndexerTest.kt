@@ -5,6 +5,7 @@ import com.christianlacerda.chords.library.LibraryIndex
 import com.christianlacerda.chords.library.LibraryIndexer
 import com.christianlacerda.chords.library.SongEntryHeader
 import com.christianlacerda.chords.library.SongError
+import com.christianlacerda.chords.library.countAddedSince
 import java.text.Collator
 import java.util.Locale
 import kotlin.test.Test
@@ -71,5 +72,13 @@ class LibraryIndexerTest {
         assertEquals(listOf("Ana", "beatles", "Zé", null), groups.map { it.artist })
         assertEquals(2, groups[1].count)
         assertNull(groups.last().artist); assertEquals(2, groups.last().count)
+    }
+
+    @Test fun addedTodayCountsOnlyNonBundledSince() {
+        val idx = LibraryIndexer.reindex(
+            LibraryIndex(), listOf(FileStat("a.cho", 1), FileStat("b.cho", 1)), setOf("a.cho"), 1_000, header(),
+        )
+        assertEquals(1, idx.countAddedSince(500))
+        assertEquals(0, idx.countAddedSince(2_000))
     }
 }
