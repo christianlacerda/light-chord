@@ -71,6 +71,8 @@ class SongChordsScreen(
     private val title: String,
     private val key: String?,
     private val chords: List<ChordShapes>,
+    /** The song's capo (> 0) if any; shown so the shapes are read relative to it. */
+    private val capo: Int? = null,
 ) : LightScreen<Unit, SongChordsViewModel>(sealedActivity) {
 
     override val viewModelClass: Class<SongChordsViewModel>
@@ -104,6 +106,16 @@ class SongChordsScreen(
                     maxLines = 1,
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 1.5f.gridUnitsAsDp()),
                 )
+                capo?.let {
+                    LightText(
+                        text = stringResource(R.string.capo_relative, it),
+                        variant = LightTextVariant.Detail,
+                        lighten = true,
+                        align = TextAlign.Center,
+                        maxLines = 1,
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 1.5f.gridUnitsAsDp()),
+                    )
+                }
                 val pageItems = chords.drop(page * PER_PAGE).take(PER_PAGE)
                 Column(
                     Modifier.weight(1f).fillMaxWidth().padding(horizontal = 1.5f.gridUnitsAsDp(), vertical = 0.5f.gridUnitsAsDp()),
@@ -113,7 +125,7 @@ class SongChordsScreen(
                         Row(Modifier.weight(1f).fillMaxWidth()) {
                             for (shapes in rowItems) {
                                 ChordCell(shapes, Modifier.weight(1f)) {
-                                    navigateTo({ ChordDiagramScreen(it, title, shapes) })
+                                    navigateTo({ ChordDiagramScreen(it, title, shapes, capo) })
                                 }
                             }
                             if (rowItems.size == 1) Column(Modifier.weight(1f)) {}

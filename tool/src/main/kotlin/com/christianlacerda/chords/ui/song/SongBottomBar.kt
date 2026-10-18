@@ -15,7 +15,6 @@ import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import com.christianlacerda.chords.R
 import com.thelightphone.sdk.ui.LightIcon
 import com.thelightphone.sdk.ui.LightIcons
@@ -25,21 +24,20 @@ import com.thelightphone.sdk.ui.LightThemeTokens
 import com.thelightphone.sdk.ui.gridUnitsAsDp
 import com.thelightphone.sdk.ui.lightClickable
 
-/** Progress line, then "[glyph] state ... (o) Speed N". Speed is tappable (fallback for the wheel). */
+/**
+ * Progress line, then one row: a play/pause button on the left; on the right "Speed N" while playing (opens the
+ * speed panel, the wheel fallback) or the settings icon while stopped.
+ */
 @Composable
 internal fun SongBottomBar(
     progress: State<Float>,
     playState: PlayState,
     speed: Int,
+    onPlayPause: () -> Unit,
     onSpeedTap: () -> Unit,
+    onSettings: () -> Unit,
 ) {
-    val colors = LightThemeTokens.colors
-    val stateText = when (playState) {
-        PlayState.Ready -> stringResource(R.string.state_ready)
-        PlayState.Playing -> stringResource(R.string.state_scrolling)
-        PlayState.Paused -> stringResource(R.string.state_paused)
-        PlayState.Ended -> stringResource(R.string.state_end)
-    }
+    val playing = playState == PlayState.Playing
     Column(Modifier.fillMaxWidth().padding(horizontal = 1f.gridUnitsAsDp())) {
         ProgressLine(progress)
         Row(
@@ -47,30 +45,30 @@ internal fun SongBottomBar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
+            LightIcon(
+                icon = if (playing) LightIcons.PAUSE else LightIcons.PLAY,
+                size = 1.6f,
+                modifier = Modifier.lightClickable { onPlayPause() },
+            )
+            if (playing) {
+                Row(
+                    Modifier.lightClickable { onSpeedTap() }.padding(start = 0.8f.gridUnitsAsDp()),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    LightIcon(icon = LightIcons.CIRCLE, size = 1f, contentDescription = null)
+                    Spacer(Modifier.width(0.4f.gridUnitsAsDp()))
+                    LightText(
+                        text = stringResource(R.string.speed_short, speed),
+                        variant = LightTextVariant.Fine,
+                        maxLines = 1,
+                    )
+                }
+            } else {
                 LightIcon(
-                    icon = if (playState == PlayState.Playing) LightIcons.PLAY else LightIcons.PAUSE,
-                    size = 1.2f,
-                    contentDescription = null,
-                )
-                Spacer(Modifier.width(0.5f.gridUnitsAsDp()))
-                LightText(
-                    text = stateText,
-                    variant = LightTextVariant.Fine,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-            Row(
-                Modifier.lightClickable { onSpeedTap() }.padding(start = 0.8f.gridUnitsAsDp()),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                LightIcon(icon = LightIcons.CIRCLE, size = 1f, contentDescription = null)
-                Spacer(Modifier.width(0.4f.gridUnitsAsDp()))
-                LightText(
-                    text = stringResource(R.string.speed_short, speed),
-                    variant = LightTextVariant.Fine,
-                    maxLines = 1,
+                    icon = LightIcons.SETTINGS,
+                    size = 1.6f,
+                    contentDescription = stringResource(R.string.song_settings),
+                    modifier = Modifier.lightClickable { onSettings() },
                 )
             }
         }

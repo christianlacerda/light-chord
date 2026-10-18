@@ -10,22 +10,17 @@ import com.christianlacerda.chords.library.LibraryRepository
 import com.christianlacerda.chords.library.SongError
 import com.christianlacerda.chords.library.SongSettings
 import com.christianlacerda.chords.model.ChordName
+import com.christianlacerda.chords.model.SectionKind
 import com.christianlacerda.chords.model.Song
 import com.christianlacerda.chords.ui.WheelInput
 import com.christianlacerda.chords.ui.WheelKeys
 import com.christianlacerda.chords.voicing.ChordShapes
 import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.NonCancellable
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import com.thelightphone.sdk.LightViewModel
 import com.thelightphone.sdk.SimpleLightScreen
 
@@ -68,16 +63,31 @@ class SongViewModel(
     val wheel = WheelInput(onStep = { changeSpeed(it) }, onPress = { togglePlay() })
 
     private var loadStarted = false
-    private val saveRequests = MutableSharedFlow<Unit>(extraBufferCapacity = 1, onBufferOverflow = BufferOverflow.DROP_OLDEST)
 
-    @OptIn(FlowPreview::class)
-    private val saver = viewModelScope.launch(Dispatchers.IO) {
-        saveRequests.debounce(400).collect { saveNow() }
+    /** Show TAB sections? From the song's saved settings. */
+    private val _showTabs = MutableStateFlow(true)
+    val showTabs: StateFlow<Boolean> = _showTabs.asStateFlow()
+
+    /** The saved (default) speed last applied, so a return from Settings only resets speed when it changed. */
+    private var appliedSavedSpeed: Int? = null
+
+    init {
+        // The settings screen saves asynchronously; apply its result when the write lands, even if the song
+        // screen was shown again before it finished.
+        viewModelScope.launch {
+            LibraryEvents.settingsChanged.drop(1).collect {
+                if (_load.value is SongLoad.Ready) applySettings(repository.settings(fileName))
+            }
+        }
     }
 
     override fun onScreenShow(screen: SimpleLightScreen<Unit>) {
         // onResume re-invokes this: only ever load once, never reset the play position.
-        if (loadStarted) return
+        if (loadStarted) {
+            // Back from the settings screen (or app resume): pick up a new default speed / tab visibility.
+            viewModelScope.launch { applySettings(repository.settings(fileName)) }
+            return
+        }
         loadStarted = true
         viewModelScope.launch {
             try {
@@ -91,8 +101,7 @@ class SongViewModel(
     }
 
     private suspend fun loadSong() {
-        val settings = repository.settings(fileName)
-        _speed.value = ScrollSpeed.clamp(settings.speed)
+        applySettings(repository.settings(fileName))
         val result = repository.readSong(fileName)
         _load.value = when {
             result == null -> SongLoad.Failed(
@@ -105,6 +114,24 @@ class SongViewModel(
         }
         repository.voicings() // warm the cache (loaded on IO) so a chord tap is instant
     }
+
+    /**
+     * The saved speed is the song's default: what it opens with. Wheel / speed-panel changes only last for this
+     * session. A changed default is applied when not playing; tab visibility always applies.
+     */
+    private fun applySettings(settings: SongSettings) {
+        _showTabs.value = settings.showTabs
+        val saved = ScrollSpeed.clamp(settings.speed)
+        if (saved != appliedSavedSpeed && _playState.value != PlayState.Playing) {
+            _speed.value = saved
+            appliedSavedSpeed = saved
+        }
+    }
+
+    fun hasTabs(): Boolean =
+        (_load.value as? SongLoad.Ready)?.song?.sections?.any { it.kind == SectionKind.TAB } == true
+
+    fun songCapo(): Int? = (_load.value as? SongLoad.Ready)?.song?.meta?.capo?.takeIf { it > 0 }
 
     /** Looks the shapes up (chords.json is read on IO the first time) and hands them to [onReady] on the main thread. */
     fun withShapes(chord: ChordName, onReady: (ChordShapes) -> Unit) {
@@ -143,9 +170,10 @@ class SongViewModel(
         when (_playState.value) {
             PlayState.Ready, PlayState.Paused -> _playState.value = PlayState.Playing
             PlayState.Playing -> _playState.value = PlayState.Paused
-            PlayState.Ended -> {
-                viewModelScope.launch { scrollState.scrollTo(0) }
-                _playState.value = PlayState.Paused
+            PlayState.Ended -> viewModelScope.launch {
+                // back to the top first, so the end check doesn't fire again straight away
+                scrollState.scrollTo(0)
+                _playState.value = PlayState.Playing
             }
         }
     }
@@ -164,7 +192,7 @@ class SongViewModel(
         val next = ScrollSpeed.clamp(_speed.value + delta)
         _speed.value = next
         _flashToken.value = _flashToken.value + 1
-        saveRequests.tryEmit(Unit)
+        // session only: the song's default speed is changed on its settings screen
     }
 
     fun openSpeedPanel() {
@@ -176,40 +204,13 @@ class SongViewModel(
         _speedPanel.value = false
     }
 
-    private fun progress(): Float {
-        val max = scrollState.maxValue
-        return if (max > 0) (scrollState.value.toFloat() / max).coerceIn(0f, 1f) else 0f
-    }
-
-    private suspend fun saveNow() {
-        try {
-            saveSettingsNow()
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            // a failed settings write must never crash the song view
-        }
-    }
-
-    private suspend fun saveSettingsNow() {
-        repository.saveSettings(fileName, SongSettings(speed = _speed.value, transpose = 0, lastProgress = progress()))
-    }
-
-    private fun flush() {
-        if (_load.value !is SongLoad.Ready) return
-        // NonCancellable: the screen's scope may be cleared right after onScreenHide.
-        viewModelScope.launch { withContext(NonCancellable) { saveNow() } }
-    }
-
     override fun onScreenHide(screen: SimpleLightScreen<Unit>) {
         // Leaving for the chord sheet must not leave the song scrolling or resume on its own when we come back.
         closeSpeedPanel()
         pause()
-        flush()
     }
 
     override fun onAppPause() {
         pause()
-        flush()
     }
 }

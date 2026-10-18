@@ -65,6 +65,8 @@ class ChordDiagramScreen(
     sealedActivity: SealedLightActivity,
     private val songTitle: String,
     private val shapes: ChordShapes,
+    /** The song's capo (> 0) if any: shapes are then relative to the capo. */
+    private val capo: Int? = null,
 ) : LightScreen<Unit, ChordDiagramViewModel>(sealedActivity) {
 
     override val viewModelClass: Class<ChordDiagramViewModel>
@@ -95,6 +97,15 @@ class ChordDiagramScreen(
                         textAlign = TextAlign.Center,
                     ),
                 )
+                capo?.let {
+                    LightText(
+                        text = stringResource(R.string.capo_relative, it),
+                        variant = LightTextVariant.Detail,
+                        lighten = true,
+                        align = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
                 val voicing = shapes.voicings.getOrNull(index)
                 if (voicing == null) {
                     Box(Modifier.weight(1f).fillMaxWidth().padding(horizontal = 2f.gridUnitsAsDp()), contentAlignment = Alignment.Center) {

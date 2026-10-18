@@ -18,9 +18,16 @@ class Measurers(
     val chordGap: Float,
 )
 
-fun buildRenderItems(song: Song, maxWidth: Float, measurers: Measurers): List<RenderItem> {
+/** [showTabs] false leaves TAB sections (and their labels) out entirely. */
+fun buildRenderItems(
+    song: Song,
+    maxWidth: Float,
+    measurers: Measurers,
+    showTabs: Boolean = true,
+): List<RenderItem> {
     val items = ArrayList<RenderItem>()
-    song.sections.forEachIndexed { idx, section ->
+    val sections = if (showTabs) song.sections else song.sections.filter { it.kind != SectionKind.TAB }
+    sections.forEachIndexed { idx, section ->
         if (idx > 0) items.add(RenderItem.Gap)
         val showLabel = section.label != null || section.kind == SectionKind.VERSE ||
             section.kind == SectionKind.CHORUS || section.kind == SectionKind.BRIDGE ||

@@ -15,10 +15,6 @@
     <string name="error_too_large">File too large</string>
     <string name="error_unreadable">Couldn\'t read this file</string>
     <string name="song_missing">This song is no longer on the phone</string>
-    <string name="state_ready">Tap the lyrics to start</string>
-    <string name="state_scrolling">Scrolling</string>
-    <string name="state_paused">Paused · tap a chord to see it</string>
-    <string name="state_end">End · tap to start over</string>
     <string name="speed_short">Speed %1$d</string>
     <string name="speed_label">SPEED</string>
     <string name="section_verse">Verse</string>
@@ -42,6 +38,12 @@
     <string name="delete_body">\"%1$s\" will be removed from this phone.</string>
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
+    <string name="song_settings">Song settings</string>
+    <string name="settings_speed">Speed</string>
+    <string name="settings_speed_hint">The song opens at this speed.</string>
+    <string name="settings_show_tabs">Show tabs</string>
+    <string name="info_capo">Capo %1$d</string>
+    <string name="capo_relative">Capo %1$d · shapes relative to capo</string>
     <plurals name="chord_count">
         <item quantity="one">%d chord</item>
         <item quantity="other">%d chords</item>

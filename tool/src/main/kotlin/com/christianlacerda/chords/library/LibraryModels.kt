@@ -33,11 +33,16 @@ data class LibraryIndex(
     val parserVersion: Int = 0,
 )
 
+/**
+ * Per-song settings, written only from the song's settings screen. [speed] is the speed the song opens with.
+ * [lastProgress] is kept for compatibility with existing saved data but is no longer written.
+ */
 @Serializable
 data class SongSettings(
     val speed: Int = 4,
     val transpose: Int = 0,
     val lastProgress: Float = 0f,
+    val showTabs: Boolean = true,
 )
 
 /** [artist] null = unknown artist. */

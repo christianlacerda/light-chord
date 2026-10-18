@@ -15,10 +15,6 @@
     <string name="error_too_large">Arquivo grande demais</string>
     <string name="error_unreadable">Não foi possível ler o arquivo</string>
     <string name="song_missing">Esta música não está mais no telefone</string>
-    <string name="state_ready">Toque na letra para começar</string>
-    <string name="state_scrolling">Rolando</string>
-    <string name="state_paused">Pausado · toque num acorde para vê-lo</string>
-    <string name="state_end">Fim · toque para recomeçar</string>
     <string name="speed_short">Vel. %1$d</string>
     <string name="speed_label">VELOCIDADE</string>
     <string name="section_verse">Verso</string>
@@ -42,6 +38,12 @@
     <string name="delete_body">\"%1$s\" será removida deste telefone.</string>
     <string name="delete">Apagar</string>
     <string name="cancel">Cancelar</string>
+    <string name="song_settings">Ajustes da música</string>
+    <string name="settings_speed">Velocidade</string>
+    <string name="settings_speed_hint">A música abre nesta velocidade.</string>
+    <string name="settings_show_tabs">Mostrar tablaturas</string>
+    <string name="info_capo">Capotraste %1$d</string>
+    <string name="capo_relative">Capotraste %1$d · formas relativas ao capotraste</string>
     <plurals name="chord_count">
         <item quantity="one">%d acorde</item>
         <item quantity="other">%d acordes</item>

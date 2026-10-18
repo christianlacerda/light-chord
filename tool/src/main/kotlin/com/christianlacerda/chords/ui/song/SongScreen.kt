@@ -81,15 +81,18 @@ class SongScreen(sealedActivity: SealedLightActivity, private val fileName: Stri
                 onBack = { goBack() },
                 onOpenChords = { title ->
                     val key = viewModel.songKey()
+                    val capo = viewModel.songCapo()
                     viewModel.withSongChords { chords ->
-                        navigateTo({ SongChordsScreen(it, title, key, chords) })
+                        navigateTo({ SongChordsScreen(it, title, key, chords, capo) })
                     }
                 },
                 onChordTap = { chord, title ->
+                    val capo = viewModel.songCapo()
                     viewModel.withShapes(chord) { shapes ->
-                        navigateTo({ ChordDiagramScreen(it, title, shapes) })
+                        navigateTo({ ChordDiagramScreen(it, title, shapes, capo) })
                     }
                 },
+                onOpenSettings = { navigateTo({ SongSettingsScreen(it, fileName) }) },
             )
         }
     }
@@ -102,9 +105,11 @@ private fun SongContent(
     onBack: () -> Unit,
     onChordTap: (ChordName, String) -> Unit,
     onOpenChords: (String) -> Unit,
+    onOpenSettings: () -> Unit,
 ) {
     val colors = LightThemeTokens.colors
     val load by vm.load.collectAsState()
+    val showTabs by vm.showTabs.collectAsState()
     val playState by vm.playState.collectAsState()
     val speed by vm.speed.collectAsState()
     val flashToken by vm.flashToken.collectAsState()
@@ -154,9 +159,17 @@ private fun SongContent(
                         song = l.song,
                         playState = playState,
                         speed = speed,
+                        showTabs = showTabs,
                         onChordTap = { onChordTap(it, title) },
                     )
-                    SongBottomBar(progress, playState, speed, onSpeedTap = { vm.openSpeedPanel() })
+                    SongBottomBar(
+                        progress = progress,
+                        playState = playState,
+                        speed = speed,
+                        onPlayPause = { vm.togglePlay() },
+                        onSpeedTap = { vm.openSpeedPanel() },
+                        onSettings = onOpenSettings,
+                    )
                 }
             }
         }
@@ -180,6 +193,7 @@ private fun SongBodyScroll(
     song: Song,
     playState: PlayState,
     speed: Int,
+    showTabs: Boolean,
     onChordTap: (ChordName) -> Unit,
 ) {
     val colors = LightThemeTokens.colors
@@ -198,7 +212,7 @@ private fun SongBodyScroll(
         val gapPx = lyricLineH * 0.35f
         val fadePx = with(density) { 1.5f.gridUnitsAsDp().toPx() }
 
-        val items = remember(song, widthPx, lyric, chord, chordGapPx) {
+        val items = remember(song, widthPx, lyric, chord, chordGapPx, showTabs) {
             val lyricCache = HashMap<String, Float>()
             val chordCache = HashMap<String, Float>()
             buildRenderItems(
@@ -208,6 +222,7 @@ private fun SongBodyScroll(
                     chordWidth = { t -> chordCache.getOrPut(t) { measurer.textWidth(t, chord) } },
                     chordGap = chordGapPx,
                 ),
+                showTabs = showTabs,
             )
         }
 

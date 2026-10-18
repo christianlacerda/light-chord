@@ -90,4 +90,14 @@ class LineWrapperTest {
         assertEquals(3, items.count { it is RenderItem.Music })
         assertTrue(items.contains(RenderItem.Gap))
     }
+
+    @Test fun hiddenTabsLeaveNoLabelOrGap() {
+        val song = ChordProParser.parse("{sot}\ne|--0--|\n{eot}\n{comment: V1}\n[G]a", "s.cho").song
+        val m = Measurers({ it.length * 10f }, { it.length * 8f }, 4f)
+        val shown = buildRenderItems(song, 500f, m)
+        assertTrue(shown.any { it is RenderItem.Tab })
+        val hidden = buildRenderItems(song, 500f, m, showTabs = false)
+        assertFalse(hidden.any { it is RenderItem.Tab })
+        assertEquals(RenderItem.Label("V1", com.christianlacerda.chords.model.SectionKind.PLAIN), hidden.first())
+    }
 }
