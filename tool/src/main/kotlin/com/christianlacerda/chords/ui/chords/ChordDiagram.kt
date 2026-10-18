@@ -22,16 +22,18 @@ import kotlin.math.min
 /**
  * Fretboard diagram: 6 strings x 5 frets. All geometry derives from the string spacing `s`.
  * [compact] is for the 4-up sheet (bigger numerals relative to the dots so they stay readable).
+ * With a [capo] (> 0) the top edge becomes a bar labelled CAPO with the capo fret beside it, as on
+ * Cifra Club; the shape is read relative to the capo.
  */
 @Composable
-fun ChordDiagram(voicing: Voicing, modifier: Modifier = Modifier, compact: Boolean = false) {
+fun ChordDiagram(voicing: Voicing, modifier: Modifier = Modifier, compact: Boolean = false, capo: Int? = null) {
     val colors = LightThemeTokens.colors
     val measurer = rememberTextMeasurer()
     val content = colors.content
     val secondary = colors.contentSecondary
     val background = colors.background
     Canvas(modifier) {
-        drawDiagram(voicing, measurer, content, secondary, background, compact)
+        drawDiagram(voicing, measurer, content, secondary, background, compact, capo?.takeIf { it > 0 })
     }
 }
 
@@ -42,6 +44,7 @@ private fun DrawScope.drawDiagram(
     secondary: Color,
     background: Color,
     compact: Boolean,
+    capo: Int?,
 ) {
     val s = min(size.width / 7.4f, size.height / 7.3f)
     if (s <= 0f) return
@@ -60,9 +63,28 @@ private fun DrawScope.drawDiagram(
     for (i in 0..5) {
         drawLine(content, Offset(sx(i), top), Offset(sx(i), top + 5 * f), strokeWidth = stroke)
     }
+    // capo bar in place of the nut, with the capo fret in the left gutter
+    if (capo != null) {
+        val barH = 0.5f * s
+        val x0 = left - 0.3f * s
+        val x1 = sx(5) + 0.3f * s
+        drawRoundRect(content, Offset(x0, top - barH / 2f), Size(x1 - x0, barH), CornerRadius(barH / 2f))
+        val capoStyle = TextStyle(color = background, fontSize = (0.32f * s).toSp(), fontWeight = FontWeight.Bold)
+        // one letter on each inner string, so the label spreads evenly across the bar
+        "CAPO".forEachIndexed { k, ch ->
+            val layout = measurer.measure(ch.toString(), capoStyle)
+            val cx = sx(k + 1)
+            drawText(layout, topLeft = Offset(cx - layout.size.width / 2f, top - layout.size.height / 2f))
+        }
+        val numStyle = TextStyle(color = content, fontSize = (0.5f * s).toSp(), fontWeight = FontWeight.Bold)
+        val num = measurer.measure(capo.toString(), numStyle)
+        drawText(num, topLeft = Offset(x0 - 0.25f * s - num.size.width, top - num.size.height / 2f))
+    }
     // nut
     if (v.baseFret == 1) {
-        drawRect(content, Offset(left - stroke / 2f, top - 0.09f * s), Size(5f * s + stroke, 0.18f * s))
+        if (capo == null) {
+            drawRect(content, Offset(left - stroke / 2f, top - 0.09f * s), Size(5f * s + stroke, 0.18f * s))
+        }
     } else {
         val style = TextStyle(color = content, fontSize = (0.45f * s).toSp(), fontWeight = FontWeight.Normal)
         val layout = measurer.measure("${v.baseFret}fr", style)
@@ -73,7 +95,7 @@ private fun DrawScope.drawDiagram(
         )
     }
     // open / muted markers above the nut
-    val markerY = top - 0.55f * s
+    val markerY = top - (if (capo != null) 0.62f else 0.55f) * s
     v.frets.forEachIndexed { i, fret ->
         when (fret) {
             null -> {

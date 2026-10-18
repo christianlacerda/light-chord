@@ -43,7 +43,6 @@
     <string name="settings_speed_hint">A música abre nesta velocidade.</string>
     <string name="settings_show_tabs">Mostrar tablaturas</string>
     <string name="info_capo">Capotraste %1$d</string>
-    <string name="capo_relative">Capotraste %1$d · formas relativas ao capotraste</string>
     <plurals name="chord_count">
         <item quantity="one">%d acorde</item>
         <item quantity="other">%d acordes</item>

@@ -97,15 +97,6 @@ class ChordDiagramScreen(
                         textAlign = TextAlign.Center,
                     ),
                 )
-                capo?.let {
-                    LightText(
-                        text = stringResource(R.string.capo_relative, it),
-                        variant = LightTextVariant.Detail,
-                        lighten = true,
-                        align = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                }
                 val voicing = shapes.voicings.getOrNull(index)
                 if (voicing == null) {
                     Box(Modifier.weight(1f).fillMaxWidth().padding(horizontal = 2f.gridUnitsAsDp()), contentAlignment = Alignment.Center) {
@@ -125,6 +116,7 @@ class ChordDiagramScreen(
                     ChordDiagram(
                         voicing = voicing,
                         modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = 2f.gridUnitsAsDp()),
+                        capo = capo,
                     )
                 }
                 ArrowBar(

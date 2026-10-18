@@ -43,7 +43,6 @@
     <string name="settings_speed_hint">The song opens at this speed.</string>
     <string name="settings_show_tabs">Show tabs</string>
     <string name="info_capo">Capo %1$d</string>
-    <string name="capo_relative">Capo %1$d · shapes relative to capo</string>
     <plurals name="chord_count">
         <item quantity="one">%d chord</item>
         <item quantity="other">%d chords</item>

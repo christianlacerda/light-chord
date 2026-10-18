@@ -71,7 +71,7 @@ class SongChordsScreen(
     private val title: String,
     private val key: String?,
     private val chords: List<ChordShapes>,
-    /** The song's capo (> 0) if any; shown so the shapes are read relative to it. */
+    /** The song's capo (> 0) if any; drawn as a CAPO bar on each diagram. */
     private val capo: Int? = null,
 ) : LightScreen<Unit, SongChordsViewModel>(sealedActivity) {
 
@@ -106,16 +106,6 @@ class SongChordsScreen(
                     maxLines = 1,
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 1.5f.gridUnitsAsDp()),
                 )
-                capo?.let {
-                    LightText(
-                        text = stringResource(R.string.capo_relative, it),
-                        variant = LightTextVariant.Detail,
-                        lighten = true,
-                        align = TextAlign.Center,
-                        maxLines = 1,
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 1.5f.gridUnitsAsDp()),
-                    )
-                }
                 val pageItems = chords.drop(page * PER_PAGE).take(PER_PAGE)
                 Column(
                     Modifier.weight(1f).fillMaxWidth().padding(horizontal = 1.5f.gridUnitsAsDp(), vertical = 0.5f.gridUnitsAsDp()),
@@ -124,7 +114,7 @@ class SongChordsScreen(
                     for (rowItems in pageItems.chunked(2)) {
                         Row(Modifier.weight(1f).fillMaxWidth()) {
                             for (shapes in rowItems) {
-                                ChordCell(shapes, Modifier.weight(1f)) {
+                                ChordCell(shapes, capo, Modifier.weight(1f)) {
                                     navigateTo({ ChordDiagramScreen(it, title, shapes, capo) })
                                 }
                             }
@@ -149,7 +139,7 @@ class SongChordsScreen(
 }
 
 @Composable
-private fun ChordCell(shapes: ChordShapes, modifier: Modifier, onClick: () -> Unit) {
+private fun ChordCell(shapes: ChordShapes, capo: Int?, modifier: Modifier, onClick: () -> Unit) {
     val colors = LightThemeTokens.colors
     Column(
         modifier = modifier.fillMaxSize().lightClickable { onClick() },
@@ -166,7 +156,7 @@ private fun ChordCell(shapes: ChordShapes, modifier: Modifier, onClick: () -> Un
         )
         val voicing = shapes.voicings.firstOrNull()
         if (voicing != null) {
-            ChordDiagram(voicing, Modifier.weight(1f).fillMaxWidth(), compact = true)
+            ChordDiagram(voicing, Modifier.weight(1f).fillMaxWidth(), compact = true, capo = capo)
         }
     }
 }
