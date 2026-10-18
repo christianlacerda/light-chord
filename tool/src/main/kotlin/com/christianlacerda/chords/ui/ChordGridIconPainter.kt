@@ -1,34 +1,31 @@
 package com.christianlacerda.chords.ui
 
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.painter.Painter
 
 /**
- * Minimal chord glyph for the song's top bar: three strings, a nut and one fret line (same weight), and a
- * single finger dot on the middle string. Thin strokes, to sit with the SDK's own icons.
+ * "Chords in this song" glyph for the song's top bar: four rounded tiles in a 2x2 grid, echoing the
+ * 4-per-page sheet it opens. Drawn on a 40-unit box like the SDK's own icons, at a similar stroke.
  * LightBarButton.Icon does not tint, so the colour is passed in.
  */
 class ChordGridPainter(private val color: Color) : Painter() {
     override val intrinsicSize: Size = Size.Unspecified
 
     override fun DrawScope.onDraw() {
-        val w = size.width
-        val h = size.height
-        val stroke = (minOf(w, h) * 0.045f).coerceAtLeast(1.5f)
-        val left = w * 0.28f
-        val right = w * 0.72f
-        val mid = (left + right) / 2f
-        val nut = h * 0.22f
-        val fret = h * 0.52f
-        val bottom = h * 0.82f
-        for (x in listOf(left, mid, right)) {
-            drawLine(color, Offset(x, nut), Offset(x, bottom), strokeWidth = stroke)
+        val u = minOf(size.width, size.height) / 40f
+        val ox = (size.width - 40f * u) / 2f
+        val oy = (size.height - 40f * u) / 2f
+        val tile = Size(12f * u, 12f * u)
+        val style = Stroke(width = (2.4f * u).coerceAtLeast(1.5f))
+        for (x in listOf(5f, 23f)) {
+            for (y in listOf(5f, 23f)) {
+                drawRoundRect(color, Offset(ox + x * u, oy + y * u), tile, CornerRadius(2f * u), style = style)
+            }
         }
-        drawLine(color, Offset(left, nut), Offset(right, nut), strokeWidth = stroke)
-        drawLine(color, Offset(left, fret), Offset(right, fret), strokeWidth = stroke)
-        drawCircle(color, radius = w * 0.085f, center = Offset(mid, (nut + fret) / 2f))
     }
 }
