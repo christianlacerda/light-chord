@@ -23,13 +23,15 @@ class ChordsIconPainter(private val color: Color) : Painter() {
         fun x(v: Float) = ox + v * u
         fun y(v: Float) = oy + v * u
         val pick = Path().apply {
-            moveTo(x(20f), y(35f))
-            cubicTo(x(12.5f), y(27f), x(6.5f), y(19f), x(6.5f), y(12f))
+            moveTo(x(18.2f), y(33.2f))
+            cubicTo(x(12f), y(26.5f), x(6.5f), y(19f), x(6.5f), y(12f))
             cubicTo(x(6.5f), y(7.5f), x(10.5f), y(5f), x(20f), y(5f))
             cubicTo(x(29.5f), y(5f), x(33.5f), y(7.5f), x(33.5f), y(12f))
-            cubicTo(x(33.5f), y(19f), x(27.5f), y(27f), x(20f), y(35f))
+            cubicTo(x(33.5f), y(19f), x(28f), y(26.5f), x(21.8f), y(33.2f))
+            // softly rounded tip
+            quadraticTo(x(20f), y(35.2f), x(18.2f), y(33.2f))
             close()
         }
-        drawPath(pick, color, style = Stroke(width = (2.6f * u).coerceAtLeast(1.5f), join = StrokeJoin.Round))
+        drawPath(pick, color, style = Stroke(width = (3.4f * u).coerceAtLeast(2f), join = StrokeJoin.Round))
     }
 }
