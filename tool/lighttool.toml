@@ -1,7 +1,7 @@
 [tool]
 id = "com.christianlacerda.chords"
 label = "@string/tool_name"
-versionCode = 3
+versionCode = 4
 versionName = "1.0.0"
 permissions = []
 capabilities = ["tool-manager-provider"]

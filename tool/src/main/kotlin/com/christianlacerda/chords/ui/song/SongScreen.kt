@@ -41,7 +41,7 @@ import com.christianlacerda.chords.layout.ScrollSpeed
 import com.christianlacerda.chords.layout.buildRenderItems
 import com.christianlacerda.chords.model.ChordName
 import com.christianlacerda.chords.model.Song
-import com.christianlacerda.chords.ui.ChordGridPainter
+import com.christianlacerda.chords.ui.ChordsIconPainter
 import com.christianlacerda.chords.ui.ChordsTheme
 import com.christianlacerda.chords.ui.KeepScreenOn
 import com.christianlacerda.chords.ui.wheelInput
@@ -132,7 +132,7 @@ private fun SongContent(
                 center = LightTopBarCenter.Text(title),
                 rightButton = if (loaded != null) {
                     LightBarButton.Icon(
-                        painter = remember(colors.content) { ChordGridPainter(colors.content) },
+                        painter = remember(colors.content) { ChordsIconPainter(colors.content) },
                         onClick = { onOpenChords(title) },
                         contentDescription = stringResource(R.string.chords_in_song),
                     )
