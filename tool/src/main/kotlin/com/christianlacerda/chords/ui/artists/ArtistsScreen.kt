@@ -2,7 +2,10 @@ package com.christianlacerda.chords.ui.artists
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,7 +35,8 @@ import com.thelightphone.sdk.LightScreen
 import com.thelightphone.sdk.LightViewModel
 import com.thelightphone.sdk.SealedLightActivity
 import com.thelightphone.sdk.SimpleLightScreen
-import com.thelightphone.sdk.ui.LightBarButton
+import com.thelightphone.sdk.ui.LightBarButtonDefaults
+import com.thelightphone.sdk.ui.LightIcon
 import com.thelightphone.sdk.ui.LightIcons
 import com.thelightphone.sdk.ui.LightScrollBarPosition
 import com.thelightphone.sdk.ui.LightScrollView
@@ -99,25 +103,40 @@ private fun ArtistsContent(
     onOpenArtist: (ArtistSummary) -> Unit,
 ) {
     val colors = LightThemeTokens.colors
-    Column(Modifier.fillMaxSize().background(colors.background)) {
-        LightTopBar(
-            center = LightTopBarCenter.Text(stringResource(R.string.artists_title)),
-            rightButton = LightBarButton.LightIcon(icon = LightIcons.ADD, onClick = onAdd),
-        )
-        when {
-            artists == null -> Unit
-            artists.isEmpty() -> EmptyLibrary()
-            else -> LightScrollView(
-                Modifier.weight(1f).fillMaxWidth(),
-                scrollBarPosition = LightScrollBarPosition.Inside,
-            ) {
-                Column(Modifier.fillMaxWidth().padding(start = CONTENT_PADDING_UNITS.gridUnitsAsDp())) {
-                    artists.forEach { ArtistRow(it, onOpenArtist) }
+    Box(Modifier.fillMaxSize().background(colors.background)) {
+        Column(Modifier.fillMaxSize()) {
+            LightTopBar(
+                center = LightTopBarCenter.Text(stringResource(R.string.artists_title)),
+            )
+            when {
+                artists == null -> Unit
+                artists.isEmpty() -> EmptyLibrary()
+                else -> LightScrollView(
+                    Modifier.weight(1f).fillMaxWidth(),
+                    scrollBarPosition = LightScrollBarPosition.Inside,
+                ) {
+                    Column(Modifier.fillMaxWidth().padding(start = CONTENT_PADDING_UNITS.gridUnitsAsDp())) {
+                        artists.forEach { ArtistRow(it, onOpenArtist) }
+                        // keep the last row clear of the corner + button
+                        Spacer(Modifier.height(ADD_BUTTON_CLEARANCE_UNITS.gridUnitsAsDp()))
+                    }
                 }
             }
         }
+        // Add songs: bottom-right corner, 1u from the right and bottom edges, top-bar icon size.
+        LightIcon(
+            icon = LightIcons.ADD,
+            size = LightBarButtonDefaults.ICON_SIZE_UNITS,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(end = 1f.gridUnitsAsDp(), bottom = 1f.gridUnitsAsDp())
+                .lightClickable { onAdd() },
+        )
     }
 }
+
+/** Icon (2u) + its 1u margin + a little air. */
+private const val ADD_BUTTON_CLEARANCE_UNITS = 3.5f
 
 @Composable
 private fun ArtistRow(summary: ArtistSummary, onOpen: (ArtistSummary) -> Unit) {
