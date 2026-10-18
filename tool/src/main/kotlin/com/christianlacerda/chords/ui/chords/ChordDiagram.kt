@@ -64,11 +64,12 @@ private fun DrawScope.drawDiagram(
     if (v.baseFret == 1) {
         drawRect(content, Offset(left - stroke / 2f, top - 0.09f * s), Size(5f * s + stroke, 0.18f * s))
     } else {
-        val style = TextStyle(color = content, fontSize = (0.5f * s).toSp(), fontWeight = FontWeight.Normal)
+        val style = TextStyle(color = content, fontSize = (0.45f * s).toSp(), fontWeight = FontWeight.Normal)
         val layout = measurer.measure("${v.baseFret}fr", style)
         drawText(
             textLayoutResult = layout,
-            topLeft = Offset(left - 0.35f * s - layout.size.width, rowCenter(0) - layout.size.height / 2f),
+            // clear of the barre and first-string dots, which reach 0.42s left of the low E string
+            topLeft = Offset(left - 0.55f * s - layout.size.width, rowCenter(0) - layout.size.height / 2f),
         )
     }
     // open / muted markers above the nut

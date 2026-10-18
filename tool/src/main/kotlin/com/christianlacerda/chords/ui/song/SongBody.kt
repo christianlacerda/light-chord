@@ -1,5 +1,8 @@
 package com.christianlacerda.chords.ui.song
 
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,12 +13,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -32,7 +42,6 @@ import com.thelightphone.sdk.ui.LightText
 import com.thelightphone.sdk.ui.LightTextVariant
 import com.thelightphone.sdk.ui.designVerticalPxToSp
 import com.thelightphone.sdk.ui.gridUnitsAsDp
-import com.thelightphone.sdk.ui.lightClickable
 import kotlin.math.roundToInt
 
 /** Everything the body needs to draw; keeps the per-item composables' parameter lists short. */
@@ -107,12 +116,37 @@ private fun MusicRowView(row: WrappedRow, palette: SongPalette, onChordTap: (Cho
     val dash = with(density) { 3.dp.toPx() }
     val chordHDp = with(density) { palette.chordLineHeightPx.toDp() }
 
+    // Chord hit areas in row coordinates, filled in as the chord boxes are placed. Taps are resolved
+    // here on the full-size row rather than with a clickable on each small chord box: Compose widens
+    // the touch target of any pointer-input node smaller than the minimum touch size (48dp), which made
+    // a chord's tap area reach into the lyric line below it.
+    val chordHits = remember(row) { mutableMapOf<Int, Pair<Rect, ChordName>>() }
+    val currentOnChordTap by rememberUpdatedState(onChordTap)
+
     Box(
         Modifier
             .fillMaxWidth()
-            .height(with(density) { (chordH + lyricH).toDp() }),
+            .height(with(density) { (chordH + lyricH).toDp() })
+            .then(
+                if (palette.chordsTappable && row.hasChords) {
+                    Modifier.pointerInput(row) {
+                        awaitEachGesture {
+                            val down = awaitFirstDown(requireUnconsumed = false)
+                            val hit = chordHits.values.firstOrNull { it.first.contains(down.position) } ?: return@awaitEachGesture
+                            val up = waitForUpOrCancellation() ?: return@awaitEachGesture
+                            if (hit.first.contains(up.position)) {
+                                // consuming the up keeps the lyrics' play/pause click from firing too
+                                up.consume()
+                                currentOnChordTap(hit.second)
+                            }
+                        }
+                    }
+                } else {
+                    Modifier
+                },
+            ),
     ) {
-        row.pieces.forEach { piece ->
+        row.pieces.forEachIndexed { index, piece ->
             val x = piece.x.roundToInt()
             val chordText = piece.chordText
             if (chordText != null) {
@@ -123,7 +157,15 @@ private fun MusicRowView(row: WrappedRow, palette: SongPalette, onChordTap: (Cho
                     .offset { IntOffset(x - slopH, 0) }
                     // exactly the chord row's height, so the tap target never reaches into the lyric below
                     .height(chordHDp)
-                    .let { m -> if (tappable && chord != null) m.lightClickable { onChordTap(chord) } else m }
+                    .onPlaced { coords ->
+                        if (tappable && chord != null) {
+                            val pos = coords.positionInParent()
+                            val size = coords.size
+                            chordHits[index] = Rect(pos.x, pos.y, pos.x + size.width, pos.y + size.height) to chord
+                        } else {
+                            chordHits.remove(index)
+                        }
+                    }
                     .padding(horizontal = 0.4f.gridUnitsAsDp())
                     .drawBehind {
                         if (tappable) {
