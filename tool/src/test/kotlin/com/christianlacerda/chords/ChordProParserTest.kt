@@ -105,4 +105,13 @@ class ChordProParserTest {
         val chords = parse("[G]a [C]b [G]c").song.allChords().map { it.raw }
         assertEquals(listOf("G", "C", "G"), chords)
     }
+
+    @Test fun commentBeforeTabLabelsTheTab() {
+        val song = parse("{title: T}\n[G]a\n\n{comment: Intro riff}\n{start_of_tab}\ne|--0--|\n{end_of_tab}").song
+        val tab = song.sections.single { it.kind == SectionKind.TAB }
+        assertEquals("Intro riff", tab.label)
+        // an explicit tab label still wins
+        val own = parse("{comment: X}\n{sot: Solo}\ne|--0--|\n{eot}").song
+        assertEquals("Solo", own.sections.single().label)
+    }
 }

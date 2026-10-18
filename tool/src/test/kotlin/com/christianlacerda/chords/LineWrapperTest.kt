@@ -100,4 +100,11 @@ class LineWrapperTest {
         assertFalse(hidden.any { it is RenderItem.Tab })
         assertEquals(RenderItem.Label("V1", com.christianlacerda.chords.model.SectionKind.PLAIN), hidden.first())
     }
+
+    @Test fun tabOnlySongIgnoresHiddenTabs() {
+        val song = ChordProParser.parse("{title: T}\n{sot}\ne|--0--|\n{eot}", "s.cho").song
+        val m = Measurers({ it.length * 10f }, { it.length * 8f }, 4f)
+        val hidden = buildRenderItems(song, 500f, m, showTabs = false)
+        assertTrue(hidden.any { it is RenderItem.Tab })
+    }
 }

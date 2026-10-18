@@ -26,7 +26,9 @@ fun buildRenderItems(
     showTabs: Boolean = true,
 ): List<RenderItem> {
     val items = ArrayList<RenderItem>()
-    val sections = if (showTabs) song.sections else song.sections.filter { it.kind != SectionKind.TAB }
+    // Hiding tabs must never leave a tab-only song blank: then the tabs are shown anyway.
+    val sections = if (showTabs) song.sections
+    else song.sections.filter { it.kind != SectionKind.TAB }.ifEmpty { song.sections }
     sections.forEachIndexed { idx, section ->
         if (idx > 0) items.add(RenderItem.Gap)
         val showLabel = section.label != null || section.kind == SectionKind.VERSE ||

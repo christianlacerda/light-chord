@@ -48,6 +48,13 @@ object ChordProParser {
             current = Builder(label, kind, keepEmpty)
         }
 
+        // A {comment: X} directly before {start_of_tab} (or verse/chorus/bridge) with no label of its own names
+        // that section; otherwise the label would vanish with the empty section that held it.
+        fun openEnv(arg: String?, kind: SectionKind) {
+            val pending = if (current.lines.all { it.segments.isEmpty() }) current.label else null
+            open(arg ?: pending, kind)
+        }
+
         for (line in cleaned.split('\n')) {
             val trimmedStart = line.trimStart()
             if (!inTab && trimmedStart.startsWith("#")) continue
@@ -84,10 +91,10 @@ object ChordProParser {
                             open(arg, kind)
                         }
                     }
-                    "start_of_verse", "sov" -> { open(arg, SectionKind.VERSE); inEnv = true; inTab = false }
-                    "start_of_chorus", "soc" -> { open(arg, SectionKind.CHORUS); inEnv = true; inTab = false }
-                    "start_of_bridge", "sob" -> { open(arg, SectionKind.BRIDGE); inEnv = true; inTab = false }
-                    "start_of_tab", "sot" -> { open(arg, SectionKind.TAB); inEnv = true; inTab = true }
+                    "start_of_verse", "sov" -> { openEnv(arg, SectionKind.VERSE); inEnv = true; inTab = false }
+                    "start_of_chorus", "soc" -> { openEnv(arg, SectionKind.CHORUS); inEnv = true; inTab = false }
+                    "start_of_bridge", "sob" -> { openEnv(arg, SectionKind.BRIDGE); inEnv = true; inTab = false }
+                    "start_of_tab", "sot" -> { openEnv(arg, SectionKind.TAB); inEnv = true; inTab = true }
                     "end_of_verse", "eov", "end_of_chorus", "eoc", "end_of_bridge", "eob",
                     "end_of_tab", "eot" -> { open(null, SectionKind.PLAIN); inEnv = false; inTab = false }
                     "chorus" -> {

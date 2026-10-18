@@ -4,8 +4,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -111,14 +109,17 @@ private fun ArtistsContent(
             when {
                 artists == null -> Unit
                 artists.isEmpty() -> EmptyLibrary()
+                // Outside: the scrollbar gets its own 2u gutter, so it never draws over the counts. The bottom
+                // padding ends the list (and the scrollbar track) above the corner + button.
                 else -> LightScrollView(
-                    Modifier.weight(1f).fillMaxWidth(),
-                    scrollBarPosition = LightScrollBarPosition.Inside,
+                    Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                        .padding(bottom = ADD_BUTTON_CLEARANCE_UNITS.gridUnitsAsDp()),
+                    scrollBarPosition = LightScrollBarPosition.Outside,
                 ) {
                     Column(Modifier.fillMaxWidth().padding(start = CONTENT_PADDING_UNITS.gridUnitsAsDp())) {
                         artists.forEach { ArtistRow(it, onOpenArtist) }
-                        // keep the last row clear of the corner + button
-                        Spacer(Modifier.height(ADD_BUTTON_CLEARANCE_UNITS.gridUnitsAsDp()))
                     }
                 }
             }
@@ -158,7 +159,8 @@ private fun ArtistRow(summary: ArtistSummary, onOpen: (ArtistSummary) -> Unit) {
             text = summary.count.toString(),
             variant = LightTextVariant.Detail,
             lighten = true,
-            modifier = Modifier.padding(start = 1f.gridUnitsAsDp(), end = 1f.gridUnitsAsDp()),
+            // the 2u scrollbar gutter already sits to the right, so counts end 2u from the edge
+            modifier = Modifier.padding(start = 1f.gridUnitsAsDp()),
         )
     }
 }

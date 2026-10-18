@@ -15,6 +15,7 @@ import com.christianlacerda.chords.model.Song
 import com.christianlacerda.chords.ui.WheelInput
 import com.christianlacerda.chords.ui.WheelKeys
 import com.christianlacerda.chords.voicing.ChordShapes
+import com.christianlacerda.chords.voicing.VoicingLibrary
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -133,21 +134,43 @@ class SongViewModel(
 
     fun songCapo(): Int? = (_load.value as? SongLoad.Ready)?.song?.meta?.capo?.takeIf { it > 0 }
 
+    /** True while a chord lookup that will navigate is in flight: further taps are ignored until it lands. */
+    private var pendingNav = false
+
+    /** Bumped by [onScreenHide]; a lookup that finishes after the screen was hidden drops its result. */
+    private var hideCount = 0
+
+    /**
+     * Runs [lookup] against the voicing library and hands the result to [onReady] (which navigates) on the main
+     * thread. When the library is already cached this is synchronous. Otherwise taps are ignored while chords.json
+     * loads, and the result is dropped if the screen was hidden meanwhile (so a late result can't navigate twice
+     * or from another screen).
+     */
+    private fun <T> navigateWithLibrary(lookup: (VoicingLibrary) -> T, onReady: (T) -> Unit) {
+        if (pendingNav) return
+        LibraryEvents.voicingCache?.let { onReady(lookup(it)); return }
+        pendingNav = true
+        val startedAt = hideCount
+        viewModelScope.launch {
+            try {
+                val result = lookup(repository.voicings())
+                if (hideCount == startedAt) onReady(result)
+            } finally {
+                pendingNav = false
+            }
+        }
+    }
+
     /** Looks the shapes up (chords.json is read on IO the first time) and hands them to [onReady] on the main thread. */
     fun withShapes(chord: ChordName, onReady: (ChordShapes) -> Unit) {
-        viewModelScope.launch {
-            val lib = repository.voicings()
-            onReady(lib.shapesFor(chord))
-        }
+        navigateWithLibrary({ it.shapesFor(chord) }, onReady)
     }
 
     /** Distinct chords of the song in order of first use, each with its shapes. */
     fun withSongChords(onReady: (List<ChordShapes>) -> Unit) {
         val song = (_load.value as? SongLoad.Ready)?.song ?: return
-        viewModelScope.launch {
-            val lib = repository.voicings()
-            onReady(song.allChords().distinctBy { it.canonicalName(false) }.map { lib.shapesFor(it) })
-        }
+        val chords = song.allChords().distinctBy { it.canonicalName(false) }
+        navigateWithLibrary({ lib -> chords.map { lib.shapesFor(it) } }, onReady)
     }
 
     fun songKey(): String? = (_load.value as? SongLoad.Ready)?.song?.meta?.key
@@ -206,6 +229,7 @@ class SongViewModel(
 
     override fun onScreenHide(screen: SimpleLightScreen<Unit>) {
         // Leaving for the chord sheet must not leave the song scrolling or resume on its own when we come back.
+        hideCount++
         closeSpeedPanel()
         pause()
     }
