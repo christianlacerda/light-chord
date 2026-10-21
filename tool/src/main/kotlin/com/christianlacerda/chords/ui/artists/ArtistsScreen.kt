@@ -174,17 +174,22 @@ private fun ArtistsContent(
                 .padding(start = 1f.gridUnitsAsDp(), bottom = 1f.gridUnitsAsDp())
                 .lightClickable { onAdd() },
         )
-        // Edit: bottom-right corner; a check while editing. Only offered when there is something to delete.
+        // Edit: bottom-right corner; DONE while editing, like the song list. Only offered when there is something to delete.
         if (!artists.isNullOrEmpty()) {
-            LightIcon(
-                icon = if (editMode) LightIcons.ACCEPT else LightIcons.PENCIL,
-                size = LightBarButtonDefaults.ICON_SIZE_UNITS,
-                contentDescription = stringResource(if (editMode) R.string.done else R.string.edit),
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(end = 1f.gridUnitsAsDp(), bottom = 1f.gridUnitsAsDp())
-                    .lightClickable { onToggleEdit() },
-            )
+            val corner = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(end = 1f.gridUnitsAsDp(), bottom = 1f.gridUnitsAsDp())
+                .lightClickable { onToggleEdit() }
+            if (editMode) {
+                LightText(stringResource(R.string.done).uppercase(), LightTextVariant.Heading, modifier = corner)
+            } else {
+                LightIcon(
+                    icon = LightIcons.PENCIL,
+                    size = LightBarButtonDefaults.ICON_SIZE_UNITS,
+                    contentDescription = stringResource(R.string.edit),
+                    modifier = corner,
+                )
+            }
         }
     }
 }
