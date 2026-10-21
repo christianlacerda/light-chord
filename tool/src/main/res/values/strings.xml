@@ -4,7 +4,7 @@
     <string name="artists_title">Artists</string>
     <string name="unknown_artist">Unknown artist</string>
     <string name="library_empty_title">No songs yet</string>
-    <string name="library_empty_body">Tap + to see how to add songs from your computer.</string>
+    <string name="library_empty_body">Tap + and scan the code from Chord Desk on your computer.</string>
     <string name="detail_key">Key %1$s</string>
     <string name="detail_capo">capo %1$d</string>
     <string name="detail_speed">Speed %1$d</string>
@@ -27,13 +27,6 @@
     <string name="no_shape">No diagram for this chord yet</string>
     <string name="closest_shape">Closest shape: %1$s</string>
     <string name="bass_note">%1$s in the bass</string>
-    <string name="add_title">Add songs</string>
-    <string name="add_from_computer">From your computer</string>
-    <string name="add_step1">Open Tool Manager on this phone</string>
-    <string name="add_step2">Go to the link it shows, on your computer</string>
-    <string name="add_step3">Open %1$s › %2$s and drop your ChordPro files</string>
-    <string name="add_note">Songs appear here by artist as soon as they finish uploading. Files: .cho, .chopro or .txt.</string>
-    <string name="add_missing">Don\'t see %1$s in Tool Manager? Your LightOS may need an update.</string>
     <string name="delete_title">Delete song?</string>
     <string name="delete_body">\"%1$s\" will be removed from this phone.</string>
     <string name="delete">Delete</string>
@@ -47,12 +40,6 @@
         <item quantity="one">%d chord</item>
         <item quantity="other">%d chords</item>
     </plurals>
-    <plurals name="add_recent">
-        <item quantity="one">%d song added from Tool Manager today</item>
-        <item quantity="other">%d songs added from Tool Manager today</item>
-    </plurals>
-    <string name="receive_action">Scan Chord Desk code</string>
-    <string name="receive_hint">In Chord Desk, choose File › Send to Light Phone, then tap here. Same Wi-Fi only.</string>
     <string name="receive_title">Chord Desk</string>
     <string name="receive_scan_title">Scan Chord Desk code</string>
     <string name="receive_connecting">Connecting…</string>

@@ -24,9 +24,10 @@ import com.christianlacerda.chords.library.LibraryIndexer
 import com.christianlacerda.chords.library.LibraryRepository
 import com.christianlacerda.chords.ui.CONTENT_PADDING_UNITS
 import com.christianlacerda.chords.ui.ChordsTheme
-import com.christianlacerda.chords.ui.add.AddSongsScreen
 import com.christianlacerda.chords.ui.artistCollator
 import com.christianlacerda.chords.ui.libraryRepositoryFor
+import com.christianlacerda.chords.ui.receive.ReceiveScreen
+import com.christianlacerda.chords.ui.receive.ScanChordDeskScreen
 import com.christianlacerda.chords.ui.songs.SongsScreen
 import com.thelightphone.sdk.InitialScreen
 import com.thelightphone.sdk.LightScreen
@@ -87,7 +88,13 @@ class ArtistsScreen(sealedActivity: SealedLightActivity) :
         ChordsTheme {
             ArtistsContent(
                 artists = artists,
-                onAdd = { navigateTo({ AddSongsScreen(it) }) },
+                onAdd = {
+                    // + goes straight to the scanner; it pops itself with the text, then Receive is pushed
+                    // (see LightQrCodeScanner KDoc). Done on Receive lands back here.
+                    navigateTo(screenFactory = { ScanChordDeskScreen(it) }) { text ->
+                        navigateTo(screenFactory = { ReceiveScreen(it, text) })
+                    }
+                },
                 onOpenArtist = { a -> navigateTo({ SongsScreen(it, a.artist) }) },
             )
         }

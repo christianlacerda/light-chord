@@ -4,7 +4,7 @@
     <string name="artists_title">Artistas</string>
     <string name="unknown_artist">Artista desconhecido</string>
     <string name="library_empty_title">Nenhuma música ainda</string>
-    <string name="library_empty_body">Toque em + para ver como adicionar músicas pelo computador.</string>
+    <string name="library_empty_body">Toque em + e leia o código do Chord Desk no computador.</string>
     <string name="detail_key">Tom %1$s</string>
     <string name="detail_capo">capo %1$d</string>
     <string name="detail_speed">Velocidade %1$d</string>
@@ -27,13 +27,6 @@
     <string name="no_shape">Ainda não há diagrama para este acorde</string>
     <string name="closest_shape">Forma mais próxima: %1$s</string>
     <string name="bass_note">%1$s no baixo</string>
-    <string name="add_title">Adicionar músicas</string>
-    <string name="add_from_computer">Pelo computador</string>
-    <string name="add_step1">Abra o Tool Manager neste telefone</string>
-    <string name="add_step2">No computador, acesse o link que ele mostra</string>
-    <string name="add_step3">Abra %1$s › %2$s e solte seus arquivos ChordPro</string>
-    <string name="add_note">As músicas aparecem aqui por artista assim que o envio termina. Arquivos: .cho, .chopro ou .txt.</string>
-    <string name="add_missing">Não encontrou %1$s no Tool Manager? Talvez seu LightOS precise de atualização.</string>
     <string name="delete_title">Apagar música?</string>
     <string name="delete_body">\"%1$s\" será removida deste telefone.</string>
     <string name="delete">Apagar</string>
@@ -47,12 +40,6 @@
         <item quantity="one">%d acorde</item>
         <item quantity="other">%d acordes</item>
     </plurals>
-    <plurals name="add_recent">
-        <item quantity="one">%d música adicionada pelo Tool Manager hoje</item>
-        <item quantity="other">%d músicas adicionadas pelo Tool Manager hoje</item>
-    </plurals>
-    <string name="receive_action">Ler código do Chord Desk</string>
-    <string name="receive_hint">No Chord Desk, escolha Arquivo › Enviar para o Light Phone e toque aqui. Somente na mesma rede Wi-Fi.</string>
     <string name="receive_title">Chord Desk</string>
     <string name="receive_scan_title">Ler código do Chord Desk</string>
     <string name="receive_connecting">Conectando…</string>

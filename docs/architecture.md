@@ -95,7 +95,6 @@ ui/
   chords/ChordDiagram.kt       @Composable ChordDiagram(voicing: Voicing, modifier, compact: Boolean)
   chords/ChordDiagramScreen.kt ChordDiagramScreen(sa, songTitle: String, shapes: ChordShapes)
   chords/SongChordsScreen.kt   SongChordsScreen(sa, title: String, key: String?, chords: List<ChordShapes>)
-  add/AddSongsScreen.kt        AddSongsScreen + AddSongsViewModel (recent-upload count)
 ```
 
 **Resources and assets**
@@ -492,12 +491,11 @@ Files go in `assets/samples/`, listed in `assets/samples/index.txt`, all with `{
 
 | Screen | Contents |
 |---|---|
-| **ArtistsScreen** (`@InitialScreen`) | Center "Artists"; right `LightIcons.ADD` → AddSongs. `LightScrollView` of rows: artist name (Heading, single line, ellipsis) and count right-aligned (Detail, lightened). Sorted with `Collator(Locale.getDefault()).apply { strength = PRIMARY }`; "Unknown artist" last. Empty state: "No songs yet" + hint. Before the first load, show nothing (no empty flash, a light-habit lesson). |
+| **ArtistsScreen** (`@InitialScreen`) | Center "Artists"; right `LightIcons.ADD` → ScanChordDeskScreen → ReceiveScreen (see docs/chord-desk-transfer.md). `LightScrollView` of rows: artist name (Heading, single line, ellipsis) and count right-aligned (Detail, lightened). Sorted with `Collator(Locale.getDefault()).apply { strength = PRIMARY }`; "Unknown artist" last. Empty state: "No songs yet" + hint. Before the first load, show nothing (no empty flash, a light-habit lesson). |
 | **SongsScreen(artist)** | Back + artist name; right Edit/Done. Rows: title (Heading) and a detail line joined with " · ": `Key G`, `capo 2` if > 0, `Speed 4` if settings exist, or the error text. In edit mode a trash icon is on the right. |
 | **SongScreen(file)** | Back, title, right `LightBarButton.Icon(ChordsIconPainter(content))` → SongChordsScreen. Body as in §3. Bottom area (3.5u): `LightProgressBar` line, then a Row with PLAY/PAUSE icon (1.2u) + state text (Fine) and, on the right, `LightIcons.CIRCLE` (1u) + "Speed N" (Fine, Bold, tappable fallback). Plus SpeedOverlay. If the file has an error or is missing: centred message + Back. |
 | **ChordDiagramScreen(songTitle, shapes)** | Back + song title. Chord name (`64f.designVerticalPxToSp()` Bold, centred), diagram about 12u × 13u, optional "Closest shape: X" / "F# in the bass" (Detail, lightened). Bottom: ‹ (`LightIcons.BACK`) and › (BACK mirrored with `graphicsLayer(scaleX = -1f)`), arrows at 0.3 alpha when disabled. Centre: "Shape 1 of 2" (Fine) + the fret string "3 2 0 0 0 1", muted as "x" (Detail, lightened, letter-spaced). The wheel cycles shapes. No shapes: "No diagram for this chord yet". |
 | **SongChordsScreen** | Back + "Chords in this song". Subtitle "Amazing Grace · Key G · 5 chords" (Detail, lightened). 2 × 2 grid of compact diagrams with the name above (Subheading Bold). Bottom pager "1 / 2" with ‹ ›; the wheel pages. Tapping a diagram opens ChordDiagramScreen. Chords are distinct by `canonicalName` in first-use order, each in its easiest (first) shape. |
-| **AddSongsScreen** | Back + "Add songs". "From your computer" (Heading). 3 numbered steps (number Bold + Copy text). Note (Detail, lightened). The "missing in Tool Manager" line. Footer above a divider, shown only if N > 0: "N songs added from Tool Manager today". |
 | **DeleteSongScreen(title)** | Centred question + body; `LightBottomBar` with Cancel / Delete text items. |
 
 **Strings** (`values/strings.xml` | `values-pt/strings.xml`)
@@ -535,13 +533,6 @@ Files go in `assets/samples/`, listed in `assets/samples/index.txt`, all with `{
 | no_shape | No diagram for this chord yet | Ainda não há diagrama para este acorde |
 | closest_shape | Closest shape: %1$s | Forma mais próxima: %1$s |
 | bass_note | %1$s in the bass | %1$s no baixo |
-| add_title | Add songs | Adicionar músicas |
-| add_from_computer | From your computer | Pelo computador |
-| add_step1 | Open Tool Manager on this phone | Abra o Tool Manager neste telefone |
-| add_step2 | Go to the link it shows, on your computer | No computador, acesse o link que ele mostra |
-| add_step3 | Open %1$s › %2$s and drop your ChordPro files | Abra %1$s › %2$s e solte seus arquivos ChordPro |
-| add_note | Songs appear here by artist as soon as they finish uploading. Files: .cho, .chopro or .txt. | As músicas aparecem aqui por artista assim que o envio termina. Arquivos: .cho, .chopro ou .txt. |
-| add_missing | Don't see %1$s in Tool Manager? Your LightOS may need an update. | Não encontrou %1$s no Tool Manager? Talvez seu LightOS precise de atualização. |
 | plurals add_recent | %d song added from Tool Manager today / %d songs … | %d música adicionada pelo Tool Manager hoje / %d músicas adicionadas … |
 | delete_title | Delete song? | Apagar música? |
 | delete_body | "%1$s" will be removed from this phone. | "%1$s" será removida deste telefone. |
