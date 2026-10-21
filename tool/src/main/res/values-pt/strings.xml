@@ -51,4 +51,26 @@
         <item quantity="one">%d música adicionada pelo Tool Manager hoje</item>
         <item quantity="other">%d músicas adicionadas pelo Tool Manager hoje</item>
     </plurals>
+    <string name="receive_action">Receber do Chord Desk</string>
+    <string name="receive_hint">Abra Enviar para o celular no Chord Desk e leia o código. Somente na mesma rede Wi-Fi.</string>
+    <string name="receive_title">Chord Desk</string>
+    <string name="receive_scan_title">Ler código do Chord Desk</string>
+    <string name="receive_connecting">Conectando…</string>
+    <string name="receive_progress">Recebendo %1$d de %2$d</string>
+    <string name="receive_replace">Substituir</string>
+    <string name="receive_skip">Pular</string>
+    <string name="receive_skipped_count">%1$d ignoradas</string>
+    <string name="receive_failed_count">%1$d com erro</string>
+    <string name="receive_error_not_code">Não é um código do Chord Desk</string>
+    <string name="receive_error_unreachable">Não foi possível acessar o Chord Desk. Mesma rede Wi-Fi?</string>
+    <string name="receive_error_expired">Código expirado. Inicie um novo envio no Chord Desk.</string>
+    <string name="receive_error_protocol">O Chord Desk enviou algo inesperado. Tente de novo.</string>
+    <plurals name="receive_conflict">
+        <item quantity="one">%d música já está no celular</item>
+        <item quantity="other">%d músicas já estão no celular</item>
+    </plurals>
+    <plurals name="receive_done">
+        <item quantity="one">%d música recebida</item>
+        <item quantity="other">%d músicas recebidas</item>
+    </plurals>
 </resources>

@@ -26,6 +26,8 @@ import com.christianlacerda.chords.library.countAddedSince
 import com.christianlacerda.chords.ui.CONTENT_PADDING_UNITS
 import com.christianlacerda.chords.ui.ChordsTheme
 import com.christianlacerda.chords.ui.libraryRepositoryFor
+import com.christianlacerda.chords.ui.receive.ReceiveScreen
+import com.christianlacerda.chords.ui.receive.ScanChordDeskScreen
 import com.thelightphone.sdk.LightScreen
 import com.thelightphone.sdk.LightViewModel
 import com.thelightphone.sdk.SealedLightActivity
@@ -39,6 +41,7 @@ import com.thelightphone.sdk.ui.LightThemeTokens
 import com.thelightphone.sdk.ui.LightTopBar
 import com.thelightphone.sdk.ui.LightTopBarCenter
 import com.thelightphone.sdk.ui.gridUnitsAsDp
+import com.thelightphone.sdk.ui.lightClickable
 import java.time.LocalDate
 import java.time.ZoneId
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -83,14 +86,25 @@ class AddSongsScreen(sealedActivity: SealedLightActivity) :
     override fun Content() {
         val recent by viewModel.recent.collectAsState()
         ChordsTheme {
-            AddSongsContent(recent = recent, onBack = { goBack() })
+            AddSongsContent(
+                recent = recent,
+                onBack = { goBack() },
+                onReceive = {
+                    // The scanner pops itself with the text; only then push Receive (see LightQrCodeScanner KDoc).
+                    navigateTo(screenFactory = { ScanChordDeskScreen(it) }) { text ->
+                        navigateTo(screenFactory = { ReceiveScreen(it, text) }) { finished ->
+                            if (finished) goBack() // Done: back to Artists
+                        }
+                    }
+                },
+            )
         }
     }
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-private fun AddSongsContent(recent: Int, onBack: () -> Unit) {
+private fun AddSongsContent(recent: Int, onBack: () -> Unit, onReceive: () -> Unit) {
     val colors = LightThemeTokens.colors
     val pad = CONTENT_PADDING_UNITS.gridUnitsAsDp()
     Column(Modifier.fillMaxSize().background(colors.background)) {
@@ -100,6 +114,18 @@ private fun AddSongsContent(recent: Int, onBack: () -> Unit) {
         )
         LightScrollView(Modifier.weight(1f).fillMaxWidth()) {
             Column(Modifier.fillMaxWidth().padding(start = pad, top = 0.5f.gridUnitsAsDp())) {
+                LightText(
+                    text = stringResource(R.string.receive_action),
+                    variant = LightTextVariant.Heading,
+                    modifier = Modifier.fillMaxWidth().lightClickable { onReceive() }.padding(vertical = 0.3f.gridUnitsAsDp()),
+                )
+                LightText(
+                    text = stringResource(R.string.receive_hint),
+                    variant = LightTextVariant.Detail,
+                    lighten = true,
+                    modifier = Modifier.padding(end = pad),
+                )
+                Spacer(Modifier.height(1.2f.gridUnitsAsDp()))
                 LightText(stringResource(R.string.add_from_computer), LightTextVariant.Heading)
                 Spacer(Modifier.height(0.8f.gridUnitsAsDp()))
                 Step(1, stringResource(R.string.add_step1))

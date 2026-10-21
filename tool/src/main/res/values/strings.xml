@@ -51,4 +51,26 @@
         <item quantity="one">%d song added from Tool Manager today</item>
         <item quantity="other">%d songs added from Tool Manager today</item>
     </plurals>
+    <string name="receive_action">Receive from Chord Desk</string>
+    <string name="receive_hint">Open Send to phone in Chord Desk and scan its code. Same Wi-Fi only.</string>
+    <string name="receive_title">Chord Desk</string>
+    <string name="receive_scan_title">Scan Chord Desk code</string>
+    <string name="receive_connecting">Connecting…</string>
+    <string name="receive_progress">Receiving %1$d of %2$d</string>
+    <string name="receive_replace">Replace</string>
+    <string name="receive_skip">Skip</string>
+    <string name="receive_skipped_count">%1$d skipped</string>
+    <string name="receive_failed_count">%1$d failed</string>
+    <string name="receive_error_not_code">Not a Chord Desk code</string>
+    <string name="receive_error_unreachable">Can\'t reach Chord Desk. Same Wi-Fi?</string>
+    <string name="receive_error_expired">Code expired. Start a new send in Chord Desk.</string>
+    <string name="receive_error_protocol">Chord Desk sent something unexpected. Try again.</string>
+    <plurals name="receive_conflict">
+        <item quantity="one">%d song already on the phone</item>
+        <item quantity="other">%d songs already on the phone</item>
+    </plurals>
+    <plurals name="receive_done">
+        <item quantity="one">%d song received</item>
+        <item quantity="other">%d songs received</item>
+    </plurals>
 </resources>

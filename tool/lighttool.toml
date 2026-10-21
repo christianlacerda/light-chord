@@ -1,10 +1,10 @@
 [tool]
 id = "com.christianlacerda.chords"
 label = "@string/tool_name"
-versionCode = 4
+versionCode = 5
 versionName = "1.0.0"
-permissions = []
-capabilities = ["tool-manager-provider"]
+permissions = ["android.permission.INTERNET", "android.permission.CAMERA"]
+capabilities = ["tool-manager-provider", "cleartext-http"]
 # No orientation lock (see light-habit: it letterboxes on the LP3's near-square display).
 # for the LightOS emulator, use the line below and build with -DlightSdk.allowAltServerPackage=true
 # serverPackage = "com.thelightphone.sdk.emulator"

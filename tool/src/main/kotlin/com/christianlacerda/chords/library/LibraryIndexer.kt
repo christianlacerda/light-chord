@@ -3,7 +3,7 @@ package com.christianlacerda.chords.library
 import java.text.Collator
 
 object LibraryIndexer {
-    val SONG_EXTENSIONS = setOf("cho", "chopro", "chordpro", "txt")
+    val SONG_EXTENSIONS = setOf("cho", "chopro", "chordpro", "crd", "txt")
 
     fun isSongFile(name: String): Boolean {
         if (name.startsWith(".") || name.startsWith("._")) return false

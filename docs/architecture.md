@@ -627,3 +627,7 @@ Files go in `assets/samples/`, listed in `assets/samples/index.txt`, all with `{
 - `sdk/client/src/main/kotlin/com/thelightphone/sdk/LightFileShare.kt` (`shared/songs` I/O; no size field)
 - `sdk/ui/src/main/kotlin/com/thelightphone/sdk/ui/LightGrid.kt` and `LightText.kt` / `LightTheme.kt` (grid units, `designVerticalPxToSp`, typography tokens)
 - `light-habit: tool/src/main/kotlin/com/christianlacerda/habits/ui/HabitTrackerViewModel.kt` (DataStore JSON pattern, `onAppPause` / `onScreenShow` lessons)
+
+## Chord Desk transfer (phone side)
+
+Implements `docs/chord-desk-transfer.md`. `transfer/` is pure Kotlin (no Android types): `TransferProtocol` (QR/manifest/hash/duplicate/done-JSON), `TransferClient` (orchestration behind `TransferHost` and `TransferHttp`), `UrlConnectionHttp` (HttpURLConnection, 5 s connect / 15 s read, `Dispatchers.IO`). `ui/receive/` holds the scanner screen (`ScanChordDeskScreen`, wraps the SDK `LightQrCodeScanner`; it pops itself with the text, then Add songs pushes `ReceiveScreen`) and the receive screen. Files are written through `LibraryRepository.writeSong` into `files/shared/songs/` and `refresh()` re-indexes afterwards. `lighttool.toml` needs `INTERNET` + `CAMERA` permissions and the `cleartext-http` capability. `.crd` was added to the indexed song extensions because the protocol allows it.

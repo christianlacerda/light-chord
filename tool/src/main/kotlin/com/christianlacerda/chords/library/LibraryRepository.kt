@@ -12,6 +12,7 @@ import com.christianlacerda.chords.chordpro.TextDecoding
 import com.christianlacerda.chords.voicing.VoicingLibrary
 import com.thelightphone.sdk.LightFileShare
 import java.io.InputStreamReader
+import java.security.MessageDigest
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -124,6 +125,23 @@ class LibraryRepository(
             if (sb.length > MAX_CHARS) return null
         }
         return sb.toString()
+    }
+
+    /** SHA-256 hex of the stored song [name]'s bytes, or null when there is no such file. */
+    suspend fun songHash(name: String): String? = withContext(Dispatchers.IO) {
+        try {
+            val text = readLoaded(name)?.text ?: return@withContext if (fileShare.exists("$SONGS_DIR/$name")) "unreadable" else null
+            MessageDigest.getInstance("SHA-256").digest(text.toByteArray(Charsets.ISO_8859_1))
+                .joinToString("") { "%02x".format(it.toInt() and 0xFF) }
+        } catch (e: Exception) {
+            if (fileShare.exists("$SONGS_DIR/$name")) "unreadable" else null
+        }
+    }
+
+    /** Writes a received song into the shared songs folder (the caller re-indexes with [refresh]). */
+    suspend fun writeSong(name: String, bytes: ByteArray) = withContext(Dispatchers.IO) {
+        val text = TextDecoding.decode(bytes)
+        fileShare.write("$SONGS_DIR/$name") { it.write(text) }
     }
 
     private fun decodeLatin1(text: String): String = TextDecoding.decode(text.toByteArray(Charsets.ISO_8859_1))
