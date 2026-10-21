@@ -4,10 +4,11 @@
     <string name="artists_title">Artists</string>
     <string name="unknown_artist">Unknown artist</string>
     <string name="library_empty_title">No songs yet</string>
-    <string name="library_empty_body">Tap + and scan the code from Chord Desk on your computer.</string>
+    <string name="library_empty_body">Tap ADD and scan the code from Chord Desk on your computer.</string>
     <string name="detail_key">Key %1$s</string>
     <string name="detail_capo">capo %1$d</string>
     <string name="detail_speed">Speed %1$d</string>
+    <string name="add">Add</string>
     <string name="edit">Edit</string>
     <string name="done">Done</string>
     <string name="error_not_chordpro">Not a ChordPro file</string>

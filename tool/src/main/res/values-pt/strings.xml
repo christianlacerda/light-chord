@@ -4,10 +4,11 @@
     <string name="artists_title">Artistas</string>
     <string name="unknown_artist">Artista desconhecido</string>
     <string name="library_empty_title">Nenhuma música ainda</string>
-    <string name="library_empty_body">Toque em + e leia o código do Chord Desk no computador.</string>
+    <string name="library_empty_body">Toque em ADICIONAR e leia o código do Chord Desk no computador.</string>
     <string name="detail_key">Tom %1$s</string>
     <string name="detail_capo">capo %1$d</string>
     <string name="detail_speed">Velocidade %1$d</string>
+    <string name="add">Adicionar</string>
     <string name="edit">Editar</string>
     <string name="done">OK</string>
     <string name="error_not_chordpro">Não é um arquivo ChordPro</string>

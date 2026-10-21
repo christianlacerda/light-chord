@@ -165,15 +165,17 @@ private fun ArtistsContent(
                 }
             }
         }
-        // Add songs: bottom-left corner, 1u from the left and bottom edges, top-bar icon size.
-        LightIcon(
-            icon = LightIcons.ADD,
-            size = LightBarButtonDefaults.ICON_SIZE_UNITS,
-            modifier = Modifier
-                .align(Alignment.BottomStart)
-                .padding(start = 1f.gridUnitsAsDp(), bottom = 1f.gridUnitsAsDp())
-                .lightClickable { onAdd() },
-        )
+        // Add songs: an ADD text button centred on the bottom bar; hidden while editing.
+        if (!editMode) {
+            LightText(
+                text = stringResource(R.string.add).uppercase(),
+                variant = LightTextVariant.Heading,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 1f.gridUnitsAsDp())
+                    .lightClickable { onAdd() },
+            )
+        }
         // Edit: bottom-right corner; DONE while editing, like the song list. Only offered when there is something to delete.
         if (!artists.isNullOrEmpty()) {
             val corner = Modifier
@@ -194,8 +196,8 @@ private fun ArtistsContent(
     }
 }
 
-/** Icon (2u) + its 1u margin + a little air. */
-private const val ADD_BUTTON_CLEARANCE_UNITS = 3.5f
+/** Bottom bar (2u) + its 1u margin + 2u of air between the list's end and the bar. */
+private const val ADD_BUTTON_CLEARANCE_UNITS = 5f
 
 @Composable
 private fun ArtistRow(
