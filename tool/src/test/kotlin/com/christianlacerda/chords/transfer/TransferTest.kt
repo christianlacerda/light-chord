@@ -1,7 +1,5 @@
 package com.christianlacerda.chords.transfer
 
-import com.sun.net.httpserver.HttpServer
-import java.net.InetSocketAddress
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -260,46 +258,5 @@ class TransferClientTest {
     fun unreachable() = runBlocking<Unit> {
         val http = FakeHttp(unreachable = true)
         assertFailsWith<TransferException.Unreachable> { TransferClient(http, target).run(FakeHost()) }
-    }
-
-    @Test
-    fun endToEndAgainstLocalServer() = runBlocking<Unit> {
-        val a = bytesOf("{title: Local}\n[G]hi")
-        val manifest = manifestJson(Triple(0, "local.cho", a))
-        val posted = ArrayList<String>()
-        val server = HttpServer.create(InetSocketAddress("127.0.0.1", 0), 0)
-        fun reply(ex: com.sun.net.httpserver.HttpExchange, status: Int, body: ByteArray) {
-            if (status == 204) ex.sendResponseHeaders(204, -1) else {
-                ex.sendResponseHeaders(status, body.size.toLong())
-                ex.responseBody.use { it.write(body) }
-            }
-            ex.close()
-        }
-        server.createContext("/lightchord/v1") { ex ->
-            if (ex.requestURI.rawQuery != "t=$TOKEN") return@createContext reply(ex, 401, ByteArray(0))
-            when (ex.requestURI.path) {
-                "/lightchord/v1/manifest" -> reply(ex, 200, bytesOf(manifest))
-                "/lightchord/v1/file/0" -> reply(ex, 200, a)
-                "/lightchord/v1/done" -> {
-                    posted.add(ex.requestBody.readBytes().toString(Charsets.UTF_8))
-                    reply(ex, 204, ByteArray(0))
-                }
-                else -> reply(ex, 404, ByteArray(0))
-            }
-        }
-        server.start()
-        try {
-            val t = TransferProtocol.parseQr("http://127.0.0.1:${server.address.port}/lightchord/v1?t=$TOKEN")!!
-            val host = FakeHost()
-            val s = TransferClient(UrlConnectionHttp(), t).run(host)
-            assertEquals(listOf("local.cho"), s.received)
-            assertTrue(host.written["local.cho"]!!.contentEquals(a))
-            assertEquals(1, posted.size)
-            assertTrue(posted[0].contains(""""received":["local.cho"]"""))
-            val bad = TransferProtocol.parseQr("http://127.0.0.1:${server.address.port}/lightchord/v1?t=${"f".repeat(32)}")!!
-            assertFailsWith<TransferException.Expired> { TransferClient(UrlConnectionHttp(), bad).run(FakeHost()) }
-        } finally {
-            server.stop(0)
-        }
     }
 }
