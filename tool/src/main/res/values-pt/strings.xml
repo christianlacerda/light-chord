@@ -51,8 +51,8 @@
         <item quantity="one">%d música adicionada pelo Tool Manager hoje</item>
         <item quantity="other">%d músicas adicionadas pelo Tool Manager hoje</item>
     </plurals>
-    <string name="receive_action">Receber do Chord Desk</string>
-    <string name="receive_hint">Abra Enviar para o celular no Chord Desk e leia o código. Somente na mesma rede Wi-Fi.</string>
+    <string name="receive_action">Ler código do Chord Desk</string>
+    <string name="receive_hint">No Chord Desk, escolha Arquivo › Enviar para o Light Phone e toque aqui. Somente na mesma rede Wi-Fi.</string>
     <string name="receive_title">Chord Desk</string>
     <string name="receive_scan_title">Ler código do Chord Desk</string>
     <string name="receive_connecting">Conectando…</string>

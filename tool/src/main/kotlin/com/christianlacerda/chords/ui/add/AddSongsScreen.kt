@@ -1,6 +1,7 @@
 package com.christianlacerda.chords.ui.add
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,9 +10,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
@@ -33,6 +36,7 @@ import com.thelightphone.sdk.LightViewModel
 import com.thelightphone.sdk.SealedLightActivity
 import com.thelightphone.sdk.SimpleLightScreen
 import com.thelightphone.sdk.ui.LightBarButton
+import com.thelightphone.sdk.ui.LightIcon
 import com.thelightphone.sdk.ui.LightIcons
 import com.thelightphone.sdk.ui.LightScrollView
 import com.thelightphone.sdk.ui.LightText
@@ -114,17 +118,27 @@ private fun AddSongsContent(recent: Int, onBack: () -> Unit, onReceive: () -> Un
         )
         LightScrollView(Modifier.weight(1f).fillMaxWidth()) {
             Column(Modifier.fillMaxWidth().padding(start = pad, top = 0.5f.gridUnitsAsDp())) {
-                LightText(
-                    text = stringResource(R.string.receive_action),
-                    variant = LightTextVariant.Heading,
-                    modifier = Modifier.fillMaxWidth().lightClickable { onReceive() }.padding(vertical = 0.3f.gridUnitsAsDp()),
-                )
-                LightText(
-                    text = stringResource(R.string.receive_hint),
-                    variant = LightTextVariant.Detail,
-                    lighten = true,
-                    modifier = Modifier.padding(end = pad),
-                )
+                // Drawn as an outlined button so it reads as tappable, not as information.
+                Row(
+                    Modifier
+                        .padding(end = pad)
+                        .fillMaxWidth()
+                        .border(2.dp, colors.content, RoundedCornerShape(0.4f.gridUnitsAsDp()))
+                        .lightClickable { onReceive() }
+                        .padding(0.5f.gridUnitsAsDp()),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    LightIcon(LightIcons.CAMERA, size = 1.4f)
+                    Spacer(Modifier.width(0.5f.gridUnitsAsDp()))
+                    Column(Modifier.weight(1f)) {
+                        LightText(stringResource(R.string.receive_action), LightTextVariant.Heading)
+                        LightText(
+                            text = stringResource(R.string.receive_hint),
+                            variant = LightTextVariant.Detail,
+                            lighten = true,
+                        )
+                    }
+                }
                 Spacer(Modifier.height(1.2f.gridUnitsAsDp()))
                 LightText(stringResource(R.string.add_from_computer), LightTextVariant.Heading)
                 Spacer(Modifier.height(0.8f.gridUnitsAsDp()))
