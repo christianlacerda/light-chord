@@ -28,6 +28,7 @@ import com.christianlacerda.chords.ui.artistCollator
 import com.christianlacerda.chords.ui.libraryRepositoryFor
 import com.christianlacerda.chords.ui.receive.ReceiveScreen
 import com.christianlacerda.chords.ui.receive.ScanChordDeskScreen
+import com.christianlacerda.chords.ui.songs.DeleteArtistScreen
 import com.christianlacerda.chords.ui.songs.SongsScreen
 import com.thelightphone.sdk.InitialScreen
 import com.thelightphone.sdk.LightScreen
@@ -46,6 +47,7 @@ import com.thelightphone.sdk.ui.LightTopBar
 import com.thelightphone.sdk.ui.LightTopBarCenter
 import com.thelightphone.sdk.ui.gridUnitsAsDp
 import com.thelightphone.sdk.ui.lightClickable
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -68,6 +70,27 @@ class ArtistsViewModel(private val repository: LibraryRepository) : LightViewMod
         }
     }
 
+    private val _editMode = MutableStateFlow(false)
+    val editMode: StateFlow<Boolean> = _editMode.asStateFlow()
+
+    fun toggleEdit() {
+        _editMode.value = !_editMode.value
+    }
+
+    /** Removes every song file of the artist, then re-indexes (settings of removed songs are pruned there). */
+    fun delete(summary: ArtistSummary) {
+        viewModelScope.launch {
+            try {
+                repository.deleteAll(summary.songs.map { it.file })
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // the refresh below shows what is left
+            }
+            repository.refreshSafely()
+        }
+    }
+
     override fun onScreenShow(screen: SimpleLightScreen<Unit>) {
         viewModelScope.launch { repository.refreshSafely() }
     }
@@ -85,9 +108,12 @@ class ArtistsScreen(sealedActivity: SealedLightActivity) :
     @Composable
     override fun Content() {
         val artists by viewModel.artists.collectAsState()
+        val editMode by viewModel.editMode.collectAsState()
         ChordsTheme {
             ArtistsContent(
                 artists = artists,
+                editMode = editMode,
+                onToggleEdit = { viewModel.toggleEdit() },
                 onAdd = {
                     // + goes straight to the scanner; it pops itself with the text, then Receive is pushed
                     // (see LightQrCodeScanner KDoc). Done on Receive lands back here.
@@ -96,6 +122,11 @@ class ArtistsScreen(sealedActivity: SealedLightActivity) :
                     }
                 },
                 onOpenArtist = { a -> navigateTo({ SongsScreen(it, a.artist) }) },
+                onDeleteArtist = { a, name ->
+                    navigateTo(screenFactory = { DeleteArtistScreen(it, name, a.count) }) { confirmed ->
+                        if (confirmed) viewModel.delete(a)
+                    }
+                },
             )
         }
     }
@@ -104,8 +135,11 @@ class ArtistsScreen(sealedActivity: SealedLightActivity) :
 @Composable
 private fun ArtistsContent(
     artists: List<ArtistSummary>?,
+    editMode: Boolean,
+    onToggleEdit: () -> Unit,
     onAdd: () -> Unit,
     onOpenArtist: (ArtistSummary) -> Unit,
+    onDeleteArtist: (ArtistSummary, String) -> Unit,
 ) {
     val colors = LightThemeTokens.colors
     Box(Modifier.fillMaxSize().background(colors.background)) {
@@ -126,20 +160,32 @@ private fun ArtistsContent(
                     scrollBarPosition = LightScrollBarPosition.Outside,
                 ) {
                     Column(Modifier.fillMaxWidth().padding(start = CONTENT_PADDING_UNITS.gridUnitsAsDp())) {
-                        artists.forEach { ArtistRow(it, onOpenArtist) }
+                        artists.forEach { ArtistRow(it, editMode, onOpenArtist, onDeleteArtist) }
                     }
                 }
             }
         }
-        // Add songs: bottom-right corner, 1u from the right and bottom edges, top-bar icon size.
+        // Add songs: bottom-left corner, 1u from the left and bottom edges, top-bar icon size.
         LightIcon(
             icon = LightIcons.ADD,
             size = LightBarButtonDefaults.ICON_SIZE_UNITS,
             modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(end = 1f.gridUnitsAsDp(), bottom = 1f.gridUnitsAsDp())
+                .align(Alignment.BottomStart)
+                .padding(start = 1f.gridUnitsAsDp(), bottom = 1f.gridUnitsAsDp())
                 .lightClickable { onAdd() },
         )
+        // Edit: bottom-right corner; a check while editing. Only offered when there is something to delete.
+        if (!artists.isNullOrEmpty()) {
+            LightIcon(
+                icon = if (editMode) LightIcons.ACCEPT else LightIcons.PENCIL,
+                size = LightBarButtonDefaults.ICON_SIZE_UNITS,
+                contentDescription = stringResource(if (editMode) R.string.done else R.string.edit),
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 1f.gridUnitsAsDp(), bottom = 1f.gridUnitsAsDp())
+                    .lightClickable { onToggleEdit() },
+            )
+        }
     }
 }
 
@@ -147,16 +193,22 @@ private fun ArtistsContent(
 private const val ADD_BUTTON_CLEARANCE_UNITS = 3.5f
 
 @Composable
-private fun ArtistRow(summary: ArtistSummary, onOpen: (ArtistSummary) -> Unit) {
+private fun ArtistRow(
+    summary: ArtistSummary,
+    editMode: Boolean,
+    onOpen: (ArtistSummary) -> Unit,
+    onDelete: (ArtistSummary, String) -> Unit,
+) {
+    val name = summary.artist ?: stringResource(R.string.unknown_artist)
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .lightClickable { onOpen(summary) }
+            .lightClickable(enabled = !editMode) { onOpen(summary) }
             .padding(vertical = 0.9f.gridUnitsAsDp()),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         LightText(
-            text = summary.artist ?: stringResource(R.string.unknown_artist),
+            text = name,
             variant = LightTextVariant.Heading,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -169,6 +221,12 @@ private fun ArtistRow(summary: ArtistSummary, onOpen: (ArtistSummary) -> Unit) {
             // the 2u scrollbar gutter already sits to the right, so counts end 2u from the edge
             modifier = Modifier.padding(start = 1f.gridUnitsAsDp()),
         )
+        if (editMode) {
+            LightIcon(
+                icon = LightIcons.TRASH,
+                modifier = Modifier.padding(horizontal = 0.8f.gridUnitsAsDp()).lightClickable { onDelete(summary, name) },
+            )
+        }
     }
 }
 

@@ -70,6 +70,14 @@ object LibraryIndexer {
     }
 }
 
+/** The songs of [artist] (null = unknown artist) in [index], matched case-insensitively; empty if none. */
+fun songsForArtist(index: LibraryIndex, artist: String?, collator: Collator): List<SongEntry> {
+    val key = artist?.trim()?.lowercase()
+    return LibraryIndexer.groupByArtist(index, collator)
+        .firstOrNull { it.artist?.trim()?.lowercase() == key }
+        ?.songs.orEmpty()
+}
+
 /** Songs the user added (not bundled) whose first sighting is at or after [startOfDayMillis]. */
 fun LibraryIndex.countAddedSince(startOfDayMillis: Long): Int =
     entries.count { !it.bundled && it.firstSeen >= startOfDayMillis }

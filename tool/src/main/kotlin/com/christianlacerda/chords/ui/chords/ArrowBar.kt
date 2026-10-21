@@ -29,7 +29,14 @@ internal fun ArrowBar(
 ) {
     val colors = LightThemeTokens.colors
     Column(Modifier.fillMaxWidth()) {
-        Box(Modifier.fillMaxWidth().height(1.dp).background(colors.contentSecondary))
+        // Dim like the song's progress track, with a little air above it (between the diagram and the line).
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .padding(top = 1f.gridUnitsAsDp())
+                .height(1.dp)
+                .background(colors.content.copy(alpha = 0.25f)),
+        )
         Row(
             modifier = Modifier.fillMaxWidth().height(4f.gridUnitsAsDp()).padding(horizontal = 1f.gridUnitsAsDp()),
             verticalAlignment = Alignment.CenterVertically,

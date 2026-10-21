@@ -31,6 +31,11 @@
     <string name="delete_body">\"%1$s\" will be removed from this phone.</string>
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
+    <string name="delete_artist_title">Delete artist?</string>
+    <plurals name="delete_artist_body">
+        <item quantity="one">Delete %1$s? This removes %2$d song.</item>
+        <item quantity="other">Delete %1$s? This removes %2$d songs.</item>
+    </plurals>
     <string name="song_settings">Song settings</string>
     <string name="settings_speed">Speed</string>
     <string name="settings_speed_hint">The song opens at this speed.</string>

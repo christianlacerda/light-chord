@@ -31,6 +31,11 @@
     <string name="delete_body">\"%1$s\" será removida deste telefone.</string>
     <string name="delete">Apagar</string>
     <string name="cancel">Cancelar</string>
+    <string name="delete_artist_title">Apagar artista?</string>
+    <plurals name="delete_artist_body">
+        <item quantity="one">Apagar %1$s? Isso remove %2$d música.</item>
+        <item quantity="other">Apagar %1$s? Isso remove %2$d músicas.</item>
+    </plurals>
     <string name="song_settings">Ajustes da música</string>
     <string name="settings_speed">Velocidade</string>
     <string name="settings_speed_hint">A música abre nesta velocidade.</string>

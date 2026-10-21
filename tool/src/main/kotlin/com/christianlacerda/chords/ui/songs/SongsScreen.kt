@@ -17,10 +17,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.viewModelScope
 import com.christianlacerda.chords.R
 import com.christianlacerda.chords.library.LibraryEvents
-import com.christianlacerda.chords.library.LibraryIndexer
 import com.christianlacerda.chords.library.LibraryRepository
 import com.christianlacerda.chords.library.SongEntry
 import com.christianlacerda.chords.library.SongSettings
+import com.christianlacerda.chords.library.songsForArtist
 import com.christianlacerda.chords.ui.CONTENT_PADDING_UNITS
 import com.christianlacerda.chords.ui.ChordsTheme
 import com.christianlacerda.chords.ui.artistCollator
@@ -48,6 +48,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class SongsState(val songs: List<SongEntry>, val settings: Map<String, SongSettings>)
@@ -84,11 +85,9 @@ class SongsViewModel(
     init {
         viewModelScope.launch {
             LibraryEvents.index.filterNotNull().collect { index ->
-                val key = artist?.trim()?.lowercase()
-                val songs = LibraryIndexer.groupByArtist(index, artistCollator())
-                    .firstOrNull { it.artist?.trim()?.lowercase() == key }
-                    ?.songs.orEmpty()
-                _state.value = SongsState(songs, repository.allSettings())
+                val songs = songsForArtist(index, artist, artistCollator())
+                val settings = repository.allSettings()
+                _state.value = SongsState(songs, settings)
             }
         }
         viewModelScope.launch {
@@ -101,8 +100,10 @@ class SongsViewModel(
     }
 
     private suspend fun reloadSettings() {
-        val current = _state.value ?: return
-        _state.value = current.copy(settings = repository.allSettings())
+        val settings = repository.allSettings()
+        // Atomic on the latest state: the old read-then-write could put back a song list from before a
+        // delete that landed while the settings were loading (the "deleted song reappears" bug).
+        _state.update { it?.copy(settings = settings) }
     }
 
     override fun onScreenShow(screen: SimpleLightScreen<Unit>) {

@@ -183,6 +183,17 @@ class LibraryRepository(
         fileShare.delete("$SONGS_DIR/$file")
     }
 
+    /** Deletes every file in [files] (an artist's songs); returns how many were removed. Settings are pruned by [refresh]. */
+    suspend fun deleteAll(files: List<String>): Int = withContext(Dispatchers.IO) {
+        files.count { file ->
+            try {
+                fileShare.delete("$SONGS_DIR/$file")
+            } catch (e: Exception) {
+                false
+            }
+        }
+    }
+
     suspend fun allSettings(): Map<String, SongSettings> = try {
         decodeSettings(dataStore.data.first()[SETTINGS_KEY])
     } catch (e: CancellationException) {
