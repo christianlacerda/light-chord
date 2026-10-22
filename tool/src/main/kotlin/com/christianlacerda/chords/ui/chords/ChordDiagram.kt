@@ -89,7 +89,7 @@ private fun DrawScope.drawDiagram(
     if (v.baseFret == 1) {
         drawRect(content, Offset(left - stroke / 2f, top - 0.09f * s), Size(5f * s + stroke, 0.18f * s))
     } else {
-        val style = TextStyle(color = content, fontSize = (0.45f * s).toSp(), fontWeight = FontWeight.Normal)
+        val style = TextStyle(color = content, fontSize = (0.55f * s).toSp(), fontWeight = FontWeight.Medium)
         val layout = measurer.measure("${v.baseFret}fr", style)
         drawText(
             textLayoutResult = layout,
