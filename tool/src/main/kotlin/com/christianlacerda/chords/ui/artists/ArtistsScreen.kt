@@ -36,7 +36,8 @@ import com.thelightphone.sdk.LightScreen
 import com.thelightphone.sdk.LightViewModel
 import com.thelightphone.sdk.SealedLightActivity
 import com.thelightphone.sdk.SimpleLightScreen
-import com.thelightphone.sdk.ui.LightBarButtonDefaults
+import com.thelightphone.sdk.ui.LightBarButton
+import com.thelightphone.sdk.ui.LightBottomBar
 import com.thelightphone.sdk.ui.LightIcon
 import com.thelightphone.sdk.ui.LightIcons
 import com.thelightphone.sdk.ui.LightScrollBarPosition
@@ -145,21 +146,17 @@ private fun ArtistsContent(
     onDeleteArtist: (ArtistSummary, String) -> Unit,
 ) {
     val colors = LightThemeTokens.colors
-    Box(Modifier.fillMaxSize().background(colors.background)) {
-        Column(Modifier.fillMaxSize()) {
-            LightTopBar(
-                center = LightTopBarCenter.Text(stringResource(R.string.artists_title)),
-            )
+    Column(Modifier.fillMaxSize().background(colors.background)) {
+        LightTopBar(
+            center = LightTopBarCenter.Text(stringResource(R.string.artists_title)),
+        )
+        Box(Modifier.weight(1f).fillMaxWidth()) {
             when {
                 artists == null -> Unit
                 artists.isEmpty() -> EmptyLibrary()
-                // Outside: the scrollbar gets its own 2u gutter, so it never draws over the counts. The bottom
-                // padding ends the list (and the scrollbar track) above the corner + button.
+                // Outside: the scrollbar gets its own 2u gutter, so it never draws over the counts.
                 else -> LightScrollView(
-                    Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
-                        .padding(bottom = ADD_BUTTON_CLEARANCE_UNITS.gridUnitsAsDp()),
+                    Modifier.fillMaxSize(),
                     scrollBarPosition = LightScrollBarPosition.Outside,
                 ) {
                     Column(Modifier.fillMaxWidth().padding(start = CONTENT_PADDING_UNITS.gridUnitsAsDp())) {
@@ -168,51 +165,26 @@ private fun ArtistsContent(
                 }
             }
         }
-        // Bottom bar: [gear] ADD [pencil]. Settings and ADD are hidden while editing.
-        if (!editMode) {
-            LightIcon(
-                icon = LightIcons.SETTINGS,
-                size = LightBarButtonDefaults.ICON_SIZE_UNITS,
-                contentDescription = stringResource(R.string.settings_title),
-                modifier = Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(start = 1f.gridUnitsAsDp(), bottom = 1f.gridUnitsAsDp())
-                    .lightClickable { onOpenSettings() },
-            )
-        }
-        // Add songs: an ADD text button centred on the bottom bar; hidden while editing.
-        if (!editMode) {
-            LightText(
-                text = stringResource(R.string.add).uppercase(),
-                variant = LightTextVariant.Heading,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 1f.gridUnitsAsDp())
-                    .lightClickable { onAdd() },
-            )
-        }
-        // Edit: bottom-right corner; DONE while editing, like the song list. Only offered when there is something to delete.
-        if (!artists.isNullOrEmpty()) {
-            val corner = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(end = 1f.gridUnitsAsDp(), bottom = 1f.gridUnitsAsDp())
-                .lightClickable { onToggleEdit() }
-            if (editMode) {
-                LightText(stringResource(R.string.done).uppercase(), LightTextVariant.Heading, modifier = corner)
+        // The SDK's bar, as in light-habit: [gear] ADD [pencil], and DONE alone in the centre while editing.
+        // Pencil only when there is something to delete; a null slot keeps the others in place.
+        val hasArtists = !artists.isNullOrEmpty()
+        LightBottomBar(
+            items = if (editMode) {
+                listOf(null, LightBarButton.Text(stringResource(R.string.done).uppercase(), onClick = onToggleEdit), null)
             } else {
-                LightIcon(
-                    icon = LightIcons.PENCIL,
-                    size = LightBarButtonDefaults.ICON_SIZE_UNITS,
-                    contentDescription = stringResource(R.string.edit),
-                    modifier = corner,
+                listOf(
+                    LightBarButton.LightIcon(LightIcons.SETTINGS, onClick = onOpenSettings, contentDescription = stringResource(R.string.settings_title)),
+                    LightBarButton.Text(stringResource(R.string.add).uppercase(), onClick = onAdd),
+                    if (hasArtists) {
+                        LightBarButton.LightIcon(LightIcons.PENCIL, onClick = onToggleEdit, contentDescription = stringResource(R.string.edit))
+                    } else {
+                        null
+                    },
                 )
-            }
-        }
+            },
+        )
     }
 }
-
-/** Bottom bar (2u) + its 1u margin + 2u of air between the list's end and the bar. */
-private const val ADD_BUTTON_CLEARANCE_UNITS = 5f
 
 @Composable
 private fun ArtistRow(

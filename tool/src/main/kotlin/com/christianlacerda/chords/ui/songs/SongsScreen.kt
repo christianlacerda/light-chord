@@ -33,7 +33,7 @@ import com.thelightphone.sdk.LightViewModel
 import com.thelightphone.sdk.SealedLightActivity
 import com.thelightphone.sdk.SimpleLightScreen
 import com.thelightphone.sdk.ui.LightBarButton
-import com.thelightphone.sdk.ui.LightBarButtonDefaults
+import com.thelightphone.sdk.ui.LightBottomBar
 import com.thelightphone.sdk.ui.LightIcon
 import com.thelightphone.sdk.ui.LightIcons
 import com.thelightphone.sdk.ui.LightScrollView
@@ -134,60 +134,51 @@ class SongsScreen(sealedActivity: SealedLightActivity, private val artist: Strin
             if (state?.songs?.isEmpty() == true) goBack()
         }
         ChordsTheme {
-            Box(Modifier.fillMaxSize().background(LightThemeTokens.colors.background)) {
-            Column(Modifier.fillMaxSize()) {
+            Column(Modifier.fillMaxSize().background(LightThemeTokens.colors.background)) {
                 LightTopBar(
                     leftButton = LightBarButton.LightIcon(LightIcons.BACK, onClick = { goBack() }),
                     center = LightTopBarCenter.Text(title),
                 )
                 val s = state
-                if (s != null) {
-                    // bottom padding ends the list above the corner pencil, as on Artists
-                    LightScrollView(
-                        Modifier.weight(1f).fillMaxWidth().padding(bottom = EDIT_BUTTON_CLEARANCE_UNITS.gridUnitsAsDp()),
-                    ) {
-                        Column(Modifier.fillMaxWidth().padding(start = CONTENT_PADDING_UNITS.gridUnitsAsDp())) {
-                            s.songs.forEach { entry ->
-                                SongRow(
-                                    entry = entry,
-                                    settings = s.settings[entry.file],
-                                    editMode = editMode,
-                                    onOpen = { navigateTo({ SongScreen(it, entry.file) }) },
-                                    onDelete = {
-                                        navigateTo(screenFactory = { DeleteSongScreen(it, entry.title) }) { confirmed ->
-                                            if (confirmed) viewModel.delete(entry)
-                                        }
-                                    },
-                                )
+                Box(Modifier.weight(1f).fillMaxWidth()) {
+                    if (s != null) {
+                        LightScrollView(Modifier.fillMaxSize()) {
+                            Column(Modifier.fillMaxWidth().padding(start = CONTENT_PADDING_UNITS.gridUnitsAsDp())) {
+                                s.songs.forEach { entry ->
+                                    SongRow(
+                                        entry = entry,
+                                        settings = s.settings[entry.file],
+                                        editMode = editMode,
+                                        onOpen = { navigateTo({ SongScreen(it, entry.file) }) },
+                                        onDelete = {
+                                            navigateTo(screenFactory = { DeleteSongScreen(it, entry.title) }) { confirmed ->
+                                                if (confirmed) viewModel.delete(entry)
+                                            }
+                                        },
+                                    )
+                                }
                             }
                         }
                     }
                 }
-            }
-            // Edit: bottom-right corner, like Artists; DONE while editing.
-            if (!state?.songs.isNullOrEmpty()) {
-                val corner = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(end = 1f.gridUnitsAsDp(), bottom = 1f.gridUnitsAsDp())
-                    .lightClickable { viewModel.toggleEdit() }
-                if (editMode) {
-                    LightText(stringResource(R.string.done).uppercase(), LightTextVariant.Heading, modifier = corner)
-                } else {
-                    LightIcon(
-                        icon = LightIcons.PENCIL,
-                        size = LightBarButtonDefaults.ICON_SIZE_UNITS,
-                        contentDescription = stringResource(R.string.edit),
-                        modifier = corner,
+                // The SDK's bar, as on Artists: pencil bottom-right, DONE in the centre while editing.
+                if (!s?.songs.isNullOrEmpty()) {
+                    LightBottomBar(
+                        items = if (editMode) {
+                            listOf(null, LightBarButton.Text(stringResource(R.string.done).uppercase(), onClick = { viewModel.toggleEdit() }), null)
+                        } else {
+                            listOf(
+                                null,
+                                null,
+                                LightBarButton.LightIcon(LightIcons.PENCIL, onClick = { viewModel.toggleEdit() }, contentDescription = stringResource(R.string.edit)),
+                            )
+                        },
                     )
                 }
-            }
             }
         }
     }
 }
-
-/** Bottom bar (2u) + its 1u margin + 2u of air between the list's end and the bar. */
-private const val EDIT_BUTTON_CLEARANCE_UNITS = 5f
 
 @Composable
 private fun SongRow(
