@@ -9,6 +9,7 @@ import com.christianlacerda.chords.chordpro.ChordProParser
 import com.christianlacerda.chords.chordpro.ParseIssue
 import com.christianlacerda.chords.chordpro.ParseResult
 import com.christianlacerda.chords.chordpro.TextDecoding
+import com.christianlacerda.chords.model.ChordNotation
 import com.christianlacerda.chords.voicing.VoicingLibrary
 import com.thelightphone.sdk.LightFileShare
 import java.io.InputStreamReader
@@ -26,6 +27,7 @@ import kotlinx.serialization.json.Json
 private val INDEX_KEY = stringPreferencesKey("library_index_v1")
 private val SETTINGS_KEY = stringPreferencesKey("song_settings_v1")
 private val SEEDED_KEY = stringSetPreferencesKey("seeded_files")
+private val NOTATION_KEY = stringPreferencesKey("chord_notation")
 
 private const val MAX_CHARS = 512 * 1024
 private const val SAMPLES_DIR = "samples"
@@ -211,6 +213,25 @@ class LibraryRepository(
             p[SETTINGS_KEY] = json.encodeToString(settingsSerializer, map)
         }
         LibraryEvents.settingsChanged.value = LibraryEvents.settingsChanged.value + 1
+    }
+
+    /** Reads the app-wide chord notation (Brazilian when never set) and publishes it to [LibraryEvents.notation]. */
+    suspend fun loadNotation(): ChordNotation {
+        val stored = try {
+            dataStore.data.first()[NOTATION_KEY]
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            null
+        }
+        val notation = ChordNotation.entries.firstOrNull { it.name == stored } ?: ChordNotation.BRAZILIAN
+        LibraryEvents.notation.value = notation
+        return notation
+    }
+
+    suspend fun saveNotation(notation: ChordNotation) {
+        LibraryEvents.notation.value = notation
+        dataStore.edit { p -> p[NOTATION_KEY] = notation.name }
     }
 
     /** Loads assets/chords.json (once, cached) off the main thread. */

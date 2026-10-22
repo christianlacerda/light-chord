@@ -1,7 +1,9 @@
 package com.christianlacerda.chords.layout
 
+import com.christianlacerda.chords.model.ChordNotation
 import com.christianlacerda.chords.model.SectionKind
 import com.christianlacerda.chords.model.Song
+import com.christianlacerda.chords.model.displayName
 
 sealed interface RenderItem {
     /** [text] null means "use the localized name of [kind]" (Verse, Chorus, ...). */
@@ -18,12 +20,16 @@ class Measurers(
     val chordGap: Float,
 )
 
-/** [showTabs] false leaves TAB sections (and their labels) out entirely. */
+/**
+ * [showTabs] false leaves TAB sections (and their labels) out entirely. Parsed chords are shown in [notation];
+ * annotations and unreadable chords as written.
+ */
 fun buildRenderItems(
     song: Song,
     maxWidth: Float,
     measurers: Measurers,
     showTabs: Boolean = true,
+    notation: ChordNotation = ChordNotation.BRAZILIAN,
 ): List<RenderItem> {
     val items = ArrayList<RenderItem>()
     // Hiding tabs must never leave a tab-only song blank: then the tabs are shown anyway.
@@ -43,8 +49,11 @@ fun buildRenderItems(
             if (line.segments.isEmpty()) {
                 items.add(RenderItem.Gap)
             } else {
+                val segments = line.segments.map { seg ->
+                    seg.chord?.let { seg.copy(chordText = it.displayName(notation)) } ?: seg
+                }
                 val rows = LineWrapper.wrap(
-                    line.segments, maxWidth, measurers.lyricWidth, measurers.chordWidth, measurers.chordGap,
+                    segments, maxWidth, measurers.lyricWidth, measurers.chordWidth, measurers.chordGap,
                 )
                 if (rows.isNotEmpty()) items.add(RenderItem.Music(rows))
             }

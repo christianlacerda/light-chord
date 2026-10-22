@@ -17,6 +17,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import com.christianlacerda.chords.R
+import com.christianlacerda.chords.library.LibraryEvents
+import com.christianlacerda.chords.model.displayName
 import com.christianlacerda.chords.chordpro.Transposer
 import com.christianlacerda.chords.ui.ChordsTheme
 import com.christianlacerda.chords.ui.KeepScreenOn
@@ -77,6 +79,7 @@ class ChordDiagramScreen(
     @Composable
     override fun Content() {
         val index by viewModel.index.collectAsState()
+        val notation by LibraryEvents.notation.collectAsState()
         ChordsTheme {
             val colors = LightThemeTokens.colors
             Box(Modifier.fillMaxSize().background(colors.background).wheelInput(viewModel.wheel)) {
@@ -87,7 +90,7 @@ class ChordDiagramScreen(
                     center = LightTopBarCenter.Text(songTitle),
                 )
                 BasicText(
-                    text = shapes.chord.raw,
+                    text = shapes.chord.displayName(notation),
                     modifier = Modifier.fillMaxWidth(),
                     style = LightThemeTokens.typography.copy.copy(
                         fontSize = 64f.designVerticalPxToSp(),
@@ -105,7 +108,7 @@ class ChordDiagramScreen(
                 } else {
                     val bass = shapes.chord.bass
                     val note = when {
-                        shapes.approximate -> stringResource(R.string.closest_shape, shapes.lookedUp.raw)
+                        shapes.approximate -> stringResource(R.string.closest_shape, shapes.lookedUp.displayName(notation))
                         bass != null && shapes.lookedUp.bass == null ->
                             stringResource(R.string.bass_note, Transposer.noteName(bass, shapes.chord.preferFlats))
                         else -> null

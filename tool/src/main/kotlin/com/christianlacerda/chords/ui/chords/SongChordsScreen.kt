@@ -21,6 +21,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import com.christianlacerda.chords.R
+import com.christianlacerda.chords.library.LibraryEvents
+import com.christianlacerda.chords.model.displayName
 import com.christianlacerda.chords.ui.ChordsTheme
 import com.christianlacerda.chords.ui.KeepScreenOn
 import com.christianlacerda.chords.ui.WheelInput
@@ -141,12 +143,13 @@ class SongChordsScreen(
 @Composable
 private fun ChordCell(shapes: ChordShapes, capo: Int?, modifier: Modifier, onClick: () -> Unit) {
     val colors = LightThemeTokens.colors
+    val notation by LibraryEvents.notation.collectAsState()
     Column(
         modifier = modifier.fillMaxSize().lightClickable { onClick() },
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         BasicText(
-            text = shapes.chord.raw,
+            text = shapes.chord.displayName(notation),
             style = LightThemeTokens.typography.copy.copy(
                 fontSize = 30f.designVerticalPxToSp(),
                 lineHeight = 34f.designVerticalPxToSp(),

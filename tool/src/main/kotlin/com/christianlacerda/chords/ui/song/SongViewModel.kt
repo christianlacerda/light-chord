@@ -103,6 +103,7 @@ class SongViewModel(
 
     private suspend fun loadSong() {
         applySettings(repository.settings(fileName))
+        repository.loadNotation()
         val result = repository.readSong(fileName)
         _load.value = when {
             result == null -> SongLoad.Failed(

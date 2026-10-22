@@ -39,6 +39,7 @@ import com.christianlacerda.chords.R
 import com.christianlacerda.chords.layout.Measurers
 import com.christianlacerda.chords.layout.ScrollSpeed
 import com.christianlacerda.chords.layout.buildRenderItems
+import com.christianlacerda.chords.library.LibraryEvents
 import com.christianlacerda.chords.model.ChordName
 import com.christianlacerda.chords.model.Song
 import com.christianlacerda.chords.ui.ChordsIconPainter
@@ -212,7 +213,8 @@ private fun SongBodyScroll(
         val gapPx = lyricLineH * 0.35f
         val fadePx = with(density) { 1.5f.gridUnitsAsDp().toPx() }
 
-        val items = remember(song, widthPx, lyric, chord, chordGapPx, showTabs) {
+        val notation by LibraryEvents.notation.collectAsState()
+        val items = remember(song, widthPx, lyric, chord, chordGapPx, showTabs, notation) {
             val lyricCache = HashMap<String, Float>()
             val chordCache = HashMap<String, Float>()
             buildRenderItems(
@@ -223,6 +225,7 @@ private fun SongBodyScroll(
                     chordGap = chordGapPx,
                 ),
                 showTabs = showTabs,
+                notation = notation,
             )
         }
 
