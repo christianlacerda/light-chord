@@ -153,3 +153,15 @@ toggles play/pause. Volume keys are deliberately not used. Unknown keys must fal
   distinct chord-grid entries. Physical-device checks below remain open.
 - Physical direction of wheel keycodes 317/318.
 - Record device check results in the table in `tool/README.md`.
+
+## Planned: custom desktop diagrams and Cifra Club string markers
+
+Christian requested this for later (2026-10-22), not immediate implementation. Full interaction notes are in
+Chord Desk's AGENTS.md under "Planned: visual chord-shape editor and Cifra Club string markers". Show design
+options before implementing visuals. Chord Desk will let users place fretboard dots, assign fingers 1–4 and
+create valid same-fret pestanas/barres; chosen shapes travel in existing song `{define}` lines.
+
+Both apps should display Cifra Club-style markers BELOW the strings: filled circle for bass, hollow circle for
+other played strings, × for muted. Hollow circles in this bottom row mean played, NOT necessarily open.
+Derive markers from the sounding shape, respecting slash chords. Keep finger numbers inside the dots and
+monochrome LightOS styling. The phone displays the desktop-created shape; no phone editor was requested.
