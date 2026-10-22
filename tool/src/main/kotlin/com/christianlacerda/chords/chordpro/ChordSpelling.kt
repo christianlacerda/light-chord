@@ -211,7 +211,16 @@ object ChordSpelling {
                     }
                     // "79" style runs are not a thing; read 1-2 digits as one degree
                     val take = if (d >= 2 && r.substring(0, 2) in setOf("11", "13")) 2 else 1
-                    if (!q.bareNumber(r.substring(0, take).toInt())) return null
+                    val n = r.substring(0, take).toInt()
+                    // Cifra writes the dominant 9th as 7(9), so a 9 with more tones in parentheses and no 7th is
+                    // an added note: D9(11) = Dadd9add11 (as Chord Desk's chord.rs)
+                    if (n in setOf(9, 11, 13) && r.substring(take).startsWith("(") &&
+                        q.seventh == Seventh.NONE && !q.sixth && q.ext == 0
+                    ) {
+                        q.tensions.add(n)
+                    } else if (!q.bareNumber(n)) {
+                        return null
+                    }
                     r = r.substring(take)
                 }
                 else -> return null

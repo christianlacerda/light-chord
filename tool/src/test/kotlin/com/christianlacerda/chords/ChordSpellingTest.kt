@@ -28,6 +28,7 @@ class ChordSpellingTest {
         Triple("m7(5-)", "m7b5", "m7(b5)"), Triple("m7(b5)", "m7b5", "m7(b5)"), Triple("m7b5", "m7b5", "m7(b5)"),
         Triple("ø", "m7b5", "m7(b5)"), Triple("ø7", "m7b5", "m7(b5)"),
         Triple("7(9)", "9", "7(9)"), Triple("7/9", "9", "7(9)"), Triple("9", "9", "7(9)"),
+        Triple("9(11)", "add9add11", "(9/11)"), Triple("m9(11)", "madd9add11", "m(9/11)"),
         Triple("7(4/9)", "9sus4", "7(4/9)"), Triple("7(9/4)", "9sus4", "7(4/9)"), Triple("9sus4", "9sus4", "7(4/9)"),
         Triple("7(4)", "7sus4", "7(4)"), Triple("7/4", "7sus4", "7(4)"), Triple("4/7", "7sus4", "7(4)"),
         Triple("7sus4", "7sus4", "7(4)"), Triple("7sus", "7sus4", "7(4)"),

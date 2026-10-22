@@ -36,6 +36,22 @@ class VoicingLibraryTest {
         }
     }
 
+    @Test fun fingeringIsPlayable() {
+        for (e in file.shapes) {
+            // a barre is held by one finger, so every string it covers at its fret carries that finger
+            e.barre?.let { b ->
+                for (i in b.from..b.to) {
+                    if (e.frets[i] == b.fret) assertEquals(b.finger, e.fingers[i], "${e.chord} barre finger on string $i")
+                }
+            }
+            // one finger can't press two different frets
+            val fretsByFinger = e.frets.indices.filter { e.fingers[it] > 0 }.groupBy({ e.fingers[it] }, { e.frets[it] })
+            fretsByFinger.forEach { (finger, frets) ->
+                assertEquals(1, frets.toSet().size, "${e.chord} finger $finger on frets $frets")
+            }
+        }
+    }
+
     @Test fun notesMatchChordQuality() {
         for (e in file.shapes) {
             val chord = c(e.chord)
