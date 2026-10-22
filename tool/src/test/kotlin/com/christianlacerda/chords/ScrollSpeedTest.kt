@@ -8,7 +8,7 @@ import kotlin.test.assertTrue
 class ScrollSpeedTest {
     @Test fun endpoints() {
         assertEquals(12.0, ScrollSpeed.secondsPerLine(1), 1e-9)
-        assertEquals(2.0, ScrollSpeed.secondsPerLine(10), 1e-9)
+        assertEquals(1.5, ScrollSpeed.secondsPerLine(10), 1e-9)
     }
 
     @Test fun monotonicAndClamped() {
@@ -20,6 +20,6 @@ class ScrollSpeedTest {
 
     @Test fun pixels() {
         assertEquals(10f, ScrollSpeed.pxPerSecond(1, 120f), 1e-4f)
-        assertEquals(60f, ScrollSpeed.pxPerSecond(10, 120f), 1e-3f)
+        assertEquals(80f, ScrollSpeed.pxPerSecond(10, 120f), 1e-3f)
     }
 }
