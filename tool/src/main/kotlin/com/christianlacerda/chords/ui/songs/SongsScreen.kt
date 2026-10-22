@@ -1,6 +1,7 @@
 package com.christianlacerda.chords.ui.songs
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,6 +33,7 @@ import com.thelightphone.sdk.LightViewModel
 import com.thelightphone.sdk.SealedLightActivity
 import com.thelightphone.sdk.SimpleLightScreen
 import com.thelightphone.sdk.ui.LightBarButton
+import com.thelightphone.sdk.ui.LightBarButtonDefaults
 import com.thelightphone.sdk.ui.LightIcon
 import com.thelightphone.sdk.ui.LightIcons
 import com.thelightphone.sdk.ui.LightScrollView
@@ -132,18 +134,18 @@ class SongsScreen(sealedActivity: SealedLightActivity, private val artist: Strin
             if (state?.songs?.isEmpty() == true) goBack()
         }
         ChordsTheme {
-            Column(Modifier.fillMaxSize().background(LightThemeTokens.colors.background)) {
+            Box(Modifier.fillMaxSize().background(LightThemeTokens.colors.background)) {
+            Column(Modifier.fillMaxSize()) {
                 LightTopBar(
                     leftButton = LightBarButton.LightIcon(LightIcons.BACK, onClick = { goBack() }),
                     center = LightTopBarCenter.Text(title),
-                    rightButton = LightBarButton.Text(
-                        text = stringResource(if (editMode) R.string.done else R.string.edit).uppercase(),
-                        onClick = { viewModel.toggleEdit() },
-                    ),
                 )
                 val s = state
                 if (s != null) {
-                    LightScrollView(Modifier.weight(1f).fillMaxWidth()) {
+                    // bottom padding ends the list above the corner pencil, as on Artists
+                    LightScrollView(
+                        Modifier.weight(1f).fillMaxWidth().padding(bottom = EDIT_BUTTON_CLEARANCE_UNITS.gridUnitsAsDp()),
+                    ) {
                         Column(Modifier.fillMaxWidth().padding(start = CONTENT_PADDING_UNITS.gridUnitsAsDp())) {
                             s.songs.forEach { entry ->
                                 SongRow(
@@ -162,9 +164,30 @@ class SongsScreen(sealedActivity: SealedLightActivity, private val artist: Strin
                     }
                 }
             }
+            // Edit: bottom-right corner, like Artists; DONE while editing.
+            if (!state?.songs.isNullOrEmpty()) {
+                val corner = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(end = 1f.gridUnitsAsDp(), bottom = 1f.gridUnitsAsDp())
+                    .lightClickable { viewModel.toggleEdit() }
+                if (editMode) {
+                    LightText(stringResource(R.string.done).uppercase(), LightTextVariant.Heading, modifier = corner)
+                } else {
+                    LightIcon(
+                        icon = LightIcons.PENCIL,
+                        size = LightBarButtonDefaults.ICON_SIZE_UNITS,
+                        contentDescription = stringResource(R.string.edit),
+                        modifier = corner,
+                    )
+                }
+            }
+            }
         }
     }
 }
+
+/** Bottom bar (2u) + its 1u margin + 2u of air between the list's end and the bar. */
+private const val EDIT_BUTTON_CLEARANCE_UNITS = 5f
 
 @Composable
 private fun SongRow(

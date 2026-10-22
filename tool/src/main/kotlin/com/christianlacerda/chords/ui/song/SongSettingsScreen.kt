@@ -23,7 +23,6 @@ import com.christianlacerda.chords.R
 import com.christianlacerda.chords.layout.ScrollSpeed
 import com.christianlacerda.chords.library.LibraryRepository
 import com.christianlacerda.chords.library.SongSettings
-import com.christianlacerda.chords.model.ChordNotation
 import com.christianlacerda.chords.model.SectionKind
 import com.christianlacerda.chords.ui.CONTENT_PADDING_UNITS
 import com.christianlacerda.chords.ui.ChordsTheme
@@ -56,8 +55,6 @@ data class SongSettingsState(
     val capo: Int?,
     val hasTabs: Boolean,
     val settings: SongSettings,
-    /** App-wide, not per song. */
-    val notation: ChordNotation,
 )
 
 class SongSettingsViewModel(
@@ -77,7 +74,6 @@ class SongSettingsViewModel(
                 capo = song?.meta?.capo?.takeIf { it > 0 },
                 hasTabs = song?.sections?.any { it.kind == SectionKind.TAB } == true,
                 settings = settings,
-                notation = repository.loadNotation(),
             )
         }
     }
@@ -92,24 +88,6 @@ class SongSettingsViewModel(
     fun toggleTabs() {
         val s = _state.value?.settings ?: return
         update(s.copy(showTabs = !s.showTabs))
-    }
-
-    /** Switches every song between Brazilian and international chord names. */
-    fun toggleNotation() {
-        val s = _state.value ?: return
-        val next = if (s.notation == ChordNotation.BRAZILIAN) ChordNotation.INTERNATIONAL else ChordNotation.BRAZILIAN
-        _state.value = s.copy(notation = next)
-        viewModelScope.launch {
-            withContext(NonCancellable) {
-                try {
-                    repository.saveNotation(next)
-                } catch (e: CancellationException) {
-                    throw e
-                } catch (e: Exception) {
-                    // keep the on-screen value; the next change tries again
-                }
-            }
-        }
     }
 
     private fun update(next: SongSettings) {
@@ -129,7 +107,7 @@ class SongSettingsViewModel(
     }
 }
 
-/** Per-song settings (default speed, tab visibility), the app-wide chord notation, and read-only song info. */
+/** Per-song settings: default speed, tab visibility, and read-only song info. Room for more rows later. */
 class SongSettingsScreen(sealedActivity: SealedLightActivity, private val fileName: String) :
     LightScreen<Unit, SongSettingsViewModel>(sealedActivity) {
 
@@ -175,27 +153,6 @@ class SongSettingsScreen(sealedActivity: SealedLightActivity, private val fileNa
                                 )
                             }
                         }
-                        Spacer(Modifier.height(0.6f.gridUnitsAsDp()))
-                        SettingRow(
-                            label = stringResource(R.string.settings_chord_names),
-                            onClick = { viewModel.toggleNotation() },
-                        ) {
-                            LightText(
-                                text = stringResource(
-                                    if (s.notation == ChordNotation.BRAZILIAN) R.string.notation_brazilian
-                                    else R.string.notation_international,
-                                ),
-                                variant = LightTextVariant.Copy,
-                            )
-                        }
-                        LightText(
-                            text = stringResource(
-                                if (s.notation == ChordNotation.BRAZILIAN) R.string.notation_brazilian_hint
-                                else R.string.notation_international_hint,
-                            ),
-                            variant = LightTextVariant.Detail,
-                            lighten = true,
-                        )
                         Spacer(Modifier.height(1.2f.gridUnitsAsDp()))
                         s.key?.let {
                             LightText(stringResource(R.string.detail_key, it), LightTextVariant.Detail)

@@ -28,6 +28,7 @@ import com.christianlacerda.chords.ui.artistCollator
 import com.christianlacerda.chords.ui.libraryRepositoryFor
 import com.christianlacerda.chords.ui.receive.ReceiveScreen
 import com.christianlacerda.chords.ui.receive.ScanChordDeskScreen
+import com.christianlacerda.chords.ui.settings.SettingsScreen
 import com.christianlacerda.chords.ui.songs.DeleteArtistScreen
 import com.christianlacerda.chords.ui.songs.SongsScreen
 import com.thelightphone.sdk.InitialScreen
@@ -114,6 +115,7 @@ class ArtistsScreen(sealedActivity: SealedLightActivity) :
                 artists = artists,
                 editMode = editMode,
                 onToggleEdit = { viewModel.toggleEdit() },
+                onOpenSettings = { navigateTo({ SettingsScreen(it) }) },
                 onAdd = {
                     // + goes straight to the scanner; it pops itself with the text, then Receive is pushed
                     // (see LightQrCodeScanner KDoc). Done on Receive lands back here.
@@ -137,6 +139,7 @@ private fun ArtistsContent(
     artists: List<ArtistSummary>?,
     editMode: Boolean,
     onToggleEdit: () -> Unit,
+    onOpenSettings: () -> Unit,
     onAdd: () -> Unit,
     onOpenArtist: (ArtistSummary) -> Unit,
     onDeleteArtist: (ArtistSummary, String) -> Unit,
@@ -164,6 +167,18 @@ private fun ArtistsContent(
                     }
                 }
             }
+        }
+        // Bottom bar: [gear] ADD [pencil]. Settings and ADD are hidden while editing.
+        if (!editMode) {
+            LightIcon(
+                icon = LightIcons.SETTINGS,
+                size = LightBarButtonDefaults.ICON_SIZE_UNITS,
+                contentDescription = stringResource(R.string.settings_title),
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(start = 1f.gridUnitsAsDp(), bottom = 1f.gridUnitsAsDp())
+                    .lightClickable { onOpenSettings() },
+            )
         }
         // Add songs: an ADD text button centred on the bottom bar; hidden while editing.
         if (!editMode) {
