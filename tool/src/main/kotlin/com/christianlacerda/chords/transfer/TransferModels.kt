@@ -8,7 +8,7 @@ object TransferLimits {
     const val MAX_FILES = 200
     const val MAX_FILE_BYTES = 256 * 1024
     const val MAX_MANIFEST_BYTES = 256 * 1024
-    val EXTENSIONS = setOf("cho", "chopro", "crd", "txt")
+    val EXTENSIONS = setOf("cho", "chopro", "chordpro", "crd", "txt")
 }
 
 /** Where to connect, parsed from the QR payload. [base] is `http://host:port/lightchord/v1`. */

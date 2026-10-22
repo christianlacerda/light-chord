@@ -114,6 +114,7 @@ class TransferClient(private val http: TransferHttp, private val target: Transfe
         check(reply)
         val bytes = reply.body
         if (bytes.size > TransferLimits.MAX_FILE_BYTES) throw TransferException.Protocol("too large")
+        if (bytes.size != file.size) throw TransferException.Protocol("size mismatch")
         if (!TransferProtocol.sha256Hex(bytes).equals(file.sha256, ignoreCase = true)) {
             throw TransferException.Protocol("hash mismatch")
         }

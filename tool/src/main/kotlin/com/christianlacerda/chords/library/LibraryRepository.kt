@@ -10,6 +10,7 @@ import com.christianlacerda.chords.chordpro.ParseIssue
 import com.christianlacerda.chords.chordpro.ParseResult
 import com.christianlacerda.chords.chordpro.TextDecoding
 import com.christianlacerda.chords.model.ChordNotation
+import com.christianlacerda.chords.transfer.TransferProtocol
 import com.christianlacerda.chords.voicing.VoicingLibrary
 import com.thelightphone.sdk.LightFileShare
 import java.io.InputStreamReader
@@ -28,6 +29,7 @@ private val INDEX_KEY = stringPreferencesKey("library_index_v1")
 private val SETTINGS_KEY = stringPreferencesKey("song_settings_v1")
 private val SEEDED_KEY = stringSetPreferencesKey("seeded_files")
 private val NOTATION_KEY = stringPreferencesKey("chord_notation")
+private val PENDING_WRITE_KEY = stringPreferencesKey("pending_song_write_v1")
 
 private const val MAX_CHARS = 512 * 1024
 private const val SAMPLES_DIR = "samples"
@@ -46,11 +48,29 @@ class LibraryRepository(
     private val dataStore: DataStore<Preferences>,
     private val readAsset: (String) -> ByteArray,
 ) {
+    private val writer = SongWriter(object : SongWriteStore {
+        override suspend fun pending(): PendingSongWrite? = dataStore.data.first()[PENDING_WRITE_KEY]?.let {
+            json.decodeFromString(PendingSongWrite.serializer(), it)
+        }
+
+        override suspend fun stage(write: PendingSongWrite) {
+            dataStore.edit { it[PENDING_WRITE_KEY] = json.encodeToString(PendingSongWrite.serializer(), write) }
+        }
+
+        override suspend fun writeFile(write: PendingSongWrite) {
+            require(TransferProtocol.nameProblem(write.name) == null) { "Invalid song filename" }
+            fileShare.write("$SONGS_DIR/${write.name}") { it.write(write.text) }
+        }
+
+        override suspend fun clear() { dataStore.edit { it.remove(PENDING_WRITE_KEY) } }
+    })
+
     /** [text] is null when the file exceeds the size limit. */
     private class Loaded(val text: String?)
 
     suspend fun refresh(): LibraryIndex = withContext(Dispatchers.IO) {
         refreshMutex.withLock {
+            writer.recover()
             seedLocked()
             val prefs = dataStore.data.first()
             val old = decodeIndex(prefs[INDEX_KEY])
@@ -129,21 +149,25 @@ class LibraryRepository(
         return sb.toString()
     }
 
-    /** SHA-256 hex of the stored song [name]'s bytes, or null when there is no such file. */
+    /** SHA-256 hex of the stored song [name] normalized to UTF-8, or null when there is no such file. */
     suspend fun songHash(name: String): String? = withContext(Dispatchers.IO) {
-        try {
-            val text = readLoaded(name)?.text ?: return@withContext if (fileShare.exists("$SONGS_DIR/$name")) "unreadable" else null
-            MessageDigest.getInstance("SHA-256").digest(text.toByteArray(Charsets.ISO_8859_1))
-                .joinToString("") { "%02x".format(it.toInt() and 0xFF) }
-        } catch (e: Exception) {
-            if (fileShare.exists("$SONGS_DIR/$name")) "unreadable" else null
+        refreshMutex.withLock {
+            writer.recover()
+            try {
+                val text = readLoaded(name)?.text ?: return@withContext if (fileShare.exists("$SONGS_DIR/$name")) "unreadable" else null
+                MessageDigest.getInstance("SHA-256").digest(decodeLatin1(text).toByteArray(Charsets.UTF_8))
+                    .joinToString("") { "%02x".format(it.toInt() and 0xFF) }
+            } catch (e: Exception) {
+                if (fileShare.exists("$SONGS_DIR/$name")) "unreadable" else null
+            }
         }
     }
 
     /** Writes a received song into the shared songs folder (the caller re-indexes with [refresh]). */
     suspend fun writeSong(name: String, bytes: ByteArray) = withContext(Dispatchers.IO) {
         val text = TextDecoding.decode(bytes)
-        fileShare.write("$SONGS_DIR/$name") { it.write(text) }
+        require(TransferProtocol.nameProblem(name) == null) { "Invalid song filename" }
+        refreshMutex.withLock { writer.write(name, text) }
     }
 
     private fun decodeLatin1(text: String): String = TextDecoding.decode(text.toByteArray(Charsets.ISO_8859_1))
@@ -173,25 +197,34 @@ class LibraryRepository(
 
     /** Fully parses a song; null if the file is missing, unreadable or too large. */
     suspend fun readSong(file: String): ParseResult? = withContext(Dispatchers.IO) {
-        try {
-            val text = readLoaded(file)?.text ?: return@withContext null
-            ChordProParser.parse(decodeLatin1(text), file)
-        } catch (e: Exception) {
-            null
+        refreshMutex.withLock {
+            writer.recover()
+            try {
+                val text = readLoaded(file)?.text ?: return@withContext null
+                ChordProParser.parse(decodeLatin1(text), file)
+            } catch (e: Exception) {
+                null
+            }
         }
     }
 
     suspend fun delete(file: String): Boolean = withContext(Dispatchers.IO) {
-        fileShare.delete("$SONGS_DIR/$file")
+        refreshMutex.withLock {
+            writer.recover()
+            fileShare.delete("$SONGS_DIR/$file")
+        }
     }
 
     /** Deletes every file in [files] (an artist's songs); returns how many were removed. Settings are pruned by [refresh]. */
     suspend fun deleteAll(files: List<String>): Int = withContext(Dispatchers.IO) {
-        files.count { file ->
-            try {
-                fileShare.delete("$SONGS_DIR/$file")
-            } catch (e: Exception) {
-                false
+        refreshMutex.withLock {
+            writer.recover()
+            files.count { file ->
+                try {
+                    fileShare.delete("$SONGS_DIR/$file")
+                } catch (e: Exception) {
+                    false
+                }
             }
         }
     }

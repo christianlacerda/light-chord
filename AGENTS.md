@@ -20,10 +20,14 @@ wheel, screen kept awake only in the song view, and guitar chord diagrams.
 
 ## Workflow rules
 
+- Keep this `AGENTS.md` up to date as work changes architecture, workflows, constraints, shared contracts, or
+  known issues, so Christian can switch agents and models without losing context. Update Chord Desk's
+  `AGENTS.md` too when a change affects both repos. Record durable guidance and unresolved handoff details;
+  remove stale information rather than accumulating a session log.
 - **No pull requests. Commit and push straight to `main`.** Christian is the only developer.
 - CI (`.github/workflows/pr-check.yml`, `./gradlew check`) only runs on PRs, so it will **not** run for pushes to
   main. Run `./gradlew check` locally before or right after pushing and fix anything it reports.
-- **Bump `versionCode` in `tool/lighttool.toml` before every device install** (it is 21 at the time of writing).
+- **Bump `versionCode` in `tool/lighttool.toml` before every device install** (currently 22).
   `versionName` stays `1.0.0` unless told otherwise.
 - Never commit real copyrighted song lyrics. Bundled samples are public domain only (Amazing Grace, Home on the
   Range, Wayfaring Stranger, Shenandoah, Peixe Vivo). Test fixtures use invented or public-domain text.
@@ -74,6 +78,10 @@ listing API). Strings: `res/values/strings.xml` and `res/values-pt/strings.xml`;
 Pure logic (model, parsers, layout, indexer, wheel input, transfer protocol) has **no Android imports** so it stays
 JVM-testable. Keep it that way and add tests in `tool/src/test/kotlin/...` next to the existing ones.
 
+Song writes use `library/SongWriter.kt`: persist a pending write in DataStore before the SDK text writer runs,
+then clear it after success. Refresh, reads, hashes and deletion recover pending writes under `refreshMutex`.
+This is replayable recovery, not filesystem atomic replacement; keep it tool-local (SDK has no rename API).
+
 ## Light SDK constraints (the build enforces these)
 
 The SDK plugin (`plugin/.../LightSdkPlugin.kt`, `BLOCKED_IMPORTS` / `BLOCKED_CODE_PATTERNS`) scans **every** `.kt`
@@ -116,10 +124,15 @@ toggles play/pause. Volume keys are deliberately not used. Unknown keys must fal
   for dim, `+`/`-` alterations, e.g. `G#7M`, `D4`.
 - `chordpro/ChordSpelling.kt` is a port of Chord Desk's `src/chord.rs` grammar. **Keep the two in sync**: a spelling
   change in one needs the same change (and test) in the other. `ChordSpellingTest.kt` covers the Kotlin side.
+- `ChordName.identitySuffix` / `canonicalName` preserve the full normalized suffix independently of the coarse
+  `Quality` used for voicing fallback. Never collapse C7b9/C7#9/C13 to C7 or C69 to C6 in definition/grid keys.
+  Inexact library shapes are labelled approximate; don't append simpler library shapes to an extended chord's
+  exact `{define}`. Shared fixture: `tool/src/test/resources/contracts/chord-identities.cho`, copied in Chord Desk's
+  `tests/fixtures/`; keep the two copies identical.
 
 ## Chord Desk contract
 
-- **Files:** ChordPro (`.cho`, `.chopro`, `.chordpro`, `.txt`) in `shared/songs/`, named `Artist - Title.cho`, with
+- **Files:** ChordPro (`.cho`, `.chopro`, `.chordpro`, `.crd`, `.txt`) in `shared/songs/`, named `Artist - Title.cho`, with
   `{title}`, `{artist}`, optional `{key}`/`{capo}`, `{start_of_chorus}`, `{comment: Label}`, `{start_of_tab}`.
 - **Chord shapes:** songs may carry `{define: Am base-fret 1 frets x 0 2 2 1 0 fingers 0 0 2 3 1 0}` lines. Frets run
   low E → high e and are **relative to base-fret** (1 = base fret, 0 = open, x/N = muted); fingers 0 = none. Chord
@@ -135,5 +148,8 @@ toggles play/pause. Volume keys are deliberately not used. Unknown keys must fal
 
 ## Open device questions
 
+- Review and fixes: `docs/codebase-review.md` (2026-10-22). Validation screenshots live in
+  `docs/screenshots/validation-2026-10-22/`; headless LightPhone3 emulator verified Brazilian spelling and nine
+  distinct chord-grid entries. Physical-device checks below remain open.
 - Physical direction of wheel keycodes 317/318.
 - Record device check results in the table in `tool/README.md`.

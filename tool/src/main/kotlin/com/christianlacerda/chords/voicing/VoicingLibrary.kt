@@ -48,7 +48,7 @@ class VoicingLibrary(entries: List<ShapeEntry>) {
     /** [defined]: the song's own {define} shape for [chord], shown first and never as an approximation. */
     fun shapesFor(chord: ChordName, defined: Voicing? = null): ChordShapes {
         if (defined != null) {
-            val more = if (chord.quality != Quality.OTHER && chord.bass == null) lookup(chord.root, chord.quality) else emptyList()
+            val more = if (chord.hasExactQuality && chord.bass == null) lookup(chord.root, chord.quality) else emptyList()
             return ChordShapes(chord, chord, dedupe(listOf(defined) + more), false)
         }
         // 1. Exact (root, quality, bass).
@@ -56,13 +56,13 @@ class VoicingLibrary(entries: List<ShapeEntry>) {
             val exact = open.filter {
                 it.chord.root == chord.root && it.chord.quality == chord.quality && it.chord.bass == chord.bass
             }
-            if (exact.isNotEmpty() && chord.bass != null) {
+            if (exact.isNotEmpty() && chord.bass != null && chord.hasExactQuality) {
                 // A slash chord with a dedicated shape: root-position movables would have the wrong bass.
                 return ChordShapes(chord, chord, dedupe(exact.map { build(it, 0) }), false)
             }
             val found = lookup(chord.root, chord.quality)
             if (found.isNotEmpty()) {
-                return ChordShapes(chord, withoutBass(chord, chord.quality), found, false)
+                return ChordShapes(chord, withoutBass(chord, chord.quality), found, !chord.hasExactQuality)
             }
         }
         // 4. Fallback chain.
@@ -79,7 +79,7 @@ class VoicingLibrary(entries: List<ShapeEntry>) {
         if (q == Quality.OTHER) (if (chord.minorGuess) Quality.MINOR else Quality.MAJOR) else q.fallback
 
     private fun withoutBass(chord: ChordName, q: Quality): ChordName {
-        if (q == chord.quality && chord.bass == null) return chord
+        if (q == chord.quality && chord.bass == null && chord.hasExactQuality) return chord
         val suffix = if (q == Quality.OTHER) chord.suffix else q.canonical
         return ChordName(
             chord.root, q, null,

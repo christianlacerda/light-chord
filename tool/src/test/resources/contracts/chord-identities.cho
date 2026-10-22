@@ -1,0 +1,14 @@
+{title: Chord Identity Check}
+{artist: Validation}
+{key: C}
+{define: C7 base-fret 1 frets x 3 2 3 1 0}
+{define: C7b9 base-fret 1 frets x 3 2 3 2 x}
+{define: C7#9 base-fret 1 frets x 3 2 3 4 x}
+{define: C13 base-fret 1 frets x 3 2 3 3 5}
+{define: C6 base-fret 1 frets x 3 2 2 1 0}
+{define: C69 base-fret 1 frets x 3 2 2 3 3}
+{comment: Distinct chord identities}
+[C7]One [C7b9]two [C7#9]three
+[C13]Four [C6]five [C69]six
+{comment: Brazilian notation}
+[Cmaj7]Seven [Cadd9]eight [C9]nine

@@ -210,6 +210,16 @@ class TransferClientTest {
     }
 
     @Test
+    fun incorrectDeclaredSizeIsNotSaved() = runBlocking<Unit> {
+        val bytes = bytesOf("{title: Test}")
+        val http = FakeHttp(manifestJson(Triple(0, "test.chordpro", bytes), size = { bytes.size.toLong() + 1 }), mapOf(0 to bytes))
+        val host = FakeHost()
+        val summary = TransferClient(http, target).run(host)
+        assertEquals(listOf(Failure("test.chordpro", "size mismatch")), summary.failed)
+        assertTrue(host.written.isEmpty())
+    }
+
+    @Test
     fun duplicatesSkipSameAndAskOnceForConflicts() = runBlocking<Unit> {
         val same = bytesOf("same")
         val newer = bytesOf("newer")

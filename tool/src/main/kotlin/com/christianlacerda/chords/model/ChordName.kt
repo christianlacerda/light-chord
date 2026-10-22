@@ -1,5 +1,7 @@
 package com.christianlacerda.chords.model
 
+import com.christianlacerda.chords.chordpro.ChordSpelling
+
 /** Chord qualities the voicing table understands. [fallback] is the "closest" quality to try next. */
 enum class Quality(val intervals: Set<Int>, val canonical: String) {
     MAJOR(setOf(0, 4, 7), ""),
@@ -75,8 +77,15 @@ data class ChordName(
     val minorGuess: Boolean
         get() = suffix.startsWith("m") && !suffix.startsWith("maj")
 
+    /** Full musical identity; [quality] is only a family used to find fallback shapes. */
+    val identitySuffix: String
+        get() = ChordSpelling.read(rawSuffix.ifEmpty { suffix }, ChordNotation.INTERNATIONAL) ?: suffix
+
+    val hasExactQuality: Boolean
+        get() = quality != Quality.OTHER && identitySuffix == quality.canonical
+
     fun canonicalName(flats: Boolean = preferFlats): String {
-        val q = if (quality == Quality.OTHER) suffix else quality.canonical
+        val q = identitySuffix
         val b = bass?.let { "/" + NoteNames.noteName(it, flats) } ?: ""
         return NoteNames.noteName(root, flats) + q + b
     }
