@@ -94,7 +94,7 @@ private fun DrawScope.drawDiagram(
         drawText(
             textLayoutResult = layout,
             // clear of the barre and first-string dots, which reach 0.42s left of the low E string
-            topLeft = Offset(left - 0.55f * s - layout.size.width, rowCenter(0) - layout.size.height / 2f),
+            topLeft = Offset(left - 0.7f * s - layout.size.width, rowCenter(0) - layout.size.height / 2f),
         )
     }
     // open / muted markers above the nut
