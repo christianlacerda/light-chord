@@ -38,11 +38,17 @@ object ChordDefine {
         return name to Voicing(frets, f, computeBaseFret(frets), barreOf(frets, f))
     }
 
-    /** One finger on two or more strings at the same fret is a barre across them (the lowest such fret wins). */
+    /**
+     * One finger on two or more strings at the same fret is a barre across them (the lowest such fret wins), but
+     * only when every string in between is fretted at or above it; a muted or open string in the span means the
+     * finger isn't lying flat, so the dots are drawn on their own.
+     */
     private fun barreOf(frets: List<Int?>, fingers: List<Int>): Barre? =
         (0 until 6).filter { fingers[it] > 0 }
             .groupBy { fingers[it] to frets[it]!! }
-            .filter { it.value.size >= 2 }
+            .filter { (key, strings) ->
+                strings.size >= 2 && (strings.min()..strings.max()).all { s -> (frets[s] ?: 0) >= key.second }
+            }
             .minByOrNull { it.key.second }
             ?.let { (key, strings) -> Barre(key.second, strings.min(), strings.max(), key.first) }
 }

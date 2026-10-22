@@ -27,17 +27,22 @@ class ChordDefineTest {
         assertEquals(Barre(3, 1, 5, 1), v.barre)
     }
 
+    @Test fun noBarreAcrossAMutedString() {
+        val (_, v) = ChordDefine.parse("X base-fret 5 frets x 1 x 1 2 1 fingers 0 1 0 1 2 1")!!
+        assertNull(v.barre)
+    }
+
     @Test fun incompleteDefineIsIgnored() {
         assertNull(ChordDefine.parse("Am frets x 0 2"))
         assertNull(ChordDefine.parse("Am"))
     }
 
     @Test fun songDefineWinsOverTheLibrary() {
-        val text = "{title: T}\n{define: F7(9)/A base-fret 5 frets x 1 x 1 2 1 fingers 0 1 0 1 2 1}\n[F7(9)/A]la\n"
+        val text = "{title: T}\n{define: F7(9)/A base-fret 1 frets x 0 1 0 1 1 fingers 0 0 1 0 2 3}\n[F7(9)/A]la\n"
         val song = ChordProParser.parse(text, "t.cho").song
         val chord = ChordParser.parse("F7(9)/A")!!
         val defined = song.defines[chord.canonicalName(false)]
-        assertEquals(listOf(null, 5, null, 5, 6, 5), defined!!.frets)
+        assertEquals(listOf(null, 0, 1, 0, 1, 1), defined!!.frets)
         val lib = VoicingLibrary.fromJson(File("src/main/assets/chords.json").readText())
         val shapes = lib.shapesFor(chord, defined)
         assertFalse(shapes.approximate)
