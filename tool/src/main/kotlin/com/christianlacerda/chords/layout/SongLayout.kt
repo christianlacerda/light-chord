@@ -2,6 +2,7 @@ package com.christianlacerda.chords.layout
 
 import com.christianlacerda.chords.model.ChordNotation
 import com.christianlacerda.chords.model.SectionKind
+import com.christianlacerda.chords.model.Segment
 import com.christianlacerda.chords.model.Song
 import com.christianlacerda.chords.model.displayName
 
@@ -49,9 +50,11 @@ fun buildRenderItems(
             if (line.segments.isEmpty()) {
                 items.add(RenderItem.Gap)
             } else {
-                val segments = line.segments.map { seg ->
-                    seg.chord?.let { seg.copy(chordText = it.displayName(notation)) } ?: seg
-                }
+                val segments = inlineChordOnly(
+                    line.segments.map { seg ->
+                        seg.chord?.let { seg.copy(chordText = it.displayName(notation)) } ?: seg
+                    },
+                )
                 val rows = LineWrapper.wrap(
                     segments, maxWidth, measurers.lyricWidth, measurers.chordWidth, measurers.chordGap,
                 )
@@ -60,4 +63,21 @@ fun buildRenderItems(
         }
     }
     return items
+}
+
+/**
+ * A chords line whose only "lyrics" are brackets or bars, like Cifra's `( Em7  G )`, would otherwise draw the
+ * chords on one row and the punctuation on a row below. Fold the punctuation into the chord row instead.
+ */
+internal fun inlineChordOnly(segments: List<Segment>): List<Segment> {
+    if (segments.none { it.chordText != null }) return segments
+    if (segments.any { seg -> seg.text.any { it.isLetterOrDigit() } }) return segments
+    return segments.mapNotNull { seg ->
+        val marks = seg.text.trim()
+        when {
+            seg.chordText == null -> if (marks.isEmpty()) null else Segment(marks, null, "")
+            marks.isEmpty() -> seg.copy(text = "")
+            else -> seg.copy(chordText = "${seg.chordText} $marks", text = "")
+        }
+    }
 }
