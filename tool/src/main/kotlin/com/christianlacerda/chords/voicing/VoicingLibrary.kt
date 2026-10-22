@@ -45,11 +45,10 @@ class VoicingLibrary(entries: List<ShapeEntry>) {
     private val open = parsed.filter { !it.entry.movable }
     private val movable = parsed.filter { it.entry.movable }
 
-    /** [defined]: the song's own {define} shape for [chord], shown first and never as an approximation. */
+    /** [defined]: the song's own {define} is authoritative; no library alternatives are appended. */
     fun shapesFor(chord: ChordName, defined: Voicing? = null): ChordShapes {
         if (defined != null) {
-            val more = if (chord.hasExactQuality && chord.bass == null) lookup(chord.root, chord.quality) else emptyList()
-            return ChordShapes(chord, chord, dedupe(listOf(defined) + more), false)
+            return ChordShapes(chord, chord, listOf(defined), false)
         }
         // 1. Exact (root, quality, bass).
         if (chord.quality != Quality.OTHER) {

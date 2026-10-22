@@ -126,8 +126,8 @@ toggles play/pause. Volume keys are deliberately not used. Unknown keys must fal
   change in one needs the same change (and test) in the other. `ChordSpellingTest.kt` covers the Kotlin side.
 - `ChordName.identitySuffix` / `canonicalName` preserve the full normalized suffix independently of the coarse
   `Quality` used for voicing fallback. Never collapse C7b9/C7#9/C13 to C7 or C69 to C6 in definition/grid keys.
-  Inexact library shapes are labelled approximate; don't append simpler library shapes to an extended chord's
-  exact `{define}`. Shared fixture: `tool/src/test/resources/contracts/chord-identities.cho`, copied in Chord Desk's
+  Inexact library shapes are labelled approximate. Every supplied `{define}` is authoritative: show that
+  shape alone, without appending local-library alternatives. Shared fixture: `tool/src/test/resources/contracts/chord-identities.cho`, copied in Chord Desk's
   `tests/fixtures/`; keep the two copies identical.
 
 ## Chord Desk contract
@@ -172,3 +172,8 @@ valid fret). Keep this aligned with Chord Desk's `diagram::barre_of`.
 Shared regression fixture: `tool/src/test/resources/contracts/custom-shapes.cho`, identical to Chord Desk's
 `tests/fixtures/` copy. Version 23 was checked in the headless LightPhone3 emulator: Am7/G, a finger-2 barre,
 unnumbered dots and a muted-string span. Screenshots: `docs/screenshots/custom-diagrams-2026-10-22/`.
+
+Chord Desk's final exports embed automatic and custom definitions for every recognized chord; missing shapes
+must be authored on the desktop before export. Save, Send current and batch sends share that validation.
+SongViewModel bypasses local voicing-table loading/lookups when definitions cover the requested chords.
+Keep the local table as compatibility fallback only for older/imported songs with missing definitions.

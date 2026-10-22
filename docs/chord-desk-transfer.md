@@ -85,3 +85,12 @@ has one five-second total deadline, capped by remaining session lifetime; Cancel
 - **Security.** Plain HTTP on the local network, protected by the one-time
   token. Chord Desk binds only while a send is open. Say "Same Wi-Fi only" in
   both UIs.
+
+## Embedded diagrams
+
+Before Save or any Send path, Chord Desk embeds a `{define}` for each recognized chord using its selected
+custom shape or detected default, including frets, fingers and base-fret. A chord without a resolvable shape
+must be given a custom diagram before export. Batch sends also enrich older files in memory before hashing
+and serving them; the originals on disk are unchanged. The LP uses supplied definitions as the sole shapes
+for those chords and skips its local table when the song is fully defined. Its local table remains a
+compatibility fallback for songs imported without definitions.

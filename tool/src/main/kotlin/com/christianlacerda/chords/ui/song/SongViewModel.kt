@@ -121,7 +121,10 @@ class SongViewModel(
             result.issue == ParseIssue.EMPTY -> SongLoad.Failed(SongError.EMPTY)
             else -> SongLoad.Ready(result.song)
         }
-        repository.voicings() // warm the cache (loaded on IO) so a chord tap is instant
+        // Self-contained Chord Desk exports need no local voicing table at all.
+        if (result != null && result.song.allChords().any { it.canonicalName(false) !in result.song.defines }) {
+            repository.voicings()
+        }
     }
 
     /**
@@ -172,14 +175,22 @@ class SongViewModel(
     /** Looks the shapes up (chords.json is read on IO the first time) and hands them to [onReady] on the main thread. */
     fun withShapes(chord: ChordName, onReady: (ChordShapes) -> Unit) {
         val defined = (_load.value as? SongLoad.Ready)?.song?.defines?.get(chord.canonicalName(false))
-        navigateWithLibrary({ it.shapesFor(chord, defined) }, onReady)
+        if (defined != null) {
+            if (!pendingNav) onReady(ChordShapes(chord, chord, listOf(defined), false))
+        } else {
+            navigateWithLibrary({ it.shapesFor(chord) }, onReady)
+        }
     }
 
     /** Distinct chords of the song in order of first use, each with its shapes. */
     fun withSongChords(onReady: (List<ChordShapes>) -> Unit) {
         val song = (_load.value as? SongLoad.Ready)?.song ?: return
         val chords = song.allChords().distinctBy { it.canonicalName(false) }
-        navigateWithLibrary({ lib -> chords.map { lib.shapesFor(it, song.defines[it.canonicalName(false)]) } }, onReady)
+        if (chords.all { it.canonicalName(false) in song.defines }) {
+            if (!pendingNav) onReady(chords.map { ChordShapes(it, it, listOf(song.defines.getValue(it.canonicalName(false))), false) })
+        } else {
+            navigateWithLibrary({ lib -> chords.map { lib.shapesFor(it, song.defines[it.canonicalName(false)]) } }, onReady)
+        }
     }
 
     fun songKey(): String? = (_load.value as? SongLoad.Ready)?.song?.meta?.key

@@ -5,6 +5,7 @@ import com.christianlacerda.chords.chordpro.ChordProParser
 import com.christianlacerda.chords.model.Barre
 import com.christianlacerda.chords.model.Voicing
 import com.christianlacerda.chords.voicing.bassString
+import com.christianlacerda.chords.voicing.VoicingLibrary
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -19,6 +20,22 @@ class CustomDiagramTest {
         assertEquals(Barre(3, 0, 5, 2), song.defines.getValue("Gm").barre)
         assertEquals(List(6) { 0 }, song.defines.getValue("C").fingers)
         assertNull(song.defines.getValue("C7#9").barre)
+    }
+
+    @Test fun embeddedDefinitionsAreTheOnlyShapesEvenWithLibraryAlternatives() {
+        val song = ChordProParser.parse(File("src/test/resources/contracts/custom-shapes.cho").readText(), "custom.cho").song
+        val libraries = listOf(
+            VoicingLibrary(emptyList()),
+            VoicingLibrary.fromJson(File("src/main/assets/chords.json").readText()),
+        )
+        for (chord in song.allChords()) {
+            val defined = song.defines.getValue(chord.canonicalName(false))
+            for (library in libraries) {
+                val shapes = library.shapesFor(chord, defined)
+                assertEquals(listOf(defined), shapes.voicings)
+                assertEquals(false, shapes.approximate)
+            }
+        }
     }
 
     @Test fun bassUsesActualPitchAndHandlesAllMutedOrOpenShapes() {
