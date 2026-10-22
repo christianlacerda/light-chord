@@ -47,6 +47,9 @@ import kotlinx.coroutines.flow.asStateFlow
 
 private const val PER_PAGE = 4
 
+/** Space under each row of the grid, between a diagram and the next row's chord names. */
+private const val ROW_GAP_UNITS = 1f
+
 class SongChordsViewModel(private val chordCount: Int) : LightViewModel<Unit>() {
     val pageCount: Int get() = ((chordCount + PER_PAGE - 1) / PER_PAGE).coerceAtLeast(1)
 
@@ -114,7 +117,8 @@ class SongChordsScreen(
                     verticalArrangement = Arrangement.SpaceEvenly,
                 ) {
                     for (rowItems in pageItems.chunked(2)) {
-                        Row(Modifier.weight(1f).fillMaxWidth()) {
+                        // a clear gap under each row, so the next row's names read as belonging to the diagrams below
+                        Row(Modifier.weight(1f).fillMaxWidth().padding(bottom = ROW_GAP_UNITS.gridUnitsAsDp())) {
                             for (shapes in rowItems) {
                                 ChordCell(shapes, capo, Modifier.weight(1f)) {
                                     navigateTo({ ChordDiagramScreen(it, title, shapes, capo) })
@@ -124,7 +128,7 @@ class SongChordsScreen(
                         }
                     }
                     // keep the grid 2 rows tall so a short last page doesn't stretch its cells
-                    if (pageItems.size <= 2) Row(Modifier.weight(1f).fillMaxWidth()) {}
+                    if (pageItems.size <= 2) Row(Modifier.weight(1f).fillMaxWidth().padding(bottom = ROW_GAP_UNITS.gridUnitsAsDp())) {}
                 }
                 ArrowBar(
                     canPrev = page > 0,

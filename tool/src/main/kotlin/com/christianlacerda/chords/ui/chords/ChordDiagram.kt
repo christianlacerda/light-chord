@@ -52,7 +52,9 @@ private fun DrawScope.drawDiagram(
     if (s <= 0f) return
     val f = 1.2f * s
     val left = (size.width - 5f * s) / 2f
-    val top = (size.height - (6f + headroom) * s) / 2f + headroom * s
+    // compact (the chords grid): hug the chord name above, so spare height falls between rows, not between a
+    // name and its own diagram
+    val top = if (compact) headroom * s else (size.height - (6f + headroom) * s) / 2f + headroom * s
     val stroke = max(2f, 0.05f * s)
     fun sx(i: Int) = left + i * s
     fun rowCenter(r: Int) = top + (r + 0.5f) * f
