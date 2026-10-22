@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
@@ -37,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.christianlacerda.chords.R
 import com.christianlacerda.chords.layout.Measurers
+import com.christianlacerda.chords.layout.ScrollPacing
 import com.christianlacerda.chords.layout.ScrollSpeed
 import com.christianlacerda.chords.layout.buildRenderItems
 import com.christianlacerda.chords.library.LibraryEvents
@@ -240,17 +242,25 @@ private fun SongBodyScroll(
             chordsTappable = playState != PlayState.Playing,
         )
 
-        // Speed is defined in music lines per second, so it stays right if the font size changes.
-        val pxPerSec = ScrollSpeed.pxPerSecond(speed, chordLineH + lyricLineH + gapPx)
-        LaunchedEffect(playState, pxPerSec) {
+        // Paced by sung lines (ScrollPacing): a wrapped line takes one line of time, labels and gaps take none.
+        // Item heights are measured as they lay out; the tail spacer scrolls at one music line per line of time.
+        val heights = remember(items) { FloatArray(items.size) }
+        val beats = remember(items) { FloatArray(items.size) { ScrollPacing.beats(items[it]) } }
+        val leadPx = with(density) { 1.5f.gridUnitsAsDp().toPx() }
+        val fallbackPxPerSec = ScrollSpeed.pxPerSecond(speed, chordLineH + lyricLineH + gapPx)
+        LaunchedEffect(playState, speed, items) {
             if (playState != PlayState.Playing) return@LaunchedEffect
             val scroll = vm.scrollState
+            val secondsPerLine = ScrollSpeed.secondsPerLine(speed)
             var last = withFrameNanos { it }
             while (isActive) {
                 withFrameNanos { now ->
                     val dt = (now - last) / 1_000_000_000f
                     last = now
                     if (!scroll.isScrollInProgress) { // a finger on the text = manual correction
+                        val pxPerSec = ScrollPacing.pxPerSecond(
+                            scroll.value.toFloat(), heights, beats, leadPx, secondsPerLine, fallbackPxPerSec,
+                        )
                         scroll.dispatchRawDelta(pxPerSec * dt)
                         if (scroll.maxValue < Int.MAX_VALUE && scroll.value >= scroll.maxValue) vm.onReachedEnd()
                     }
@@ -276,8 +286,10 @@ private fun SongBodyScroll(
                 .padding(horizontal = sidePad),
         ) {
             // room for the top fade, so the first line is fully visible before scrolling starts
-            Spacer(Modifier.height(1.5f.gridUnitsAsDp()))
-            items.forEach { RenderItemView(it, palette, onChordTap) }
+            Spacer(Modifier.height(with(density) { leadPx.toDp() }))
+            items.forEachIndexed { i, item ->
+                Box(Modifier.onSizeChanged { heights[i] = it.height.toFloat() }) { RenderItemView(item, palette, onChordTap) }
+            }
             // Lets the last line climb into the upper reading area before the song ends.
             Spacer(Modifier.height(with(density) { (viewportPx * 0.55f).toDp() }))
         }
