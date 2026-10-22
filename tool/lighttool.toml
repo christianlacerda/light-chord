@@ -1,7 +1,7 @@
 [tool]
 id = "com.christianlacerda.chords"
 label = "@string/tool_name"
-versionCode = 20
+versionCode = 21
 versionName = "1.0.0"
 permissions = ["android.permission.INTERNET", "android.permission.CAMERA"]
 capabilities = ["tool-manager-provider", "cleartext-http"]

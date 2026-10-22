@@ -18,7 +18,8 @@ data class Line(val segments: List<Segment>)
 
 data class Section(val label: String?, val kind: SectionKind, val lines: List<Line>)
 
-data class Song(val meta: SongMeta, val sections: List<Section>) {
+/** [defines]: shapes given in the file with {define}, keyed by [ChordName.canonicalName] (sharps). */
+data class Song(val meta: SongMeta, val sections: List<Section>, val defines: Map<String, Voicing> = emptyMap()) {
     /** Every parsed chord in first-use order (duplicates included). */
     fun allChords(): List<ChordName> =
         sections.filter { it.kind != SectionKind.TAB }

@@ -6,6 +6,7 @@ import com.christianlacerda.chords.model.SectionKind
 import com.christianlacerda.chords.model.Segment
 import com.christianlacerda.chords.model.Song
 import com.christianlacerda.chords.model.SongMeta
+import com.christianlacerda.chords.model.Voicing
 
 enum class ParseIssue { NOT_CHORDPRO, EMPTY }
 
@@ -26,6 +27,7 @@ object ChordProParser {
         var artist: String? = null
         var key: String? = null
         var capo: Int? = null
+        val defines = LinkedHashMap<String, Voicing>()
 
         val sections = ArrayList<Section>()
         var current = Builder(null, SectionKind.PLAIN)
@@ -70,6 +72,9 @@ object ChordProParser {
                     "artist" -> if (arg != null) artist = arg
                     "key" -> if (arg != null) key = arg
                     "capo" -> arg?.toIntOrNull()?.let { capo = it }
+                    "define" -> arg?.let(ChordDefine::parse)?.let { (name, voicing) ->
+                        ChordParser.parse(name)?.let { defines[it.canonicalName(false)] = voicing }
+                    }
                     "meta" -> {
                         val parts = arg?.split(Regex("\\s+"), limit = 2)
                         if (parts != null && parts.size == 2) {
@@ -135,6 +140,7 @@ object ChordProParser {
         val song = Song(
             SongMeta(title ?: fallbackTitle, artist, key, capo, subtitle),
             sections,
+            defines,
         )
         val issue = when {
             sections.isEmpty() -> ParseIssue.EMPTY

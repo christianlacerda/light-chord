@@ -171,14 +171,15 @@ class SongViewModel(
 
     /** Looks the shapes up (chords.json is read on IO the first time) and hands them to [onReady] on the main thread. */
     fun withShapes(chord: ChordName, onReady: (ChordShapes) -> Unit) {
-        navigateWithLibrary({ it.shapesFor(chord) }, onReady)
+        val defined = (_load.value as? SongLoad.Ready)?.song?.defines?.get(chord.canonicalName(false))
+        navigateWithLibrary({ it.shapesFor(chord, defined) }, onReady)
     }
 
     /** Distinct chords of the song in order of first use, each with its shapes. */
     fun withSongChords(onReady: (List<ChordShapes>) -> Unit) {
         val song = (_load.value as? SongLoad.Ready)?.song ?: return
         val chords = song.allChords().distinctBy { it.canonicalName(false) }
-        navigateWithLibrary({ lib -> chords.map { lib.shapesFor(it) } }, onReady)
+        navigateWithLibrary({ lib -> chords.map { lib.shapesFor(it, song.defines[it.canonicalName(false)]) } }, onReady)
     }
 
     fun songKey(): String? = (_load.value as? SongLoad.Ready)?.song?.meta?.key
