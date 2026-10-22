@@ -17,6 +17,8 @@ import com.christianlacerda.chords.ui.WheelKeys
 import com.christianlacerda.chords.voicing.ChordShapes
 import com.christianlacerda.chords.voicing.VoicingLibrary
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -51,6 +53,11 @@ class SongViewModel(
 
     private val _speed = MutableStateFlow(ScrollSpeed.DEFAULT)
     val speed: StateFlow<Int> = _speed.asStateFlow()
+
+    /** 3, 2, 1 shown before scrolling starts, so there is time to place the fingers; null when not counting. */
+    private val _countdown = MutableStateFlow<Int?>(null)
+    val countdown: StateFlow<Int?> = _countdown.asStateFlow()
+    private var countdownJob: Job? = null
 
     /** Bumped on every speed change so the overlay can flash. */
     private val _flashToken = MutableStateFlow(0)
@@ -190,19 +197,42 @@ class SongViewModel(
 
     // ---- play state -------------------------------------------------------------------------
 
+    /** Play counts down first (also on resume and replay); a press during the countdown cancels it. */
     fun togglePlay() {
+        if (countdownJob != null) {
+            cancelCountdown()
+            return
+        }
         when (_playState.value) {
-            PlayState.Ready, PlayState.Paused -> _playState.value = PlayState.Playing
+            PlayState.Ready, PlayState.Paused -> startCountdown()
             PlayState.Playing -> _playState.value = PlayState.Paused
-            PlayState.Ended -> viewModelScope.launch {
-                // back to the top first, so the end check doesn't fire again straight away
-                scrollState.scrollTo(0)
-                _playState.value = PlayState.Playing
-            }
+            // back to the top first, so the end check doesn't fire again straight away
+            PlayState.Ended -> startCountdown { scrollState.scrollTo(0) }
         }
     }
 
+    private fun startCountdown(before: suspend () -> Unit = {}) {
+        val job = viewModelScope.launch {
+            before()
+            for (n in COUNTDOWN_SECONDS downTo 1) {
+                _countdown.value = n
+                delay(1000L)
+            }
+            _countdown.value = null
+            countdownJob = null
+            _playState.value = PlayState.Playing
+        }
+        countdownJob = job
+    }
+
+    private fun cancelCountdown() {
+        countdownJob?.cancel()
+        countdownJob = null
+        _countdown.value = null
+    }
+
     fun pause() {
+        cancelCountdown()
         if (_playState.value == PlayState.Playing) _playState.value = PlayState.Paused
     }
 
@@ -239,3 +269,5 @@ class SongViewModel(
         pause()
     }
 }
+
+private const val COUNTDOWN_SECONDS = 3

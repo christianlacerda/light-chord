@@ -110,3 +110,30 @@ internal fun SpeedOverlay(
         }
     }
 }
+
+/** The speed panel's frame with one big number: the 3, 2, 1 before scrolling starts. */
+@Composable
+internal fun CountdownOverlay(count: Int) {
+    val colors = LightThemeTokens.colors
+    val shape = RoundedCornerShape(0.8f.gridUnitsAsDp())
+    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Box(
+            Modifier
+                .width(12f.gridUnitsAsDp())
+                .height(11.5f.gridUnitsAsDp())
+                .background(colors.background, shape)
+                .border(1.dp, colors.content, shape),
+            contentAlignment = Alignment.Center,
+        ) {
+            BasicText(
+                text = count.toString(),
+                style = LightThemeTokens.typography.copy.copy(
+                    fontSize = 120f.designVerticalPxToSp(),
+                    lineHeight = 130f.designVerticalPxToSp(),
+                    fontWeight = FontWeight.Bold,
+                    color = colors.content,
+                ),
+            )
+        }
+    }
+}

@@ -115,6 +115,7 @@ private fun SongContent(
     val speed by vm.speed.collectAsState()
     val flashToken by vm.flashToken.collectAsState()
     val speedPanel by vm.speedPanel.collectAsState()
+    val countdown by vm.countdown.collectAsState()
     // Held as State (not delegated) so only the bottom bar re-reads it every frame, not the whole screen.
     val progress = remember(vm) {
         derivedStateOf {
@@ -165,7 +166,8 @@ private fun SongContent(
                     )
                     SongBottomBar(
                         progress = progress,
-                        playState = playState,
+                        // pause (cancel) and the speed show during the countdown, as while playing
+                        playState = if (countdown != null) PlayState.Playing else playState,
                         speed = speed,
                         onPlayPause = { vm.togglePlay() },
                         onSpeedTap = { vm.openSpeedPanel() },
@@ -183,6 +185,7 @@ private fun SongContent(
                 onPlus = { vm.changeSpeed(1) },
                 onHidden = { vm.closeSpeedPanel() },
             )
+            countdown?.let { CountdownOverlay(it) }
         }
     }
 }
