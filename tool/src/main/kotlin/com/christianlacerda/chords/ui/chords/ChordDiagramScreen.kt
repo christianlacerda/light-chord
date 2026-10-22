@@ -121,24 +121,22 @@ class ChordDiagramScreen(
                         modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = 2f.gridUnitsAsDp()),
                         capo = capo,
                     )
+                    // Frets under the diagram; the bar below only takes a one-line label.
+                    LightText(
+                        text = voicing.frets.joinToString(" ") { it?.toString() ?: "x" },
+                        variant = LightTextVariant.Detail,
+                        lighten = true,
+                        align = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
                 }
                 ArrowBar(
                     canPrev = index > 0,
                     canNext = index < shapes.voicings.size - 1,
                     onPrev = { viewModel.step(-1) },
                     onNext = { viewModel.step(1) },
-                ) {
-                    if (voicing != null) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            LightText(stringResource(R.string.shape_of, index + 1, shapes.voicings.size), LightTextVariant.Fine)
-                            LightText(
-                                text = voicing.frets.joinToString(" ") { it?.toString() ?: "x" },
-                                variant = LightTextVariant.Detail,
-                                lighten = true,
-                            )
-                        }
-                    }
-                }
+                    label = voicing?.let { stringResource(R.string.shape_of, index + 1, shapes.voicings.size) },
+                )
             }
             }
         }

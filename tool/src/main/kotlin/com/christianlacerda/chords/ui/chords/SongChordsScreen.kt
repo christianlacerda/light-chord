@@ -131,9 +131,8 @@ class SongChordsScreen(
                     canNext = page < viewModel.pageCount - 1,
                     onPrev = { viewModel.step(-1) },
                     onNext = { viewModel.step(1) },
-                ) {
-                    LightText(stringResource(R.string.page_of, page + 1, viewModel.pageCount), LightTextVariant.Fine)
-                }
+                    label = stringResource(R.string.page_of, page + 1, viewModel.pageCount),
+                )
             }
             }
         }
