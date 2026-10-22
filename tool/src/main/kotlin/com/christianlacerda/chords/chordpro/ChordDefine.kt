@@ -47,7 +47,8 @@ object ChordDefine {
         (0 until 6).filter { fingers[it] > 0 }
             .groupBy { fingers[it] to frets[it]!! }
             .filter { (key, strings) ->
-                strings.size >= 2 && (strings.min()..strings.max()).all { s -> (frets[s] ?: 0) >= key.second }
+                strings.size >= 2 && fingers.indices.none { fingers[it] == key.first && frets[it] != key.second } &&
+                    (strings.min()..strings.max()).all { s -> (frets[s] ?: 0) >= key.second }
             }
             .minByOrNull { it.key.second }
             ?.let { (key, strings) -> Barre(key.second, strings.min(), strings.max(), key.first) }

@@ -1,0 +1,7 @@
+{title: Custom Shape Check}
+{artist: Validation}
+{define: Am7/G base-fret 1 frets 3 x 2 0 1 0 fingers 3 0 2 0 1 0}
+{define: Gm base-fret 3 frets 1 3 3 1 1 1 fingers 2 3 4 2 2 2}
+{define: C base-fret 1 frets x 3 2 0 1 0 fingers 0 0 0 0 0 0}
+{define: C7#9 base-fret 3 frets x 1 x 1 2 1 fingers 0 2 0 2 3 2}
+[Am7/G]One [Gm]two [C]three [C7#9]four

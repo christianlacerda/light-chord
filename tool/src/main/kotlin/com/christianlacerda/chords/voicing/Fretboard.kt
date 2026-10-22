@@ -27,3 +27,9 @@ fun computeBaseFret(frets: List<Int?>): Int {
         else -> 1
     }
 }
+
+/** Lowest sounding pitch, rather than assuming the leftmost string is the bass. */
+fun bassString(v: Voicing): Int? {
+    val midi = intArrayOf(40, 45, 50, 55, 59, 64)
+    return v.frets.indices.filter { v.frets[it] != null }.minByOrNull { midi[it] + v.frets[it]!! }
+}

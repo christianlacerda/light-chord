@@ -27,7 +27,7 @@ wheel, screen kept awake only in the song view, and guitar chord diagrams.
 - **No pull requests. Commit and push straight to `main`.** Christian is the only developer.
 - CI (`.github/workflows/pr-check.yml`, `./gradlew check`) only runs on PRs, so it will **not** run for pushes to
   main. Run `./gradlew check` locally before or right after pushing and fix anything it reports.
-- **Bump `versionCode` in `tool/lighttool.toml` before every device install** (currently 22).
+- **Bump `versionCode` in `tool/lighttool.toml` before every device install** (currently 23).
   `versionName` stays `1.0.0` unless told otherwise.
 - Never commit real copyrighted song lyrics. Bundled samples are public domain only (Amazing Grace, Home on the
   Range, Wayfaring Stranger, Shenandoah, Peixe Vivo). Test fixtures use invented or public-domain text.
@@ -154,14 +154,21 @@ toggles play/pause. Volume keys are deliberately not used. Unknown keys must fal
 - Physical direction of wheel keycodes 317/318.
 - Record device check results in the table in `tool/README.md`.
 
-## Planned: custom desktop diagrams and Cifra Club string markers
+## Custom diagrams and Cifra Club string markers
 
-Christian requested this for later (2026-10-22), not immediate implementation. Full interaction notes are in
-Chord Desk's AGENTS.md under "Planned: visual chord-shape editor and Cifra Club string markers". Show design
-options before implementing visuals. Chord Desk will let users place fretboard dots, assign fingers 1–4 and
-create valid same-fret pestanas/barres; chosen shapes travel in existing song `{define}` lines.
+Implemented 2026-10-22. Chord Desk's larger editor lets users place dots, enter fingers 1–4, choose open/muted
+strings and a starting fret, and Apply/Cancel a song-specific shape. No phone editor was requested. Custom
+shapes travel in existing `{define}` lines; preserve explicit zero/unknown finger numbers.
 
-Both apps should display Cifra Club-style markers BELOW the strings: filled circle for bass, hollow circle for
-other played strings, × for muted. Hollow circles in this bottom row mean played, NOT necessarily open.
-Derive markers from the sounding shape, respecting slash chords. Keep finger numbers inside the dots and
-monochrome LightOS styling. The phone displays the desktop-created shape; no phone editor was requested.
+Both apps display Cifra Club markers BELOW every string: filled circle for bass, hollow circle for another
+played string, × for muted. Hollow here means played, NOT necessarily open. `voicing/bassString` uses standard
+tuning's absolute pitches, including high-position and slash-chord shapes; don't assume the leftmost string
+or root is always bass. Phone diagrams stay monochrome and retain capo indicators.
+
+ChordDefine infers a barre for any finger 1–4 at one fret, only if every crossed string is fretted at or above
+it and the same finger isn't also used at another fret. The current model draws one inferred barre (lowest
+valid fret). Keep this aligned with Chord Desk's `diagram::barre_of`.
+
+Shared regression fixture: `tool/src/test/resources/contracts/custom-shapes.cho`, identical to Chord Desk's
+`tests/fixtures/` copy. Version 23 was checked in the headless LightPhone3 emulator: Am7/G, a finger-2 barre,
+unnumbered dots and a muted-string span. Screenshots: `docs/screenshots/custom-diagrams-2026-10-22/`.

@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.text.TextMeasurer
 import com.christianlacerda.chords.model.Voicing
+import com.christianlacerda.chords.voicing.bassString
 import com.thelightphone.sdk.ui.LightThemeTokens
 import kotlin.math.max
 import kotlin.math.min
@@ -48,13 +49,13 @@ private fun DrawScope.drawDiagram(
 ) {
     // the capo sits in its own row over the markers, so it needs more headroom
     val headroom = if (capo != null) 1.7f else 1.0f
-    val s = min(size.width / 7.4f, size.height / (6.3f + headroom))
+    val s = min(size.width / 7.4f, size.height / (6.8f + headroom))
     if (s <= 0f) return
     val f = 1.2f * s
     val left = (size.width - 5f * s) / 2f
     // compact (the chords grid): hug the chord name above, so spare height falls between rows, not between a
     // name and its own diagram
-    val top = if (compact) headroom * s else (size.height - (6f + headroom) * s) / 2f + headroom * s
+    val top = if (compact) headroom * s else (size.height - (6.8f + headroom) * s) / 2f + headroom * s
     val stroke = max(2f, 0.05f * s)
     fun sx(i: Int) = left + i * s
     fun rowCenter(r: Int) = top + (r + 0.5f) * f
@@ -97,8 +98,9 @@ private fun DrawScope.drawDiagram(
             topLeft = Offset(left - 0.7f * s - layout.size.width, rowCenter(0) - layout.size.height / 2f),
         )
     }
-    // open / muted markers above the nut
-    val markerY = top - 0.55f * s
+    // Cifra Club markers below every string: bass filled, played hollow, muted cross.
+    val markerY = top + 5 * f + 0.55f * s
+    val bass = bassString(v)
     v.frets.forEachIndexed { i, fret ->
         when (fret) {
             null -> {
@@ -106,8 +108,10 @@ private fun DrawScope.drawDiagram(
                 drawLine(secondary, Offset(sx(i) - h, markerY - h), Offset(sx(i) + h, markerY + h), strokeWidth = stroke)
                 drawLine(secondary, Offset(sx(i) - h, markerY + h), Offset(sx(i) + h, markerY - h), strokeWidth = stroke)
             }
-            0 -> drawCircle(content, radius = 0.25f * s, center = Offset(sx(i), markerY), style = Stroke(width = stroke))
-            else -> Unit
+            else -> {
+                if (i == bass) drawCircle(content, radius = 0.21f * s, center = Offset(sx(i), markerY))
+                else drawCircle(content, radius = 0.21f * s, center = Offset(sx(i), markerY), style = Stroke(width = stroke))
+            }
         }
     }
 

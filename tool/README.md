@@ -35,3 +35,12 @@ Version 22 was installed on the headless LightPhone3 AVD. An invented shared fix
 chords, including separate C7 / C7(9-) / C7(9+) / C7(13) and C6 / C6(9) shapes, plus Cifra Club spelling
 C7M / C9 / C7(9). Screenshots: `../docs/screenshots/validation-2026-10-22/`.
 The emulator uses DPAD fallbacks for the wheel; it cannot validate physical wheel direction or LP3 display smoothness.
+
+## Custom diagrams and string markers — version 23
+
+Chord Desk's visual editor saves the chosen frets/fingers as song `{define}` lines. The phone shows those
+shapes, including explicit unnumbered dots and barres using fingers other than 1. Both the full diagram and
+the song's chord grid now use bottom markers: ● bass, ○ another played string, × muted. A hollow circle
+includes fretted strings; an open string has no fretboard dot. Bass follows the lowest actual pitch.
+
+Headless emulator screenshots: `../docs/screenshots/custom-diagrams-2026-10-22/`.
