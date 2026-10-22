@@ -19,8 +19,8 @@ import com.thelightphone.sdk.ui.LightThemeTokens
 import com.thelightphone.sdk.ui.gridUnitsAsDp
 
 /**
- * Progress line, then the SDK's bar: play/pause on the left; "SPEED N" in the centre while playing (opens the
- * speed panel, the wheel fallback) or the settings icon on the right while stopped.
+ * Progress line, then the SDK's bar: play/pause on the left; on the right "SPEED N" while playing (opens the
+ * speed panel, the wheel fallback) or the settings icon while stopped.
  */
 @Composable
 internal fun SongBottomBar(
@@ -34,22 +34,17 @@ internal fun SongBottomBar(
     val playing = playState == PlayState.Playing
     Column(Modifier.fillMaxWidth()) {
         ProgressLine(progress)
-        // Playing: pause · SPEED N in the centre, where the bar gives text its full width (a side slot is a third
-        // of the bar and truncated it to "SPEED..."). Stopped: play · gear.
+        // Two items, so each slot is half the bar: room for "SPEED N" on the right. (With three slots a side slot is
+        // a third and truncated it to "SPEED...".)
         LightBottomBar(
-            items = if (playing) {
-                listOf(
-                    LightBarButton.LightIcon(LightIcons.PAUSE, onClick = onPlayPause),
-                    LightBarButton.Text(stringResource(R.string.speed_short, speed).uppercase(), onClick = onSpeedTap),
-                    null,
-                )
-            } else {
-                listOf(
-                    LightBarButton.LightIcon(LightIcons.PLAY, onClick = onPlayPause),
-                    null,
-                    LightBarButton.LightIcon(LightIcons.SETTINGS, onClick = onSettings, contentDescription = stringResource(R.string.song_settings)),
-                )
-            },
+            items = listOf(
+                LightBarButton.LightIcon(if (playing) LightIcons.PAUSE else LightIcons.PLAY, onClick = onPlayPause),
+                if (playing) {
+                    LightBarButton.Text(stringResource(R.string.speed_short, speed).uppercase(), onClick = onSpeedTap)
+                } else {
+                    LightBarButton.LightIcon(LightIcons.SETTINGS, onClick = onSettings, contentDescription = stringResource(R.string.song_settings))
+                },
+            ),
         )
     }
 }
