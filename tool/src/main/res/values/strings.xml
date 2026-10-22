@@ -45,7 +45,7 @@
     <string name="settings_chord_names">Chord names</string>
     <string name="notation_brazilian">Brazilian</string>
     <string name="notation_international">International</string>
-    <string name="notation_brazilian_hint">G#7M, Bm7(b5), D4, A7(4/9)</string>
+    <string name="notation_brazilian_hint">G#7M, Bm7(5-), D4, A7(4/9)</string>
     <string name="notation_international_hint">G#maj7, Bm7b5, Dsus4, A9sus4</string>
     <string name="info_capo">Capo %1$d</string>
     <plurals name="chord_count">

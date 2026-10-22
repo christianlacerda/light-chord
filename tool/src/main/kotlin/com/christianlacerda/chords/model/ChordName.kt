@@ -8,6 +8,10 @@ enum class Quality(val intervals: Set<Int>, val canonical: String) {
     AUG(setOf(0, 4, 8), "aug"),
     SUS2(setOf(0, 2, 7), "sus2"),
     SUS4(setOf(0, 5, 7), "sus4"),
+    /** Cifra's 4+: the 4th raised, no 3rd. */
+    SUS_SHARP4(setOf(0, 6, 7), "sus#4"),
+    /** Cifra's 2-: the 2nd lowered, no 3rd. */
+    SUS_FLAT2(setOf(0, 1, 7), "susb2"),
     SIX(setOf(0, 4, 7, 9), "6"),
     MIN6(setOf(0, 3, 7, 9), "m6"),
     DOM7(setOf(0, 4, 7, 10), "7"),
@@ -42,6 +46,8 @@ enum class Quality(val intervals: Set<Int>, val canonical: String) {
             SEVEN_SUS4 -> SUS4
             SUS4 -> MAJOR
             SUS2 -> MAJOR
+            SUS_SHARP4 -> SUS4
+            SUS_FLAT2 -> SUS2
             DIM7 -> DIM
             DIM -> null // a diminished triad is not a minor chord: show "no shape" instead
             HALF_DIM7 -> DIM

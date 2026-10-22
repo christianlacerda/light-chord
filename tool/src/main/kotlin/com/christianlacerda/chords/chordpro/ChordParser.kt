@@ -18,6 +18,8 @@ object ChordParser {
         "aug" to Quality.AUG,
         "sus2" to Quality.SUS2,
         "sus4" to Quality.SUS4,
+        "sus#4" to Quality.SUS_SHARP4,
+        "susb2" to Quality.SUS_FLAT2,
         "sus" to Quality.SUS4,
         "4" to Quality.SUS4,
         "6" to Quality.SIX,
@@ -32,6 +34,7 @@ object ChordParser {
         "m7b5" to Quality.HALF_DIM7,
         "7sus4" to Quality.SEVEN_SUS4,
         "7sus" to Quality.SEVEN_SUS4,
+        "9sus4" to Quality.SEVEN_SUS4,
         "74" to Quality.SEVEN_SUS4,
         "11" to Quality.SEVEN_SUS4,
         "13" to Quality.DOM7,
@@ -100,6 +103,9 @@ object ChordParser {
     private fun classify(n: String): Quality {
         TABLE[n]?.let { return it }
         if (n.startsWith("aug")) return Quality.AUG
+        // added notes over a diminished triad or a suspension (Cifra's m5-(9), 4(9), 4+(9)): the triad's shape
+        if (n.startsWith("dim")) return Quality.DIM
+        Regex("^(sus#4|susb2|sus4|sus2)add.*$").matchEntire(n)?.let { return TABLE.getValue(it.groupValues[1]) }
         if (Regex("^7[#b+]?\\d*$").matches(n) || Regex("^7[#b]\\d+.*$").matches(n)) return Quality.DOM7
         if (Regex("^13.*$").matches(n)) return Quality.DOM7
         return Quality.OTHER

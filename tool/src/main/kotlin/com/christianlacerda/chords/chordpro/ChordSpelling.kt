@@ -7,8 +7,8 @@ import com.christianlacerda.chords.model.ChordNotation
  * notation, and spells it back in either one. Same grammar as Chord Desk's src/chord.rs, so mixed spellings like
  * `m7(b5)` or `7M(9)` need no table entry.
  *
- * Brazilian (cifragem popular, Chediak style): 7M, m7(b5), 7(4/9), 4, (9), 6(9), °, °7, +, 7(#11).
- * International: maj7, m7b5, 9sus4, sus4, add9, 69, dim, dim7, aug, 7#11.
+ * Brazilian (Cifra Club's "padrão de cifragem"): 7M, m7(5-), 7(4/9), 4, 2, 4+, 9, 6(9), m5-, º, 5+, 7(11+).
+ * International: maj7, m7b5, 9sus4, sus4, sus2, sus#4, add9, 69, dim, dim7, aug, 7#11.
  */
 object ChordSpelling {
     private enum class Triad { MAJOR, MINOR, DIM, AUG, SUS2, SUS4, POWER }
@@ -31,16 +31,31 @@ object ChordSpelling {
 
         /** Natural tensions from parentheses or Cifra slashes, resolved at the end. */
         val tensions = ArrayList<Int>()
+
+        /** An altered suspension: '#' for sus#4 (Cifra 4+), 'b' for susb2 (Cifra 2-). */
+        var susAlt: Char? = null
+
+        /**
+         * Reading Cifra Club notation, where a bare 9, 11 or 13 is an added note, 2 is a suspended 2nd and º is the
+         * diminished 7th.
+         */
+        var cifra = false
     }
 
-    /** Spells [suffix] in [notation], or null when it can't be read as a chord quality. */
+    /**
+     * Spells [suffix] in [notation], or null when it can't be read as a chord quality. The suffix is read the
+     * international way (it comes from a file, which Chord Desk writes in international names).
+     */
     fun spell(suffix: String, notation: ChordNotation): String? {
-        val q = parse(suffix) ?: return null
+        val q = parse(suffix, ChordNotation.INTERNATIONAL) ?: return null
         return when (notation) {
             ChordNotation.BRAZILIAN -> brazilian(q)
             ChordNotation.INTERNATIONAL -> international(q)
         }
     }
+
+    /** Reads a suffix written in [from] notation and spells it the international way (Chord Desk's read_suffix). */
+    fun read(suffix: String, from: ChordNotation): String? = parse(suffix, from)?.let { international(it) }
 
     /** A tension like `9`, `b9`, `9-`, `#11`, `11+`, `4+`, as (sign, degree) with sign 'b', '#' or ' '. */
     private fun tension(item: String): Alt? {
@@ -81,9 +96,26 @@ object ChordSpelling {
             6 -> sixth = true
             // Cifra's (4) is a suspended 4th on major chords; on minor ones it colours like an 11th
             4 -> if (triad == Triad.MINOR) tensions.add(11) else triad = Triad.SUS4
-            2 -> tensions.add(9)
+            // a 2nd with no 3rd or 4th is suspended: 7(2) = 7sus2
+            2 -> if (triad == Triad.MAJOR) triad = Triad.SUS2 else tensions.add(9)
             5 -> {}
             else -> tensions.add(t.degree)
+        }
+        return true
+    }
+
+    /** Cifra's 4+ and 2- on a chord with no 3rd are suspensions: C4+ = Csus#4, C7(2-) = C7susb2. */
+    private fun Quality.alteredSus(item: String): Boolean {
+        when {
+            (item == "4+" || item == "#4") && (triad == Triad.MAJOR || triad == Triad.SUS4) -> {
+                triad = Triad.SUS4
+                susAlt = '#'
+            }
+            (item == "2-" || item == "b2") && (triad == Triad.MAJOR || triad == Triad.SUS2) -> {
+                triad = Triad.SUS2
+                susAlt = 'b'
+            }
+            else -> return false
         }
         return true
     }
@@ -93,6 +125,8 @@ object ChordSpelling {
             n == 7 && triad == Triad.DIM && seventh == Seventh.NONE -> seventh = Seventh.DIM
             n == 7 && seventh == Seventh.NONE -> seventh = Seventh.DOM
             n in setOf(9, 11, 13) && ext == 0 && sixth -> tensions.add(n) // 69
+            // Cifra writes the dominant 9th as 7(9); a bare 9 is an added note
+            n in setOf(9, 11, 13) && cifra && ext == 0 && seventh == Seventh.NONE -> tensions.add(n)
             n in setOf(9, 11, 13) && ext == 0 -> {
                 if (seventh == Seventh.NONE) seventh = Seventh.DOM
                 ext = n
@@ -101,6 +135,7 @@ object ChordSpelling {
             n == 5 && triad == Triad.AUG -> {}
             n == 5 && triad == Triad.MAJOR && seventh == Seventh.NONE && !sixth -> triad = Triad.POWER
             n == 4 && triad == Triad.MAJOR -> triad = Triad.SUS4
+            n == 2 && cifra && triad == Triad.MAJOR -> triad = Triad.SUS2
             n == 2 && triad == Triad.MAJOR && seventh == Seventh.NONE -> tensions.add(9)
             else -> return false
         }
@@ -109,7 +144,14 @@ object ChordSpelling {
 
     private fun digits(t: String): Int = t.takeWhile { it in '0'..'9' }.length
 
-    private fun parse(input: String): Quality? {
+    private fun parse(written: String, from: ChordNotation): Quality? {
+        val cifra = from == ChordNotation.BRAZILIAN
+        // Cifra's º is the diminished 7th (the triad is m5-); elsewhere ° is the triad
+        val input = if (cifra) {
+            written.replace("º7", "º").replace("°7", "º").replace("º", "dim7").replace("°", "dim7")
+        } else {
+            written
+        }
         val s = input
             .replace('♯', '#').replace('♭', 'b')
             .replace("ø7", "m7b5").replace("ø", "m7b5")
@@ -117,6 +159,7 @@ object ChordSpelling {
             .replace("º", "dim").replace("°", "dim")
             .replace("(maj7)", "maj7").replace("(M7)", "M7")
         val q = Quality()
+        q.cifra = cifra
         var r = s
 
         // triad prefix
@@ -138,8 +181,16 @@ object ChordSpelling {
                 r.startsWith("(") -> {
                     val end = r.indexOf(')')
                     if (end < 0) return null
-                    for (item in r.substring(1, end).split('/', ',').filter { it.isNotEmpty() }) {
-                        if (!q.applyTension(tension(item.trim()) ?: return null)) return null
+                    val items = r.substring(1, end).split('/', ',').map { it.trim() }.filter { it.isNotEmpty() }
+                    // with a 4th in the chord, a 2nd is the 9th: 7(4/2) = 9sus4
+                    val hasFourth = "4" in items
+                    for (item in items) {
+                        if (q.alteredSus(item)) continue
+                        if (item == "2" && hasFourth) {
+                            q.tensions.add(9)
+                            continue
+                        }
+                        if (!q.applyTension(tension(item) ?: return null)) return null
                     }
                     r = r.substring(end + 1)
                 }
@@ -167,13 +218,20 @@ object ChordSpelling {
                     r = t.substring(d)
                 }
                 r.startsWith("sus") -> {
-                    val t = r.substring(3)
+                    var t = r.substring(3)
+                    // sus#4 and susb2 are how Cifra's 4+ and 2- read internationally
+                    var sign: Char? = null
+                    if (t.length > 1 && (t[0] == '#' || t[0] == 'b') && (t[1] == '2' || t[1] == '4')) {
+                        sign = t[0]
+                        t = t.substring(1)
+                    }
                     val d = digits(t)
                     q.triad = when (t.substring(0, d)) {
-                        "", "4" -> Triad.SUS4
-                        "2" -> Triad.SUS2
+                        "", "4" -> if (sign == null || sign == '#') Triad.SUS4 else return null
+                        "2" -> if (sign == null || sign == 'b') Triad.SUS2 else return null
                         else -> return null
                     }
+                    q.susAlt = sign
                     r = t.substring(d)
                 }
                 r.startsWith("add") -> {
@@ -205,6 +263,10 @@ object ChordSpelling {
                     val d = digits(r)
                     // a trailing + or - alters the number itself: 5-, 9+, 4+
                     if (d < r.length && (r[d] == '+' || r[d] == '-')) {
+                        if (q.seventh == Seventh.NONE && q.alteredSus(r.substring(0, d + 1))) {
+                            r = r.substring(d + 1)
+                            continue
+                        }
                         if (!q.applyTension(tension(r.substring(0, d + 1)) ?: return null)) return null
                         r = r.substring(d + 1)
                         continue
@@ -212,8 +274,8 @@ object ChordSpelling {
                     // "79" style runs are not a thing; read 1-2 digits as one degree
                     val take = if (d >= 2 && r.substring(0, 2) in setOf("11", "13")) 2 else 1
                     val n = r.substring(0, take).toInt()
-                    // Cifra writes the dominant 9th as 7(9), so a 9 with more tones in parentheses and no 7th is
-                    // an added note: D9(11) = Dadd9add11 (as Chord Desk's chord.rs)
+                    // a 9 with more tones in parentheses and no 7th is an added note in either notation:
+                    // D9(11) = Dadd9add11 (as Chord Desk's chord.rs)
                     if (n in setOf(9, 11, 13) && r.substring(take).startsWith("(") &&
                         q.seventh == Seventh.NONE && !q.sixth && q.ext == 0
                     ) {
@@ -242,13 +304,13 @@ object ChordSpelling {
         val alts = q.alts.distinct().sortedWith(compareBy({ it.degree }, { it.sign }))
         q.alts.clear(); q.alts.addAll(alts)
         // altered fifths that are really a triad quality
-        if (q.seventh == Seventh.NONE && !q.sixth && q.adds.isEmpty()) {
-            if (q.triad == Triad.MAJOR && q.alts == listOf(Alt('#', 5))) {
+        if (q.seventh == Seventh.NONE && !q.sixth) {
+            if (q.triad == Triad.MAJOR && Alt('#', 5) in q.alts) {
                 q.triad = Triad.AUG
-                q.alts.clear()
-            } else if (q.triad == Triad.MINOR && q.alts == listOf(Alt('b', 5))) {
+                q.alts.remove(Alt('#', 5))
+            } else if (q.triad == Triad.MINOR && Alt('b', 5) in q.alts) {
                 q.triad = Triad.DIM
-                q.alts.clear()
+                q.alts.remove(Alt('b', 5))
             }
         }
         if (q.triad == Triad.POWER && (q.seventh != Seventh.NONE || q.sixth || q.alts.isNotEmpty())) return null
@@ -292,8 +354,8 @@ object ChordSpelling {
             }
         }
         when (q.triad) {
-            Triad.SUS4 -> sb.append("sus4")
-            Triad.SUS2 -> sb.append("sus2")
+            Triad.SUS4 -> sb.append(if (q.susAlt != null) "sus#4" else "sus4")
+            Triad.SUS2 -> sb.append(if (q.susAlt != null) "susb2" else "sus2")
             else -> {}
         }
         for (a in adds) sb.append("add").append(a)
@@ -306,52 +368,54 @@ object ChordSpelling {
     }
 
     /**
-     * Cifra style: the chord's body (m, 7, 7M, 6, °, +, 4), then every tension and alteration in one pair of
-     * parentheses, lowest degree first: 7(4/9), m7(b5), 7M(9/#11), 6(9).
+     * Cifra Club's standard (suporte.cifraclub.com.br, "padrão de cifragem"): the chord's body (m, 7, 7M, 5+, m5-, º,
+     * 2, 4), then the numbers in ascending order, the first right after the name and the rest in parentheses
+     * separated by "/". Alterations take + or - after the number: C7(9-), Cm7(5-), C4+.
      */
     private fun brazilian(q: Quality): String {
-        val alts = q.alts.toMutableList()
-        // (degree, text) so tensions and alterations sort together
-        val inside = ArrayList<Pair<Int, String>>()
+        fun alt(sign: Char, n: Int) = "$n" + if (sign == '#') '+' else '-'
+        fun sus(n: Int) = q.susAlt?.let { alt(it, n) } ?: n.toString()
         val seventh = when (q.seventh) {
             Seventh.MAJ -> "7M"
             Seventh.DOM -> "7"
             Seventh.DIM, Seventh.NONE -> ""
         }
+        // (degree, text), sorted together at the end
+        val nums = ArrayList<Pair<Int, String>>()
         val body = when (q.triad) {
             Triad.POWER -> "5"
-            Triad.DIM -> if (q.seventh == Seventh.DOM) {
-                // half-diminished: m7(b5)
-                inside.add(5 to "b5")
-                "m7"
-            } else {
-                "°" + if (q.seventh == Seventh.DIM) "7" else ""
+            Triad.DIM -> when (q.seventh) {
+                Seventh.DIM -> "º"
+                Seventh.NONE -> "m5-"
+                else -> {
+                    nums.add(5 to "5-")
+                    "m$seventh"
+                }
             }
             Triad.MINOR -> "m$seventh"
-            Triad.AUG -> if (q.seventh == Seventh.NONE) "+" else {
-                alts.add(Alt('#', 5))
+            Triad.AUG -> if (q.seventh == Seventh.NONE) "5+" else {
+                nums.add(5 to "5+")
                 seventh
             }
-            Triad.SUS4 -> if (q.seventh == Seventh.NONE && !q.sixth) "4" else {
-                inside.add(4 to "4")
+            Triad.SUS4 -> if (q.seventh == Seventh.NONE && !q.sixth) sus(4) else {
+                nums.add(4 to sus(4))
                 seventh
             }
-            // the 2nd stands in for the 3rd: same notes as a power chord with a 9th
-            Triad.SUS2 -> if (q.seventh == Seventh.NONE && !q.sixth) "5" else {
-                inside.add(2 to "2")
+            Triad.SUS2 -> if (q.seventh == Seventh.NONE && !q.sixth) sus(2) else {
+                nums.add(2 to sus(2))
                 seventh
             }
             Triad.MAJOR -> seventh
         }
+        if (q.sixth) nums.add(6 to "6")
+        if (q.ext > 0) nums.add(q.ext to q.ext.toString())
+        q.adds.forEach { nums.add(it to it.toString()) }
+        q.alts.forEach { nums.add(it.degree to alt(it.sign, it.degree)) }
+        val rest = nums.sortedBy { it.first }.distinct().map { it.second }.toMutableList()
         val sb = StringBuilder(body)
-        if (q.sixth) sb.append('6')
-        if (q.triad == Triad.SUS2 && q.seventh == Seventh.NONE && !q.sixth) inside.add(9 to "9")
-        if (q.ext > 0) inside.add(q.ext to q.ext.toString())
-        q.adds.forEach { inside.add(it to it.toString()) }
-        alts.forEach { inside.add(it.degree to "${it.sign}${it.degree}") }
-        if (inside.isNotEmpty()) {
-            sb.append(inside.distinct().sortedBy { it.first }.joinToString("/", "(", ")") { it.second })
-        }
+        // C9, Cm6(9): the first number joins a body that has none
+        if ((body.isEmpty() || body == "m") && rest.isNotEmpty()) sb.append(rest.removeAt(0))
+        if (rest.isNotEmpty()) sb.append(rest.joinToString("/", "(", ")"))
         return sb.toString()
     }
 }

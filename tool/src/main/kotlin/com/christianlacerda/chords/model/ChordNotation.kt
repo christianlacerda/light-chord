@@ -4,10 +4,10 @@ import com.christianlacerda.chords.chordpro.ChordSpelling
 
 /** How chord names are shown. Brazilian is the default; files are not changed either way. */
 enum class ChordNotation {
-    /** Cifragem popular: G#7M, Bm7(b5), D4, A7(4/9), C(9), B°. */
+    /** Cifra Club's standard: G#7M, Bm7(5-), D4, A7(4/9), C9, Bm5-, Bº. */
     BRAZILIAN,
 
-    /** G#maj7, Bm7b5, Dsus4, A9sus4, Cadd9, Bdim. */
+    /** G#maj7, Bm7b5, Dsus4, A9sus4, Cadd9, Bdim, Bdim7. */
     INTERNATIONAL,
 }
 

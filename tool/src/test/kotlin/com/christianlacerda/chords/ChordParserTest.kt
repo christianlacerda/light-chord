@@ -45,6 +45,26 @@ class ChordParserTest {
         p("G6/9").let { assertEquals(Quality.SIX, it.quality); assertNull(it.bass) }
     }
 
+    /** The international names Chord Desk writes for Cifra Club symbols (C9, C2, C4+, C2-, Cº, C5+(9), Cm5-(9)). */
+    @Test fun cifraClubInternationalNames() {
+        assertEquals(Quality.ADD9, p("Cadd9").quality)
+        assertEquals(Quality.SUS2, p("Csus2").quality)
+        assertEquals(Quality.SUS_SHARP4, p("Csus#4").quality)
+        assertEquals(Quality.SUS_FLAT2, p("Csusb2").quality)
+        assertEquals(Quality.DIM7, p("Cdim7").quality)
+        assertEquals(Quality.AUG, p("Caugadd9").quality)
+        assertEquals(Quality.DIM, p("Cdimadd9").quality)
+        assertEquals(Quality.SUS4, p("Csus4add9").quality)
+        assertEquals(Quality.SUS2, p("Csus2add11").quality)
+        assertEquals(Quality.SUS_SHARP4, p("Csus#4add9").quality)
+        assertEquals(Quality.SEVEN_SUS4, p("C9sus4").quality)
+        p("Csus#4/E").let { assertEquals(Quality.SUS_SHARP4, it.quality); assertEquals(4, it.bass) }
+        p("Cmaddb9").let { assertEquals(Quality.OTHER, it.quality); assertTrue(it.minorGuess) }
+        // an altered suspension falls back to the plain one, then to the major triad
+        assertEquals(Quality.SUS4, Quality.SUS_SHARP4.fallback)
+        assertEquals(Quality.SUS2, Quality.SUS_FLAT2.fallback)
+    }
+
     @Test fun lossyMappings() {
         assertEquals(Quality.SEVEN_SUS4, p("C11").quality)
         assertEquals(Quality.DOM7, p("C13").quality)
