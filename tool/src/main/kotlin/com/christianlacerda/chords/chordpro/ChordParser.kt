@@ -42,6 +42,7 @@ object ChordParser {
         "9" to Quality.DOM9,
         "maj9" to Quality.MAJ9,
         "m9" to Quality.MIN9,
+        "5" to Quality.POWER,
         "#5" to Quality.AUG,
         "+5" to Quality.AUG,
         "mb5" to Quality.DIM,

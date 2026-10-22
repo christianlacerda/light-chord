@@ -22,6 +22,7 @@ enum class Quality(val intervals: Set<Int>, val canonical: String) {
     DOM9(setOf(0, 2, 4, 7, 10), "9"),
     MAJ9(setOf(0, 2, 4, 7, 11), "maj9"),
     MIN9(setOf(0, 2, 3, 7, 10), "m9"),
+    POWER(setOf(0, 7), "5"),
     OTHER(emptySet(), "");
 
     /** Next-closest quality when no shape exists. For [OTHER] the caller decides (minor guess). */
@@ -45,6 +46,7 @@ enum class Quality(val intervals: Set<Int>, val canonical: String) {
             DIM -> null // a diminished triad is not a minor chord: show "no shape" instead
             HALF_DIM7 -> DIM
             AUG -> MAJOR
+            POWER -> MAJOR
             MAJOR, MINOR, OTHER -> null
         }
 }

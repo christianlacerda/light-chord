@@ -72,6 +72,13 @@ class VoicingLibraryTest {
         }
     }
 
+    @Test fun powerChordHasItsOwnShape() {
+        val g5 = lib.shapesFor(c("G5"))
+        assertFalse(g5.approximate)
+        assertEquals(listOf(3, 5, 5, null, null, null), g5.voicings.first().frets)
+        assertEquals(listOf(0, 2, 2, null, null, null), lib.shapesFor(c("E5")).voicings.first().frets)
+    }
+
     @Test fun movableShiftingEShape() {
         val g = lib.shapesFor(c("G"))
         assertFalse(g.approximate)

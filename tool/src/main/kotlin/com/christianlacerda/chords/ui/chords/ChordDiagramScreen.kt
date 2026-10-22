@@ -121,14 +121,6 @@ class ChordDiagramScreen(
                         modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = 2f.gridUnitsAsDp()),
                         capo = capo,
                     )
-                    // Frets under the diagram; the bar below only takes a one-line label.
-                    LightText(
-                        text = voicing.frets.joinToString(" ") { it?.toString() ?: "x" },
-                        variant = LightTextVariant.Detail,
-                        lighten = true,
-                        align = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
                 }
                 ArrowBar(
                     canPrev = index > 0,
