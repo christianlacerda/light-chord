@@ -27,7 +27,7 @@ wheel, screen kept awake only in the song view, and guitar chord diagrams.
 - **No pull requests. Commit and push straight to `main`.** Christian is the only developer.
 - CI (`.github/workflows/pr-check.yml`, `./gradlew check`) only runs on PRs, so it will **not** run for pushes to
   main. Run `./gradlew check` locally before or right after pushing and fix anything it reports.
-- **Bump `versionCode` in `tool/lighttool.toml` before every device install** (currently 23).
+- **Bump `versionCode` in `tool/lighttool.toml` before every device install** (currently 24).
   `versionName` stays `1.0.0` unless told otherwise.
 - Never commit real copyrighted song lyrics. Bundled samples are public domain only (Amazing Grace, Home on the
   Range, Wayfaring Stranger, Shenandoah, Peixe Vivo). Test fixtures use invented or public-domain text.
