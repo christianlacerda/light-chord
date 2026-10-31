@@ -1,0 +1,563 @@
+{
+ "about": "Shared Chord Desk / Light Chord rehearsal timing contract (docs/rehearsal-mode-plan.md). Invented songs. Records are KIND TAB TEXT LF; sha256 covers their UTF-8 concatenation. line_boundaries are [source line index after newline normalization, boundary]. Boundary N (record count) is terminal.",
+ "max_ms": 21600000,
+ "max_cues": 4096,
+ "canonical": [
+  {
+   "name": "base",
+   "source": "{title: Lanterna do Rio}\n{artist: Invented Band}\n{key: G}\n{define: G base-fret 1 frets 3 2 0 0 0 3 fingers 2 1 0 0 0 3}\n{comment: Intro}\n[G] [D] [Em]\n\n{start_of_verse}\n[G]Acorda, coração, que a [D]manhã já vem\nA canoa [Em]desce o rio sem ninguém\n{end_of_verse}\n\n{start_of_chorus}\n[C]Ô lanterna,   [G]clareia o caminho\n{end_of_chorus}\n",
+   "records": [
+    "M\t",
+    "M\tAcorda, coração, que a manhã já vem",
+    "M\tA canoa desce o rio sem ninguém",
+    "M\tÔ lanterna, clareia o caminho"
+   ],
+   "line_boundaries": [
+    [
+     5,
+     0
+    ],
+    [
+     8,
+     1
+    ],
+    [
+     9,
+     2
+    ],
+    [
+     13,
+     3
+    ]
+   ],
+   "sha256": "dfc8fc487e135e7cc701ab64841ff234ea00af072529c1ffbf54b8f683b65a73",
+   "repeat": false
+  },
+  {
+   "name": "respelled",
+   "source": "{title: Lanterna do Rio (ao vivo)}\n{artist: Invented Band}\n{key: G}\n{define: G base-fret 1 frets 3 2 0 0 3 3 fingers 2 1 0 0 0 3}\n{comment: Intro}\n[G] [D] [Em]\n\n{start_of_verse}\nAcorda, [G7]coração, que a [D/F#]manhã já vem\nA canoa [Em]desce o rio sem ninguém\n{end_of_verse}\n\n{start_of_chorus}\n[Cmaj7]Ô lanterna, [G]clareia o caminho\n{end_of_chorus}\n",
+   "records": [
+    "M\t",
+    "M\tAcorda, coração, que a manhã já vem",
+    "M\tA canoa desce o rio sem ninguém",
+    "M\tÔ lanterna, clareia o caminho"
+   ],
+   "line_boundaries": [
+    [
+     5,
+     0
+    ],
+    [
+     8,
+     1
+    ],
+    [
+     9,
+     2
+    ],
+    [
+     13,
+     3
+    ]
+   ],
+   "sha256": "dfc8fc487e135e7cc701ab64841ff234ea00af072529c1ffbf54b8f683b65a73",
+   "repeat": false
+  },
+  {
+   "name": "lyric_edit",
+   "source": "{title: Lanterna do Rio}\n{artist: Invented Band}\n{key: G}\n{define: G base-fret 1 frets 3 2 0 0 0 3 fingers 2 1 0 0 0 3}\n{comment: Intro}\n[G] [D] [Em]\n\n{start_of_verse}\n[G]Acorda, coração, que a [D]manhã já vem\nA canoa [Em]desce o rio sem ninguem\n{end_of_verse}\n\n{start_of_chorus}\n[C]Ô lanterna,   [G]clareia o caminho\n{end_of_chorus}\n",
+   "records": [
+    "M\t",
+    "M\tAcorda, coração, que a manhã já vem",
+    "M\tA canoa desce o rio sem ninguem",
+    "M\tÔ lanterna, clareia o caminho"
+   ],
+   "line_boundaries": [
+    [
+     5,
+     0
+    ],
+    [
+     8,
+     1
+    ],
+    [
+     9,
+     2
+    ],
+    [
+     13,
+     3
+    ]
+   ],
+   "sha256": "ae35f4b6a9faf7fc7472b68f361cb0776b492c0c688fa513c5167cc80e9108a2",
+   "repeat": false
+  },
+  {
+   "name": "crlf_bom",
+   "source": "﻿{title: Lanterna do Rio}\r\n{artist: Invented Band}\r\n{key: G}\r\n{define: G base-fret 1 frets 3 2 0 0 0 3 fingers 2 1 0 0 0 3}\r\n{comment: Intro}\r\n[G] [D] [Em]\r\n\r\n{start_of_verse}\r\n[G]Acorda, coração, que a [D]manhã já vem\r\nA canoa [Em]desce o rio sem ninguém\r\n{end_of_verse}\r\n\r\n{start_of_chorus}\r\n[C]Ô lanterna,   [G]clareia o caminho\r\n{end_of_chorus}\r\n",
+   "records": [
+    "M\t",
+    "M\tAcorda, coração, que a manhã já vem",
+    "M\tA canoa desce o rio sem ninguém",
+    "M\tÔ lanterna, clareia o caminho"
+   ],
+   "line_boundaries": [
+    [
+     5,
+     0
+    ],
+    [
+     8,
+     1
+    ],
+    [
+     9,
+     2
+    ],
+    [
+     13,
+     3
+    ]
+   ],
+   "sha256": "dfc8fc487e135e7cc701ab64841ff234ea00af072529c1ffbf54b8f683b65a73",
+   "repeat": false
+  },
+  {
+   "name": "untidy_section",
+   "source": "{title: Brasa}\n[Intro]\n[A] [E]\nUma linha inventada\n",
+   "records": [
+    "M\t",
+    "M\t",
+    "M\tUma linha inventada"
+   ],
+   "line_boundaries": [
+    [
+     1,
+     0
+    ],
+    [
+     2,
+     1
+    ],
+    [
+     3,
+     2
+    ]
+   ],
+   "sha256": "8d730b1899448490dbdb08be06a267c529b36b9ea1307c594c4affb54e16dbf2",
+   "repeat": false
+  },
+  {
+   "name": "tidy_section",
+   "source": "{title: Brasa}\n{comment: Intro}\n[A] [E]\nUma linha inventada\n",
+   "records": [
+    "M\t",
+    "M\tUma linha inventada"
+   ],
+   "line_boundaries": [
+    [
+     2,
+     0
+    ],
+    [
+     3,
+     1
+    ]
+   ],
+   "sha256": "3a9668ee45c05618f95cc1351e8665596561907cbb885ddad4c93dede315802b",
+   "repeat": false
+  },
+  {
+   "name": "tabs",
+   "source": "{t: Tab Study}\n# a note for the editor\n{c Riff}\n{start_of_tab-guitar}\ne|--[x]--0---|   \nB|--1-----1--|\n\n# hidden from both parsers\nG|--2--------|\n{end_of_tab}\n{Comment: Coda}\n\t[*Riff]   pausa   longa  [x2]\n{sot}\ne|---3---|\n{eot}\n",
+   "records": [
+    "T\te|--[x]--0---|",
+    "T\tB|--1-----1--|",
+    "T\tG|--2--------|",
+    "M\tpausa longa",
+    "T\te|---3---|"
+   ],
+   "line_boundaries": [
+    [
+     4,
+     0
+    ],
+    [
+     5,
+     1
+    ],
+    [
+     8,
+     2
+    ],
+    [
+     11,
+     3
+    ],
+    [
+     13,
+     4
+    ]
+   ],
+   "sha256": "85495511adc38a6897b21cd600b51188b27312288a6fd55ba7de6a75a003f809",
+   "repeat": false
+  },
+  {
+   "name": "tabs_as_music",
+   "source": "{t: Tab Study}\n# a note for the editor\n{c Riff}\n{start_of_verse}\ne|--[x]--0---|   \nB|--1-----1--|\n\n# hidden from both parsers\nG|--2--------|\n{end_of_verse}\n{Comment: Coda}\n\t[*Riff]   pausa   longa  [x2]\n{sot}\ne|---3---|\n{eot}\n",
+   "records": [
+    "M\te|----0---|",
+    "M\tB|--1-----1--|",
+    "M\tG|--2--------|",
+    "M\tpausa longa",
+    "T\te|---3---|"
+   ],
+   "line_boundaries": [
+    [
+     4,
+     0
+    ],
+    [
+     5,
+     1
+    ],
+    [
+     8,
+     2
+    ],
+    [
+     11,
+     3
+    ],
+    [
+     13,
+     4
+    ]
+   ],
+   "sha256": "8d80c51c16d23e2e0938180563643eaad3295e8aea13fe0805c58bcb2d1d34a9",
+   "repeat": false
+  },
+  {
+   "name": "repeat",
+   "source": "{title: Lanterna do Rio}\n{artist: Invented Band}\n{key: G}\n{define: G base-fret 1 frets 3 2 0 0 0 3 fingers 2 1 0 0 0 3}\n{comment: Intro}\n[G] [D] [Em]\n\n{start_of_verse}\n[G]Acorda, coração, que a [D]manhã já vem\nA canoa [Em]desce o rio sem ninguém\n{end_of_verse}\n\n{start_of_chorus}\n[C]Ô lanterna,   [G]clareia o caminho\n{end_of_chorus}\n\n{chorus}\n",
+   "records": [
+    "M\t",
+    "M\tAcorda, coração, que a manhã já vem",
+    "M\tA canoa desce o rio sem ninguém",
+    "M\tÔ lanterna, clareia o caminho"
+   ],
+   "line_boundaries": [
+    [
+     5,
+     0
+    ],
+    [
+     8,
+     1
+    ],
+    [
+     9,
+     2
+    ],
+    [
+     13,
+     3
+    ]
+   ],
+   "sha256": "dfc8fc487e135e7cc701ab64841ff234ea00af072529c1ffbf54b8f683b65a73",
+   "repeat": true
+  },
+  {
+   "name": "empty",
+   "source": "{title: Nothing}\n{artist: Nobody}\n\n# just a comment\n",
+   "records": [],
+   "line_boundaries": [],
+   "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+   "repeat": false
+  }
+ ],
+ "timing": [
+  {
+   "name": "valid_with_intro_hold",
+   "song": "base",
+   "value": "{\"version\":1,\"body_sha256\":\"dfc8fc487e135e7cc701ab64841ff234ea00af072529c1ffbf54b8f683b65a73\",\"cues\":[{\"ms\":0,\"boundary\":0},{\"ms\":4000,\"boundary\":0},{\"ms\":6500,\"boundary\":1},{\"ms\":15000,\"boundary\":2},{\"ms\":17000,\"boundary\":3},{\"ms\":30000,\"boundary\":4}]}",
+   "error": null
+  },
+  {
+   "name": "valid_after_respelling",
+   "song": "respelled",
+   "value": "{\"version\":1,\"body_sha256\":\"dfc8fc487e135e7cc701ab64841ff234ea00af072529c1ffbf54b8f683b65a73\",\"cues\":[{\"ms\":0,\"boundary\":0},{\"ms\":4000,\"boundary\":0},{\"ms\":6500,\"boundary\":1},{\"ms\":15000,\"boundary\":2},{\"ms\":17000,\"boundary\":3},{\"ms\":30000,\"boundary\":4}]}",
+   "error": null
+  },
+  {
+   "name": "stale_after_lyric_edit",
+   "song": "lyric_edit",
+   "value": "{\"version\":1,\"body_sha256\":\"dfc8fc487e135e7cc701ab64841ff234ea00af072529c1ffbf54b8f683b65a73\",\"cues\":[{\"ms\":0,\"boundary\":0},{\"ms\":4000,\"boundary\":0},{\"ms\":6500,\"boundary\":1},{\"ms\":15000,\"boundary\":2},{\"ms\":17000,\"boundary\":3},{\"ms\":30000,\"boundary\":4}]}",
+   "error": "stale"
+  },
+  {
+   "name": "not_json",
+   "song": "base",
+   "value": "{\"version\":1,",
+   "error": "malformed"
+  },
+  {
+   "name": "not_object",
+   "song": "base",
+   "value": "[1]",
+   "error": "malformed"
+  },
+  {
+   "name": "string_ms",
+   "song": "base",
+   "value": "{\"version\":1,\"body_sha256\":\"dfc8fc487e135e7cc701ab64841ff234ea00af072529c1ffbf54b8f683b65a73\",\"cues\":[{\"ms\":0,\"boundary\":0},{\"ms\":\"4000\",\"boundary\":0},{\"ms\":6500,\"boundary\":1},{\"ms\":15000,\"boundary\":2},{\"ms\":17000,\"boundary\":3},{\"ms\":30000,\"boundary\":4}]}",
+   "error": "malformed"
+  },
+  {
+   "name": "fractional_ms",
+   "song": "base",
+   "value": "{\"version\":1,\"body_sha256\":\"dfc8fc487e135e7cc701ab64841ff234ea00af072529c1ffbf54b8f683b65a73\",\"cues\":[{\"ms\":0,\"boundary\":0},{\"ms\":4000.5,\"boundary\":0},{\"ms\":6500,\"boundary\":1},{\"ms\":15000,\"boundary\":2},{\"ms\":17000,\"boundary\":3},{\"ms\":30000,\"boundary\":4}]}",
+   "error": "malformed"
+  },
+  {
+   "name": "missing_hash",
+   "song": "base",
+   "value": "{\"version\":1,\"cues\":[{\"ms\":0,\"boundary\":0},{\"ms\":4000,\"boundary\":0},{\"ms\":6500,\"boundary\":1},{\"ms\":15000,\"boundary\":2},{\"ms\":17000,\"boundary\":3},{\"ms\":30000,\"boundary\":4}]}",
+   "error": "malformed"
+  },
+  {
+   "name": "future_version",
+   "song": "base",
+   "value": "{\"version\":2,\"anything\":true}",
+   "error": "unsupported_version"
+  },
+  {
+   "name": "repeat_song",
+   "song": "repeat",
+   "value": "{\"version\":1,\"body_sha256\":\"dfc8fc487e135e7cc701ab64841ff234ea00af072529c1ffbf54b8f683b65a73\",\"cues\":[{\"ms\":0,\"boundary\":0},{\"ms\":4000,\"boundary\":0},{\"ms\":6500,\"boundary\":1},{\"ms\":15000,\"boundary\":2},{\"ms\":17000,\"boundary\":3},{\"ms\":30000,\"boundary\":4}]}",
+   "error": "repeat_unsupported"
+  },
+  {
+   "name": "empty_song",
+   "song": "empty",
+   "value": "{\"version\":1,\"body_sha256\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\",\"cues\":[{\"ms\":0,\"boundary\":0},{\"ms\":4000,\"boundary\":0},{\"ms\":6500,\"boundary\":1},{\"ms\":15000,\"boundary\":2},{\"ms\":17000,\"boundary\":3},{\"ms\":30000,\"boundary\":4}]}",
+   "error": "empty"
+  },
+  {
+   "name": "negative_ms",
+   "song": "base",
+   "value": "{\"version\":1,\"body_sha256\":\"dfc8fc487e135e7cc701ab64841ff234ea00af072529c1ffbf54b8f683b65a73\",\"cues\":[{\"ms\":0,\"boundary\":0},{\"ms\":-5,\"boundary\":1},{\"ms\":9,\"boundary\":4}]}",
+   "error": "bad_cues"
+  },
+  {
+   "name": "first_not_zero",
+   "song": "base",
+   "value": "{\"version\":1,\"body_sha256\":\"dfc8fc487e135e7cc701ab64841ff234ea00af072529c1ffbf54b8f683b65a73\",\"cues\":[{\"ms\":10,\"boundary\":0},{\"ms\":20,\"boundary\":4}]}",
+   "error": "bad_cues"
+  },
+  {
+   "name": "first_not_boundary_zero",
+   "song": "base",
+   "value": "{\"version\":1,\"body_sha256\":\"dfc8fc487e135e7cc701ab64841ff234ea00af072529c1ffbf54b8f683b65a73\",\"cues\":[{\"ms\":0,\"boundary\":1},{\"ms\":20,\"boundary\":4}]}",
+   "error": "bad_cues"
+  },
+  {
+   "name": "duplicate_time",
+   "song": "base",
+   "value": "{\"version\":1,\"body_sha256\":\"dfc8fc487e135e7cc701ab64841ff234ea00af072529c1ffbf54b8f683b65a73\",\"cues\":[{\"ms\":0,\"boundary\":0},{\"ms\":500,\"boundary\":1},{\"ms\":500,\"boundary\":2},{\"ms\":900,\"boundary\":4}]}",
+   "error": "bad_cues"
+  },
+  {
+   "name": "backward_target",
+   "song": "base",
+   "value": "{\"version\":1,\"body_sha256\":\"dfc8fc487e135e7cc701ab64841ff234ea00af072529c1ffbf54b8f683b65a73\",\"cues\":[{\"ms\":0,\"boundary\":0},{\"ms\":500,\"boundary\":2},{\"ms\":700,\"boundary\":1},{\"ms\":900,\"boundary\":4}]}",
+   "error": "bad_cues"
+  },
+  {
+   "name": "out_of_range",
+   "song": "base",
+   "value": "{\"version\":1,\"body_sha256\":\"dfc8fc487e135e7cc701ab64841ff234ea00af072529c1ffbf54b8f683b65a73\",\"cues\":[{\"ms\":0,\"boundary\":0},{\"ms\":500,\"boundary\":5}]}",
+   "error": "bad_cues"
+  },
+  {
+   "name": "no_terminal",
+   "song": "base",
+   "value": "{\"version\":1,\"body_sha256\":\"dfc8fc487e135e7cc701ab64841ff234ea00af072529c1ffbf54b8f683b65a73\",\"cues\":[{\"ms\":0,\"boundary\":0},{\"ms\":500,\"boundary\":3}]}",
+   "error": "bad_cues"
+  },
+  {
+   "name": "single_cue",
+   "song": "base",
+   "value": "{\"version\":1,\"body_sha256\":\"dfc8fc487e135e7cc701ab64841ff234ea00af072529c1ffbf54b8f683b65a73\",\"cues\":[{\"ms\":0,\"boundary\":0}]}",
+   "error": "bad_cues"
+  },
+  {
+   "name": "too_long",
+   "song": "base",
+   "value": "{\"version\":1,\"body_sha256\":\"dfc8fc487e135e7cc701ab64841ff234ea00af072529c1ffbf54b8f683b65a73\",\"cues\":[{\"ms\":0,\"boundary\":0},{\"ms\":21600001,\"boundary\":4}]}",
+   "error": "bad_cues"
+  },
+  {
+   "name": "longest_allowed",
+   "song": "base",
+   "value": "{\"version\":1,\"body_sha256\":\"dfc8fc487e135e7cc701ab64841ff234ea00af072529c1ffbf54b8f683b65a73\",\"cues\":[{\"ms\":0,\"boundary\":0},{\"ms\":21600000,\"boundary\":4}]}",
+   "error": null
+  }
+ ],
+ "interpolation": {
+  "cues": [
+   {
+    "ms": 0,
+    "boundary": 0
+   },
+   {
+    "ms": 4000,
+    "boundary": 0
+   },
+   {
+    "ms": 6500,
+    "boundary": 1
+   },
+   {
+    "ms": 15000,
+    "boundary": 2
+   },
+   {
+    "ms": 17000,
+    "boundary": 3
+   },
+   {
+    "ms": 30000,
+    "boundary": 4
+   }
+  ],
+  "geometries": [
+   {
+    "geometry": "phone",
+    "positions": [
+     0.0,
+     180.0,
+     300.0,
+     620.0,
+     900.0
+    ],
+    "samples": [
+     [
+      0,
+      0.0
+     ],
+     [
+      2000,
+      0.0
+     ],
+     [
+      4000,
+      0.0
+     ],
+     [
+      5250,
+      90.0
+     ],
+     [
+      6500,
+      180.0
+     ],
+     [
+      10750,
+      240.0
+     ],
+     [
+      15000,
+      300.0
+     ],
+     [
+      16000,
+      460.0
+     ],
+     [
+      17000,
+      620.0
+     ],
+     [
+      23500,
+      760.0
+     ],
+     [
+      30000,
+      900.0
+     ],
+     [
+      45000,
+      900.0
+     ]
+    ]
+   },
+   {
+    "geometry": "desktop",
+    "positions": [
+     0.0,
+     64.0,
+     128.0,
+     230.0,
+     310.0
+    ],
+    "samples": [
+     [
+      0,
+      0.0
+     ],
+     [
+      2000,
+      0.0
+     ],
+     [
+      4000,
+      0.0
+     ],
+     [
+      5250,
+      32.0
+     ],
+     [
+      6500,
+      64.0
+     ],
+     [
+      10750,
+      96.0
+     ],
+     [
+      15000,
+      128.0
+     ],
+     [
+      16000,
+      179.0
+     ],
+     [
+      17000,
+      230.0
+     ],
+     [
+      23500,
+      270.0
+     ],
+     [
+      30000,
+      310.0
+     ],
+     [
+      45000,
+      310.0
+     ]
+    ]
+   }
+  ]
+ },
+ "directive": {
+  "song": "base",
+  "value": "{\"version\":1,\"body_sha256\":\"dfc8fc487e135e7cc701ab64841ff234ea00af072529c1ffbf54b8f683b65a73\",\"cues\":[{\"ms\":0,\"boundary\":0},{\"ms\":4000,\"boundary\":0},{\"ms\":6500,\"boundary\":1},{\"ms\":15000,\"boundary\":2},{\"ms\":17000,\"boundary\":3},{\"ms\":30000,\"boundary\":4}]}",
+  "line": "{meta: lightchord_timing {\"version\":1,\"body_sha256\":\"dfc8fc487e135e7cc701ab64841ff234ea00af072529c1ffbf54b8f683b65a73\",\"cues\":[{\"ms\":0,\"boundary\":0},{\"ms\":4000,\"boundary\":0},{\"ms\":6500,\"boundary\":1},{\"ms\":15000,\"boundary\":2},{\"ms\":17000,\"boundary\":3},{\"ms\":30000,\"boundary\":4}]}}"
+ }
+}

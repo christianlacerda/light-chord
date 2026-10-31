@@ -184,3 +184,6 @@ Manual Chord Desk rehearsal and finer phone speed control are planned in `docs/r
 (identical copy in Chord Desk). This is a proposed handoff, not implemented behavior. Freeze the shared timing
 contract and obtain visual design approval before GUI changes. Preserve constant px/s for untimed songs;
 explicit user timing cues do not reinstate equal-time-per-source-line pacing.
+The v1 timing contract is frozen (plan's "Frozen v1 rules"): `timing/RehearsalTiming.kt` is the pure canonicalizer, validator
+and interpolator, ported 1:1 from/to `src/rehearsal.rs` in Chord Desk; both run the shared `rehearsal-timing.json` fixture.
+Change both and regenerate the fixture together. No UI uses it yet.
