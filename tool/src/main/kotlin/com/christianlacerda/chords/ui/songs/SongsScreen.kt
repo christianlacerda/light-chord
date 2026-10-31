@@ -27,6 +27,7 @@ import com.christianlacerda.chords.ui.ChordsTheme
 import com.christianlacerda.chords.ui.artistCollator
 import com.christianlacerda.chords.ui.errorText
 import com.christianlacerda.chords.ui.libraryRepositoryFor
+import com.christianlacerda.chords.ui.speedLabel
 import com.christianlacerda.chords.ui.song.SongScreen
 import com.thelightphone.sdk.LightScreen
 import com.thelightphone.sdk.LightViewModel
@@ -229,6 +230,6 @@ private fun songDetail(entry: SongEntry, settings: SongSettings?): String {
     val parts = ArrayList<String>()
     entry.key?.takeIf { it.isNotBlank() }?.let { parts.add(stringResource(R.string.detail_key, it)) }
     entry.capo?.takeIf { it > 0 }?.let { parts.add(stringResource(R.string.detail_capo, it)) }
-    settings?.let { parts.add(stringResource(R.string.detail_speed, it.speed)) }
+    settings?.let { parts.add(stringResource(R.string.detail_speed, speedLabel(it.tick))) }
     return parts.joinToString(" · ")
 }

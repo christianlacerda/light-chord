@@ -2,17 +2,36 @@ package com.christianlacerda.chords.layout
 
 import kotlin.math.pow
 
+/**
+ * Scroll speed in half-level ticks: tick 0 = level 1 … tick 18 = level 10. Legacy integer level L is tick
+ * 2 * (L - 1), so whole levels keep their former speeds.
+ */
 object ScrollSpeed {
-    const val MIN = 1
-    const val MAX = 10
-    const val DEFAULT = 4
+    const val MIN_LEVEL = 1
+    const val MAX_LEVEL = 10
+    const val TICKS_PER_LEVEL = 2
+    const val MIN = 0
+    const val MAX = (MAX_LEVEL - MIN_LEVEL) * TICKS_PER_LEVEL
+    const val DEFAULT = 6 // level 4
 
-    fun clamp(level: Int): Int = level.coerceIn(MIN, MAX)
+    fun clamp(tick: Int): Int = tick.coerceIn(MIN, MAX)
 
-    /** Geometric curve: 12 s per music line at level 1 down to 1.5 s at level 10 (each step about 26% faster). */
-    fun secondsPerLine(level: Int): Double =
-        12.0 * (1.0 / 8.0).pow((clamp(level) - 1) / 9.0)
+    fun tickOf(level: Int): Int = (level.coerceIn(MIN_LEVEL, MAX_LEVEL) - MIN_LEVEL) * TICKS_PER_LEVEL
 
-    fun pxPerSecond(level: Int, linePitchPx: Float): Float =
-        (linePitchPx / secondsPerLine(level)).toFloat()
+    /** Nearest whole level for older app versions; half steps round down (slower). */
+    fun legacyLevel(tick: Int): Int = MIN_LEVEL + clamp(tick) / TICKS_PER_LEVEL
+
+    /** Geometric curve: 12 s per music line at level 1 down to 1.5 s at level 10 (each tick about 12% faster). */
+    fun secondsPerLine(tick: Int): Double =
+        12.0 * (1.0 / 8.0).pow(clamp(tick).toDouble() / MAX)
+
+    fun pxPerSecond(tick: Int, linePitchPx: Float): Float =
+        (linePitchPx / secondsPerLine(tick)).toFloat()
+
+    /** "4" or "4.5" (with [decimalSeparator]). */
+    fun label(tick: Int, decimalSeparator: Char = '.'): String {
+        val t = clamp(tick)
+        val whole = MIN_LEVEL + t / TICKS_PER_LEVEL
+        return if (t % TICKS_PER_LEVEL == 0) whole.toString() else "$whole${decimalSeparator}5"
+    }
 }

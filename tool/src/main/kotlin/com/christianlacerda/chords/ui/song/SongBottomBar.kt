@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.christianlacerda.chords.R
+import com.christianlacerda.chords.ui.speedLabel
 import com.thelightphone.sdk.ui.LightBarButton
 import com.thelightphone.sdk.ui.LightBottomBar
 import com.thelightphone.sdk.ui.LightIcons
@@ -19,7 +20,7 @@ import com.thelightphone.sdk.ui.LightThemeTokens
 import com.thelightphone.sdk.ui.gridUnitsAsDp
 
 /**
- * Progress line, then the SDK's bar: play/pause on the left; on the right "SPEED N" while playing (opens the
+ * Progress line, then the SDK's bar: play/pause on the left; on the right "SPEED N" (N in ticks, shown as 4 / 4.5) while playing (opens the
  * speed panel, the wheel fallback) or the settings icon while stopped.
  */
 @Composable
@@ -34,13 +35,13 @@ internal fun SongBottomBar(
     val playing = playState == PlayState.Playing
     Column(Modifier.fillMaxWidth()) {
         ProgressLine(progress)
-        // Two items, so each slot is half the bar: room for "SPEED N" on the right. (With three slots a side slot is
+        // Two items, so each slot is half the bar: room for "SPEED N" (N in ticks, shown as 4 / 4.5) on the right. (With three slots a side slot is
         // a third and truncated it to "SPEED...".)
         LightBottomBar(
             items = listOf(
                 LightBarButton.LightIcon(if (playing) LightIcons.PAUSE else LightIcons.PLAY, onClick = onPlayPause),
                 if (playing) {
-                    LightBarButton.Text(stringResource(R.string.speed_short, speed).uppercase(), onClick = onSpeedTap)
+                    LightBarButton.Text(stringResource(R.string.speed_short, speedLabel(speed)).uppercase(), onClick = onSpeedTap)
                 } else {
                     LightBarButton.LightIcon(LightIcons.SETTINGS, onClick = onSettings, contentDescription = stringResource(R.string.song_settings))
                 },

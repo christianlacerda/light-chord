@@ -1,5 +1,6 @@
 package com.christianlacerda.chords.library
 
+import com.christianlacerda.chords.layout.ScrollSpeed
 import kotlinx.serialization.Serializable
 
 /** Error codes stored in [SongEntry.error]. */
@@ -34,8 +35,9 @@ data class LibraryIndex(
 )
 
 /**
- * Per-song settings, written only from the song's settings screen. [speed] is the speed the song opens with.
- * [lastProgress] is kept for compatibility with existing saved data but is no longer written.
+ * Per-song settings, written only from the song's settings screen. The song opens at [speedTick]; when absent
+ * (data saved before half steps) at legacy level [speed]. [speed] is still written, rounded down, for older
+ * versions. [lastProgress] is kept for compatibility with existing saved data but is no longer written.
  */
 @Serializable
 data class SongSettings(
@@ -43,7 +45,13 @@ data class SongSettings(
     val transpose: Int = 0,
     val lastProgress: Float = 0f,
     val showTabs: Boolean = true,
-)
+    val speedTick: Int? = null,
+) {
+    val tick: Int get() = speedTick?.let(ScrollSpeed::clamp) ?: ScrollSpeed.tickOf(speed)
+
+    fun withTick(tick: Int): SongSettings =
+        ScrollSpeed.clamp(tick).let { copy(speedTick = it, speed = ScrollSpeed.legacyLevel(it)) }
+}
 
 /** [artist] null = unknown artist. */
 data class ArtistSummary(val artist: String?, val songs: List<SongEntry>) {

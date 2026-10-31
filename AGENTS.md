@@ -27,7 +27,7 @@ wheel, screen kept awake only in the song view, and guitar chord diagrams.
 - **No pull requests. Commit and push straight to `main`.** Christian is the only developer.
 - CI (`.github/workflows/pr-check.yml`, `./gradlew check`) only runs on PRs, so it will **not** run for pushes to
   main. Run `./gradlew check` locally before or right after pushing and fix anything it reports.
-- **Bump `versionCode` in `tool/lighttool.toml` before every device install** (currently 24).
+- **Bump `versionCode` in `tool/lighttool.toml` before every device install** (currently 25).
   `versionName` stays `1.0.0` unless told otherwise.
 - Never commit real copyrighted song lyrics. Bundled samples are public domain only (Amazing Grace, Home on the
   Range, Wayfaring Stranger, Shenandoah, Peixe Vivo). Test fixtures use invented or public-domain text.
@@ -67,7 +67,7 @@ only the pure-Kotlin logic can be tested (copy it into a throwaway Kotlin/JVM Gr
 | `model/` | `Song`, `ChordName`, `Voicing`, `ChordNotation` (display notation + `displayName`). |
 | `chordpro/` | `ChordProParser`, `ChordParser` (chord names), `ChordDefine` (`{define}` lines), `ChordSpelling` (Brazilian/International spelling), `Transposer`, `TextDecoding` (strict UTF-8, else windows-1252). |
 | `voicing/` | `VoicingLibrary` (shapes for a chord; `{define}` first, then `assets/chords.json`), `Fretboard`. |
-| `layout/` | `LineWrapper`, `SongLayout` (render items), `ScrollSpeed` (levels 1–10: 12 s … 1.5 s per line). |
+| `layout/` | `LineWrapper`, `SongLayout` (render items), `ScrollSpeed` (half-step ticks 0–18 = levels 1–10: 12 s … 1.5 s per line; `SongSettings.speedTick` with legacy `speed` fallback). |
 | `library/` | `LibraryRepository` (files in `shared/songs/`, DataStore settings, sample seeding), pure `LibraryIndexer`, `LibraryEvents` (process-wide flows; data only, never a Context). |
 | `transfer/` | Receive from Chord Desk: QR URL parsing, HTTP client, protocol models. |
 | `ui/` | Screens: artists, songs (+ delete), song (player, bottom bar, speed overlay, settings), chords (diagram, song chords grid), receive, settings. `WheelInput`/`WheelModifier`, `KeepScreenOn`, `ChordsTheme`, `SongStyles`. |

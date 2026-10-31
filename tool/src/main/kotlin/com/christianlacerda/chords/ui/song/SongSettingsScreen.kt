@@ -27,6 +27,7 @@ import com.christianlacerda.chords.model.SectionKind
 import com.christianlacerda.chords.ui.CONTENT_PADDING_UNITS
 import com.christianlacerda.chords.ui.ChordsTheme
 import com.christianlacerda.chords.ui.libraryRepositoryFor
+import com.christianlacerda.chords.ui.speedLabel
 import com.thelightphone.sdk.LightScreen
 import com.thelightphone.sdk.LightViewModel
 import com.thelightphone.sdk.SealedLightActivity
@@ -81,8 +82,8 @@ class SongSettingsViewModel(
     /** The song's default speed: what it opens with. */
     fun changeSpeed(delta: Int) {
         val s = _state.value?.settings ?: return
-        val next = ScrollSpeed.clamp(s.speed + delta)
-        if (next != s.speed) update(s.copy(speed = next))
+        val next = ScrollSpeed.clamp(s.tick + delta)
+        if (next != s.tick || s.speedTick == null) update(s.withTick(next))
     }
 
     fun toggleTabs() {
@@ -130,9 +131,9 @@ class SongSettingsScreen(sealedActivity: SealedLightActivity, private val fileNa
                     Column(Modifier.fillMaxWidth().padding(start = CONTENT_PADDING_UNITS.gridUnitsAsDp())) {
                         SettingRow(stringResource(R.string.settings_speed)) {
                             Stepper(
-                                value = s.settings.speed,
-                                canDecrease = s.settings.speed > ScrollSpeed.MIN,
-                                canIncrease = s.settings.speed < ScrollSpeed.MAX,
+                                value = speedLabel(s.settings.tick),
+                                canDecrease = s.settings.tick > ScrollSpeed.MIN,
+                                canIncrease = s.settings.tick < ScrollSpeed.MAX,
                                 onDecrease = { viewModel.changeSpeed(-1) },
                                 onIncrease = { viewModel.changeSpeed(1) },
                             )
@@ -185,7 +186,7 @@ private fun SettingRow(label: String, onClick: (() -> Unit)? = null, control: @C
 /** − N + with large tap targets; an arrow at its limit dims to 0.3. */
 @Composable
 private fun Stepper(
-    value: Int,
+    value: String,
     canDecrease: Boolean,
     canIncrease: Boolean,
     onDecrease: () -> Unit,
@@ -194,7 +195,7 @@ private fun Stepper(
     Row(verticalAlignment = Alignment.CenterVertically) {
         StepButton("−", canDecrease, onDecrease)
         LightText(
-            text = value.toString(),
+            text = value,
             variant = LightTextVariant.Heading,
             align = TextAlign.Center,
             modifier = Modifier.width(2.4f.gridUnitsAsDp()),

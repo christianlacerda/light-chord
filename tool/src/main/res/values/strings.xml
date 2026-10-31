@@ -7,7 +7,7 @@
     <string name="library_empty_body">Tap ADD and scan the code from Chord Desk on your computer.</string>
     <string name="detail_key">Key %1$s</string>
     <string name="detail_capo">capo %1$d</string>
-    <string name="detail_speed">Speed %1$d</string>
+    <string name="detail_speed">Speed %1$s</string>
     <string name="add">Add</string>
     <string name="edit">Edit</string>
     <string name="done">Done</string>
@@ -16,7 +16,8 @@
     <string name="error_too_large">File too large</string>
     <string name="error_unreadable">Couldn\'t read this file</string>
     <string name="song_missing">This song is no longer on the phone</string>
-    <string name="speed_short">Speed %1$d</string>
+    <string name="speed_short">Speed %1$s</string>
+    <string name="decimal_separator">.</string>
     <string name="speed_label">SPEED</string>
     <string name="section_verse">Verse</string>
     <string name="section_chorus">Chorus</string>

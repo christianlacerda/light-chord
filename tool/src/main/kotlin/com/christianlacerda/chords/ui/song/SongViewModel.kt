@@ -51,6 +51,7 @@ class SongViewModel(
     private val _playState = MutableStateFlow(PlayState.Ready)
     val playState: StateFlow<PlayState> = _playState.asStateFlow()
 
+    /** In [ScrollSpeed] ticks. */
     private val _speed = MutableStateFlow(ScrollSpeed.DEFAULT)
     val speed: StateFlow<Int> = _speed.asStateFlow()
 
@@ -133,7 +134,7 @@ class SongViewModel(
      */
     private fun applySettings(settings: SongSettings) {
         _showTabs.value = settings.showTabs
-        val saved = ScrollSpeed.clamp(settings.speed)
+        val saved = settings.tick
         if (saved != appliedSavedSpeed && _playState.value != PlayState.Playing) {
             _speed.value = saved
             appliedSavedSpeed = saved

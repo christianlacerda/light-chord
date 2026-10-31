@@ -3,6 +3,7 @@ package com.christianlacerda.chords.ui
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.christianlacerda.chords.R
+import com.christianlacerda.chords.layout.ScrollSpeed
 import com.christianlacerda.chords.library.LibraryRepository
 import com.christianlacerda.chords.library.SongError
 import com.thelightphone.sdk.SealedLightContext
@@ -18,6 +19,11 @@ internal fun artistCollator(): Collator =
 
 /** Horizontal padding of screen content, in grid units. */
 internal const val CONTENT_PADDING_UNITS = 1.5f
+
+/** "4" or "4.5" ("4,5" in Portuguese) for a speed in [ScrollSpeed] ticks. */
+@Composable
+internal fun speedLabel(tick: Int): String =
+    ScrollSpeed.label(tick, stringResource(R.string.decimal_separator).first())
 
 /** Localized text for a stored error code, or null when there is no error. */
 @Composable

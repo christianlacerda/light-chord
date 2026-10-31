@@ -7,7 +7,7 @@
     <string name="library_empty_body">Toque em ADICIONAR e leia o código do Chord Desk no computador.</string>
     <string name="detail_key">Tom %1$s</string>
     <string name="detail_capo">capo %1$d</string>
-    <string name="detail_speed">Velocidade %1$d</string>
+    <string name="detail_speed">Velocidade %1$s</string>
     <string name="add">Adicionar</string>
     <string name="edit">Editar</string>
     <string name="done">OK</string>
@@ -16,7 +16,8 @@
     <string name="error_too_large">Arquivo grande demais</string>
     <string name="error_unreadable">Não foi possível ler o arquivo</string>
     <string name="song_missing">Esta música não está mais no telefone</string>
-    <string name="speed_short">Vel. %1$d</string>
+    <string name="speed_short">Vel. %1$s</string>
+    <string name="decimal_separator">,</string>
     <string name="speed_label">VELOCIDADE</string>
     <string name="section_verse">Verso</string>
     <string name="section_chorus">Refrão</string>

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -28,6 +29,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.christianlacerda.chords.R
 import com.christianlacerda.chords.layout.ScrollSpeed
+import com.christianlacerda.chords.ui.speedLabel
 import com.thelightphone.sdk.ui.LightText
 import com.thelightphone.sdk.ui.LightTextVariant
 import com.thelightphone.sdk.ui.LightThemeTokens
@@ -75,7 +77,7 @@ internal fun SpeedOverlay(
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 LightText(stringResource(R.string.speed_label), LightTextVariant.Detail, lighten = true, align = TextAlign.Center)
                 BasicText(
-                    text = speed.toString(),
+                    text = speedLabel(speed),
                     style = LightThemeTokens.typography.copy.copy(
                         fontSize = 64f.designVerticalPxToSp(),
                         lineHeight = 70f.designVerticalPxToSp(),
@@ -85,15 +87,19 @@ internal fun SpeedOverlay(
                 )
                 Spacer(Modifier.height(0.5f.gridUnitsAsDp()))
                 Row(horizontalArrangement = Arrangement.spacedBy(0.25f.gridUnitsAsDp()), verticalAlignment = Alignment.Bottom) {
-                    for (i in 0 until ScrollSpeed.MAX) {
+                    // One bar per whole level; a half step fills the lower half of the next bar.
+                    for (i in 0 until ScrollSpeed.MAX_LEVEL) {
+                        val fill = ((speed + ScrollSpeed.TICKS_PER_LEVEL).toFloat() / ScrollSpeed.TICKS_PER_LEVEL - i)
+                            .coerceIn(0f, 1f)
                         Box(
                             Modifier
                                 .width(0.5f.gridUnitsAsDp())
                                 .height((0.6f + i * 0.12f).gridUnitsAsDp())
-                                .background(
-                                    if (i < speed) colors.content else colors.contentSecondary.copy(alpha = 0.35f),
-                                ),
-                        )
+                                .background(colors.contentSecondary.copy(alpha = 0.35f)),
+                            contentAlignment = Alignment.BottomCenter,
+                        ) {
+                            if (fill > 0f) Box(Modifier.fillMaxWidth().fillMaxHeight(fill).background(colors.content))
+                        }
                     }
                 }
             }
