@@ -177,3 +177,10 @@ Chord Desk's final exports embed automatic and custom definitions for every reco
 must be authored on the desktop before export. Save, Send current and batch sends share that validation.
 SongViewModel bypasses local voicing-table loading/lookups when definitions cover the requested chords.
 Keep the local table as compatibility fallback only for older/imported songs with missing definitions.
+
+## Planned rehearsal timing
+
+Manual Chord Desk rehearsal and finer phone speed control are planned in `docs/rehearsal-mode-plan.md`
+(identical copy in Chord Desk). This is a proposed handoff, not implemented behavior. Freeze the shared timing
+contract and obtain visual design approval before GUI changes. Preserve constant px/s for untimed songs;
+explicit user timing cues do not reinstate equal-time-per-source-line pacing.
