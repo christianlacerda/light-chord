@@ -106,6 +106,10 @@ If existing wrapped widgets cannot reliably expose geometry, prototype a dedicat
 
 Alongside the spike, freeze canonicalizer rules above and create identical invented fixtures in both repos, with expected hashes, source tags, validation failures and sampled time-to-position results. A short test comment can explain the fixture; no separate spec package/document is needed. Include unequal phrase durations and intro holds. Review semantics before the next assignments.
 
+#### Spike result (2026-10-31)
+
+Existing widgets suffice; no canvas view is needed. `examples/rehearsal-spike.rs` in Chord Desk (`cargo run --example rehearsal-spike -- /tmp/rehearsal-spike`) wraps each canonical phrase in a container with `Id` `phrase-<boundary>` inside a `mouse_area` (click gives the boundary). A custom widget `Operation` (run with `iced::runtime::task::widget`) collects every phrase container's unclipped bounds plus the scrollable's bounds and current translation, giving content-space phrase tops and the real scroll offset. `scrollable::scroll_to` placed the chosen phrase exactly on a guide at one third of the viewport, before and after a reflow that wrapped lines from one or two rows to three. Findings: `on_scroll` is not emitted for programmatic scrolls (no feedback loop; read the offset through the operation instead); re-measure after every layout-affecting change (padding, width, font, notation) because stale tops misplace the guide; `window::frames()` ran at about 5 fps while the window was unfocused, while `time::every(16 ms)` gave about 60 fps; COSMIC tiling ignores `window::resize`, so the reflow was tested by narrowing the text column; a screenshot can be taken before a just-issued scroll is drawn. The click itself was a synthesized message, so real pointer hit testing still needs a manual check.
+
 ### 3. Desktop rehearsal end to end (Rust implementer)
 
 Files: new `src/rehearsal.rs`, `src/lib.rs`, `src/preview.rs`, `src/document.rs`, shared fixtures; avoid bloating `main.rs` with timing math.
