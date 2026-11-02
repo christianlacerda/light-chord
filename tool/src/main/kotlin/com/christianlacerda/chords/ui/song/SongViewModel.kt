@@ -12,6 +12,7 @@ import com.christianlacerda.chords.library.SongSettings
 import com.christianlacerda.chords.model.ChordName
 import com.christianlacerda.chords.model.SectionKind
 import com.christianlacerda.chords.model.Song
+import com.christianlacerda.chords.timing.RehearsalTiming
 import com.christianlacerda.chords.ui.WheelInput
 import com.christianlacerda.chords.ui.WheelKeys
 import com.christianlacerda.chords.voicing.ChordShapes
@@ -22,6 +23,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import com.thelightphone.sdk.LightViewModel
@@ -68,8 +70,20 @@ class SongViewModel(
     private val _speedPanel = MutableStateFlow(false)
     val speedPanel: StateFlow<Boolean> = _speedPanel.asStateFlow()
 
-    /** Wheel steps change the speed; a wheel press (319) toggles play/pause. */
+    /** Wheel steps change the speed (the rate for a timed song); a wheel press (319) toggles play/pause. */
     val wheel = WheelInput(onStep = { changeSpeed(it) }, onPress = { togglePlay() })
+
+    /** Rehearsed cues, when the song has valid timing that isn't switched off for this session. */
+    private val _timed = MutableStateFlow<List<RehearsalTiming.Cue>?>(null)
+    val timed: StateFlow<List<RehearsalTiming.Cue>?> = _timed.asStateFlow()
+
+    /** Timed playback rate in percent, session only. */
+    private val _rate = MutableStateFlow(100)
+    val rate: StateFlow<Int> = _rate.asStateFlow()
+
+    /** Active time on the rehearsed timeline; only advances while playing (countdown, pauses and background excluded). */
+    var timelineMs = 0.0
+        private set
 
     private var loadStarted = false
 
@@ -86,6 +100,17 @@ class SongViewModel(
         viewModelScope.launch {
             LibraryEvents.settingsChanged.drop(1).collect {
                 if (_load.value is SongLoad.Ready) applySettings(repository.settings(fileName))
+            }
+        }
+        viewModelScope.launch {
+            combine(_load, LibraryEvents.timingOff) { load, off ->
+                val timing = ((load as? SongLoad.Ready)?.song?.timing as? RehearsalTiming.Result.Ok)?.timing
+                timing?.cues?.takeIf { fileName !in off }
+            }.collect { cues ->
+                if (cues != _timed.value) {
+                    _timed.value = cues
+                    _rate.value = 100
+                }
             }
         }
     }
@@ -220,7 +245,10 @@ class SongViewModel(
             PlayState.Ready, PlayState.Paused -> startCountdown()
             PlayState.Playing -> _playState.value = PlayState.Paused
             // back to the top first, so the end check doesn't fire again straight away
-            PlayState.Ended -> startCountdown { scrollState.scrollTo(0) }
+            PlayState.Ended -> {
+                timelineMs = 0.0
+                startCountdown { scrollState.scrollTo(0) }
+            }
         }
     }
 
@@ -256,10 +284,25 @@ class SongViewModel(
     // ---- speed ------------------------------------------------------------------------------
 
     fun changeSpeed(delta: Int) {
+        if (_timed.value != null) {
+            _rate.value = (_rate.value + delta * RATE_STEP).coerceIn(MIN_RATE, MAX_RATE)
+            _flashToken.value = _flashToken.value + 1
+            return
+        }
         val next = ScrollSpeed.clamp(_speed.value + delta)
         _speed.value = next
         _flashToken.value = _flashToken.value + 1
         // session only: the song's default speed is changed on its settings screen
+    }
+
+    /** Called by the player each frame while playing; [dtSeconds] is capped by the caller. */
+    fun advance(dtSeconds: Double) {
+        timelineMs += dtSeconds * 1000.0 * _rate.value / 100.0
+    }
+
+    /** After a manual drag: continue from the time that matches where the text was left. */
+    fun seek(ms: Long) {
+        timelineMs = ms.toDouble()
     }
 
     fun openSpeedPanel() {
@@ -284,3 +327,6 @@ class SongViewModel(
 }
 
 private const val COUNTDOWN_SECONDS = 3
+private const val RATE_STEP = 5
+private const val MIN_RATE = 50
+private const val MAX_RATE = 150

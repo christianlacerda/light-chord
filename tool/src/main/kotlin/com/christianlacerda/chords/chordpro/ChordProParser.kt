@@ -7,13 +7,13 @@ import com.christianlacerda.chords.model.Segment
 import com.christianlacerda.chords.model.Song
 import com.christianlacerda.chords.model.SongMeta
 import com.christianlacerda.chords.model.Voicing
+import com.christianlacerda.chords.timing.RehearsalTiming
 
 enum class ParseIssue { NOT_CHORDPRO, EMPTY }
 
 data class ParseResult(val song: Song, val issue: ParseIssue?)
 
 object ChordProParser {
-    private val DIRECTIVE = Regex("""^\s*\{\s*([A-Za-z_][\w-]*)\s*(?:[:\s]\s*(.*?))?\s*\}\s*$""")
     private val CHORD = Regex("""\[([^\]]*)\]""")
 
     private class Builder(var label: String?, val kind: SectionKind, val keepEmpty: Boolean = false) {
@@ -21,7 +21,10 @@ object ChordProParser {
     }
 
     fun parse(text: String, fileName: String): ParseResult {
-        val cleaned = text.removePrefix("\uFEFF").replace("\r\n", "\n").replace('\r', '\n')
+        val cleaned = RehearsalTiming.normalize(text)
+        // Lines carry their rehearsal boundary; directives and comments are classified the same way.
+        val canon = RehearsalTiming.canonicalize(cleaned)
+        val boundaryOf = canon.records.withIndex().associate { (b, r) -> r.line to b }
         var title: String? = null
         var subtitle: String? = null
         var artist: String? = null
@@ -57,15 +60,13 @@ object ChordProParser {
             open(arg ?: pending, kind)
         }
 
-        for (line in cleaned.split('\n')) {
-            val trimmedStart = line.trimStart()
-            if (!inTab && trimmedStart.startsWith("#")) continue
-            if (inTab && trimmedStart.startsWith("#")) continue
-            val m = DIRECTIVE.matchEntire(line)
-            if (m != null) {
+        for ((index, line) in cleaned.split('\n').withIndex()) {
+            if (line.trimStart(' ', '\t').startsWith("#")) continue
+            val d = RehearsalTiming.directive(line)
+            if (d != null) {
                 sawDirective = true
-                val name = m.groupValues[1].lowercase().substringBefore('-') // drop a "-selector" suffix
-                val arg = m.groups[2]?.value?.trim()?.takeIf { it.isNotEmpty() }
+                val name = d.first
+                val arg = d.second.trim().takeIf { it.isNotEmpty() }
                 when (name) {
                     "title", "t" -> if (arg != null) title = arg
                     "subtitle", "st" -> if (arg != null) subtitle = arg
@@ -119,7 +120,7 @@ object ChordProParser {
             }
 
             if (inTab) {
-                current.lines.add(Line(listOf(Segment(null, null, line.trimEnd()))))
+                current.lines.add(Line(listOf(Segment(null, null, line.trimEnd())), boundaryOf[index]))
                 continue
             }
 
@@ -132,7 +133,7 @@ object ChordProParser {
             }
             val segs = parseLyricLine(body)
             if (segs.any { it.chordText != null }) sawChord = true
-            current.lines.add(Line(segs))
+            current.lines.add(Line(segs, boundaryOf[index]))
         }
         finish()
 
@@ -141,6 +142,8 @@ object ChordProParser {
             SongMeta(title ?: fallbackTitle, artist, key, capo, subtitle),
             sections,
             defines,
+            RehearsalTiming.read(cleaned),
+            canon.records.size,
         )
         val issue = when {
             sections.isEmpty() -> ParseIssue.EMPTY

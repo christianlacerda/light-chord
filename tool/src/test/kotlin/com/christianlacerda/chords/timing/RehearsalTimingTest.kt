@@ -95,4 +95,35 @@ class RehearsalTimingTest {
         assertNull(RehearsalTiming.directive("{}"))
         assertNull(RehearsalTiming.directive("[G]{x}"))
     }
+
+    @Test fun seekingFindsTheTimeOfADraggedPosition() {
+        // intro hold at 0..4000, then 0 → 100 px over 4000..8000, hold at 100 until 9000, then 100 → 300 by 11000
+        val cues = listOf(Cue(0, 0), Cue(4000, 0), Cue(8000, 1), Cue(9000, 1), Cue(11000, 2))
+        val positions = doubleArrayOf(0.0, 100.0, 300.0)
+        assertEquals(6000, RehearsalTiming.timeAt(50.0, cues, positions, preferMs = 1000))
+        assertEquals(2500, RehearsalTiming.timeAt(0.0, cues, positions, preferMs = 2500), "current time already maps there")
+        assertEquals(4000, RehearsalTiming.timeAt(0.0, cues, positions, preferMs = 7000), "closest end of the hold")
+        assertEquals(8500, RehearsalTiming.timeAt(100.0, cues, positions, preferMs = 8500))
+        assertEquals(9000, RehearsalTiming.timeAt(100.0, cues, positions, preferMs = 10000))
+        assertEquals(8000, RehearsalTiming.timeAt(100.0, cues, positions, preferMs = 2000))
+        assertEquals(11000, RehearsalTiming.timeAt(500.0, cues, positions, preferMs = 0))
+        assertEquals(10000, RehearsalTiming.timeAt(200.0, cues, positions, preferMs = 0))
+    }
+
+    @Test fun hiddenBoundariesTakeTheNextVisiblePositionAndOffsetsClamp() {
+        // boundaries 1 and 2 are hidden tab rows
+        val p = RehearsalTiming.resolvePositions(4, mapOf(0 to 50f, 3 to 400f), terminalTop = 900f, readingY = 100f, maxScroll = 700f)
+        assertEquals(listOf(0.0, 300.0, 300.0, 300.0, 700.0), p.toList())
+    }
+
+    @Test fun parserTagsLinesWithTheCanonicalBoundaries() {
+        for (case in fixture.getValue("canonical").jsonArray.map { it.jsonObject }) {
+            if (case.getValue("repeat").jsonPrimitive.boolean) continue // {chorus} copies lines; timing unsupported
+            val song = com.christianlacerda.chords.chordpro.ChordProParser.parse(case.str("source"), "x.cho").song
+            val tagged = song.sections.flatMap { it.lines }.mapNotNull { it.boundary }
+            val expected = case.getValue("line_boundaries").jsonArray.map { it.jsonArray[1].jsonPrimitive.int }
+            assertEquals(expected, tagged, case.str("name"))
+            assertEquals(expected.size, song.terminal, case.str("name"))
+        }
+    }
 }

@@ -9,8 +9,10 @@ import com.christianlacerda.chords.model.displayName
 sealed interface RenderItem {
     /** [text] null means "use the localized name of [kind]" (Verse, Chorus, ...). */
     data class Label(val text: String?, val kind: SectionKind) : RenderItem
-    data class Music(val rows: List<WrappedRow>) : RenderItem
-    data class Tab(val text: String) : RenderItem
+    /** [boundary]: the source line's rehearsal timing boundary. */
+    data class Music(val rows: List<WrappedRow>, val boundary: Int? = null) : RenderItem
+    /** [rowBoundaries]: each row's rehearsal boundary (null for blank rows). */
+    data class Tab(val text: String, val rowBoundaries: List<Int?> = emptyList()) : RenderItem
     data object Gap : RenderItem
 }
 
@@ -43,7 +45,12 @@ fun buildRenderItems(
             section.kind == SectionKind.TAB
         if (showLabel) items.add(RenderItem.Label(section.label, section.kind))
         if (section.kind == SectionKind.TAB) {
-            items.add(RenderItem.Tab(section.lines.joinToString("\n") { l -> l.segments.joinToString("") { it.text } }))
+            items.add(
+                RenderItem.Tab(
+                    section.lines.joinToString("\n") { l -> l.segments.joinToString("") { it.text } },
+                    section.lines.map { it.boundary },
+                ),
+            )
             return@forEachIndexed
         }
         for (line in section.lines) {
@@ -58,7 +65,7 @@ fun buildRenderItems(
                 val rows = LineWrapper.wrap(
                     segments, maxWidth, measurers.lyricWidth, measurers.chordWidth, measurers.chordGap,
                 )
-                if (rows.isNotEmpty()) items.add(RenderItem.Music(rows))
+                if (rows.isNotEmpty()) items.add(RenderItem.Music(rows, line.boundary))
             }
         }
     }

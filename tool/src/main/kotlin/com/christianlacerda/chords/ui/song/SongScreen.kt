@@ -16,6 +16,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,6 +27,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.onPlaced
+import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -37,11 +40,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.christianlacerda.chords.R
 import com.christianlacerda.chords.layout.Measurers
+import com.christianlacerda.chords.layout.RenderItem
 import com.christianlacerda.chords.layout.ScrollSpeed
 import com.christianlacerda.chords.layout.buildRenderItems
 import com.christianlacerda.chords.library.LibraryEvents
 import com.christianlacerda.chords.model.ChordName
 import com.christianlacerda.chords.model.Song
+import com.christianlacerda.chords.timing.RehearsalTiming
 import com.christianlacerda.chords.ui.ChordsIconPainter
 import com.christianlacerda.chords.ui.ChordsTheme
 import com.christianlacerda.chords.ui.KeepScreenOn
@@ -52,6 +57,7 @@ import com.christianlacerda.chords.ui.chords.ChordDiagramScreen
 import com.christianlacerda.chords.ui.errorText
 import com.christianlacerda.chords.ui.libraryRepositoryFor
 import com.christianlacerda.chords.ui.lyricStyle
+import com.christianlacerda.chords.ui.speedLabel
 import com.thelightphone.sdk.LightScreen
 import com.thelightphone.sdk.SealedLightActivity
 import com.thelightphone.sdk.ui.LightBarButton
@@ -113,6 +119,11 @@ private fun SongContent(
     val showTabs by vm.showTabs.collectAsState()
     val playState by vm.playState.collectAsState()
     val speed by vm.speed.collectAsState()
+    val timed by vm.timed.collectAsState()
+    val rate by vm.rate.collectAsState()
+    // a timed song shows its playback rate where the speed would be
+    val speedText = if (timed != null) stringResource(R.string.rate_percent, rate) else speedLabel(speed)
+    val speedTitle = stringResource(if (timed != null) R.string.timing_label else R.string.speed_label)
     val flashToken by vm.flashToken.collectAsState()
     val speedPanel by vm.speedPanel.collectAsState()
     val countdown by vm.countdown.collectAsState()
@@ -161,6 +172,7 @@ private fun SongContent(
                         song = l.song,
                         playState = playState,
                         speed = speed,
+                        timed = timed,
                         showTabs = showTabs,
                         onChordTap = { onChordTap(it, title) },
                     )
@@ -168,7 +180,7 @@ private fun SongContent(
                         progress = progress,
                         // pause (cancel) and the speed show during the countdown, as while playing
                         playState = if (countdown != null) PlayState.Playing else playState,
-                        speed = speed,
+                        speedText = if (timed != null) stringResource(R.string.timing_short, speedText) else stringResource(R.string.speed_short, speedText),
                         onPlayPause = { vm.togglePlay() },
                         onSpeedTap = { vm.openSpeedPanel() },
                         onSettings = onOpenSettings,
@@ -178,7 +190,9 @@ private fun SongContent(
         }
         if (loaded != null) {
             SpeedOverlay(
-                speed = speed,
+                title = speedTitle,
+                value = speedText,
+                level = if (timed != null) null else (speed + ScrollSpeed.TICKS_PER_LEVEL).toFloat() / ScrollSpeed.TICKS_PER_LEVEL,
                 flashToken = flashToken,
                 interactive = speedPanel,
                 onMinus = { vm.changeSpeed(-1) },
@@ -197,6 +211,7 @@ private fun SongBodyScroll(
     song: Song,
     playState: PlayState,
     speed: Int,
+    timed: List<RehearsalTiming.Cue>?,
     showTabs: Boolean,
     onChordTap: (ChordName) -> Unit,
 ) {
@@ -243,20 +258,48 @@ private fun SongBodyScroll(
             chordsTappable = playState != PlayState.Playing,
         )
 
+        // Rehearsed timing: where each line sits in the content, measured as it is placed.
+        val geometry = remember(items) { TimingGeometry() }
+        val scroll = vm.scrollState
+        fun positions(): DoubleArray = RehearsalTiming.resolvePositions(
+            song.terminal, geometry.tops, geometry.end, readingY = viewportPx / 3f,
+            maxScroll = if (scroll.maxValue == Int.MAX_VALUE) 0f else scroll.maxValue.toFloat(),
+        )
+
         // Speed is defined in music lines per second, so it stays right if the font size changes.
         val pxPerSec = ScrollSpeed.pxPerSecond(speed, chordLineH + lyricLineH + gapPx)
-        LaunchedEffect(playState, pxPerSec) {
+        LaunchedEffect(playState, pxPerSec, timed, geometry, viewportPx) {
             if (playState != PlayState.Playing) return@LaunchedEffect
-            val scroll = vm.scrollState
             var last = withFrameNanos { it }
             while (isActive) {
                 withFrameNanos { now ->
-                    val dt = (now - last) / 1_000_000_000f
+                    val dt = (now - last) / 1_000_000_000.0
                     last = now
-                    if (!scroll.isScrollInProgress) { // a finger on the text = manual correction
-                        scroll.dispatchRawDelta(pxPerSec * dt)
+                    if (scroll.isScrollInProgress) return@withFrameNanos // a finger on the text = manual correction
+                    if (timed == null) {
+                        scroll.dispatchRawDelta(pxPerSec * dt.toFloat())
                         if (scroll.maxValue < Int.MAX_VALUE && scroll.value >= scroll.maxValue) vm.onReachedEnd()
+                    } else {
+                        // a long gap is time the screen wasn't drawn (e.g. in the background): not song time
+                        vm.advance(dt.coerceAtMost(0.25))
+                        val ms = vm.timelineMs.toLong()
+                        val y = RehearsalTiming.positionAt(ms, timed, positions())
+                        scroll.dispatchRawDelta((y - scroll.value).toFloat())
+                        if (ms >= timed.last().ms) vm.onReachedEnd()
                     }
+                }
+            }
+        }
+        // After a drag (playing or paused), continue from the time that matches where the text was left.
+        LaunchedEffect(timed, geometry, viewportPx) {
+            val cues = timed ?: return@LaunchedEffect
+            var dragging = false
+            snapshotFlow { scroll.isScrollInProgress }.collect { inProgress ->
+                if (inProgress) {
+                    dragging = true
+                } else if (dragging) {
+                    dragging = false
+                    vm.seek(RehearsalTiming.timeAt(scroll.value.toDouble(), cues, positions(), vm.timelineMs.toLong()))
                 }
             }
         }
@@ -280,10 +323,33 @@ private fun SongBodyScroll(
         ) {
             // room for the top fade, so the first line is fully visible before scrolling starts
             Spacer(Modifier.height(1.5f.gridUnitsAsDp()))
-            items.forEach { RenderItemView(it, palette, onChordTap) }
+            items.forEach { item ->
+                Box(Modifier.onPlaced { geometry.place(item, it.positionInParent().y, it.size.height.toFloat()) }) {
+                    RenderItemView(item, palette, onChordTap)
+                }
+            }
             // Lets the last line climb into the upper reading area before the song ends.
             Spacer(Modifier.height(with(density) { (viewportPx * 0.55f).toDp() }))
         }
+    }
+}
+
+/** Content y of each placed line's boundary, and the bottom of the last line (the terminal boundary). */
+private class TimingGeometry {
+    val tops = HashMap<Int, Float>()
+    var end = 0f
+
+    fun place(item: RenderItem, y: Float, height: Float) {
+        when (item) {
+            is RenderItem.Music -> item.boundary?.let { tops[it] = y }
+            // tab rows have a fixed pitch inside the block
+            is RenderItem.Tab -> {
+                val pitch = height / item.rowBoundaries.size.coerceAtLeast(1)
+                item.rowBoundaries.forEachIndexed { row, b -> if (b != null) tops[b] = y + row * pitch }
+            }
+            else -> return
+        }
+        end = maxOf(end, y + height)
     }
 }
 

@@ -170,4 +170,44 @@ object RehearsalTiming {
         }
         return pos(cues.last())
     }
+
+    /**
+     * The timeline time whose position is [y], for seeking after a manual drag. Keeps [preferMs] when it already
+     * maps there; otherwise the matching time closest to it (earliest on ties). Holds match a whole interval.
+     */
+    fun timeAt(y: Double, cues: List<Cue>, positions: DoubleArray, preferMs: Long): Long {
+        if (cues.isEmpty()) return 0
+        if (kotlin.math.abs(positionAt(preferMs, cues, positions) - y) < 0.5) return preferMs
+        fun pos(c: Cue) = positions[c.boundary.toInt()]
+        val candidates = ArrayList<Long>()
+        if (y <= pos(cues.first())) candidates += cues.first().ms
+        if (y >= pos(cues.last())) candidates += cues.last().ms
+        for ((a, b) in cues.zipWithNext()) {
+            val pa = pos(a)
+            val pb = pos(b)
+            when {
+                pa == pb -> if (kotlin.math.abs(y - pa) < 0.5) candidates += preferMs.coerceIn(a.ms, b.ms)
+                y in minOf(pa, pb)..maxOf(pa, pb) ->
+                    candidates += a.ms + Math.round((y - pa) / (pb - pa) * (b.ms - a.ms))
+            }
+        }
+        if (candidates.isEmpty()) return cues.minBy { kotlin.math.abs(pos(it) - y) }.ms
+        return candidates.minWith(compareBy<Long>({ kotlin.math.abs(it - preferMs) }, { it }))
+    }
+
+    /**
+     * Scroll offsets that bring each boundary to [readingY], from measured [tops] (content y of each visible
+     * boundary) and [terminalTop] (bottom of the last line). A hidden boundary (tabs hidden) takes the next visible
+     * one's position, so its time is still spent. Offsets are clamped to 0..[maxScroll].
+     */
+    fun resolvePositions(terminal: Int, tops: Map<Int, Float>, terminalTop: Float, readingY: Float, maxScroll: Float): DoubleArray {
+        val out = DoubleArray(terminal + 1)
+        var next = terminalTop
+        for (b in terminal downTo 0) {
+            val top = if (b == terminal) terminalTop else tops[b] ?: next
+            next = top
+            out[b] = (top - readingY).coerceIn(0f, maxScroll.coerceAtLeast(0f)).toDouble()
+        }
+        return out
+    }
 }

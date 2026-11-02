@@ -178,12 +178,23 @@ must be authored on the desktop before export. Save, Send current and batch send
 SongViewModel bypasses local voicing-table loading/lookups when definitions cover the requested chords.
 Keep the local table as compatibility fallback only for older/imported songs with missing definitions.
 
-## Planned rehearsal timing
+## Rehearsal timing
 
-Manual Chord Desk rehearsal and finer phone speed control are planned in `docs/rehearsal-mode-plan.md`
-(identical copy in Chord Desk). This is a proposed handoff, not implemented behavior. Freeze the shared timing
-contract and obtain visual design approval before GUI changes. Preserve constant px/s for untimed songs;
-explicit user timing cues do not reinstate equal-time-per-source-line pacing.
-The v1 timing contract is frozen (plan's "Frozen v1 rules"): `timing/RehearsalTiming.kt` is the pure canonicalizer, validator
-and interpolator, ported 1:1 from/to `src/rehearsal.rs` in Chord Desk; both run the shared `rehearsal-timing.json` fixture.
-Change both and regenerate the fixture together. No UI uses it yet.
+Chord Desk records rehearsal timing (layout A, 2026-10-31); plan and frozen contract in
+`docs/rehearsal-mode-plan.md` (identical copy in Chord Desk). `timing/RehearsalTiming.kt` is ported 1:1 from/to
+Chord Desk's `src/rehearsal.rs`; both run `contracts/rehearsal-timing.json`. Change both and regenerate together.
+
+- `ChordProParser` tags each `Line` with its canonical boundary (and classifies directives/`#` lines with
+  `RehearsalTiming.directive`); `Song.timing` holds the validated timing, `Song.terminal` the boundary count.
+  Render items carry boundaries (`Music.boundary`, `Tab.rowBoundaries`).
+- Timed playback (`SongScreen`): measured item tops → `resolvePositions` (reading line a third down, hidden tab
+  boundaries take the next visible one, clamped) → `positionAt` on the VM's active timeline. The timeline only
+  advances while playing (frame gaps over 250 ms are dropped); the terminal cue ends the song. A drag seeks with
+  `timeAt` on release and keeps playing (or stays paused). Untimed songs keep constant px/s; explicit timing
+  is not the rejected v14 line pacing.
+- For a timed song the wheel/speed panel change the rate (50–150 %, steps of 5, session only) and show
+  "TIMING 105%". Song settings has a session-only Rehearsed timing toggle (`LibraryEvents.timingOff`) and a
+  notice when the timing is stale or invalid (then the song scrolls normally).
+- Emulator check (2026-11-01): invented timed song pushed into the app's `files/shared/songs/` with adb (root,
+  chown to the app uid). Intro hold, unequal lines, end on the terminal cue, rate change and drag-seek looked right.
+  Physical LP3 wheel/display validation is still open.

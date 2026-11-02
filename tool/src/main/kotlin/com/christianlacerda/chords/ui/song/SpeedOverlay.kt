@@ -29,7 +29,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.christianlacerda.chords.R
 import com.christianlacerda.chords.layout.ScrollSpeed
-import com.christianlacerda.chords.ui.speedLabel
 import com.thelightphone.sdk.ui.LightText
 import com.thelightphone.sdk.ui.LightTextVariant
 import com.thelightphone.sdk.ui.LightThemeTokens
@@ -45,7 +44,10 @@ import kotlinx.coroutines.delay
  */
 @Composable
 internal fun SpeedOverlay(
-    speed: Int,
+    title: String,
+    value: String,
+    /** Filled bars (1 to 10, halves allowed); null hides the bars (timed playback rate). */
+    level: Float?,
     flashToken: Int,
     interactive: Boolean,
     onMinus: () -> Unit,
@@ -75,9 +77,9 @@ internal fun SpeedOverlay(
             contentAlignment = Alignment.Center,
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                LightText(stringResource(R.string.speed_label), LightTextVariant.Detail, lighten = true, align = TextAlign.Center)
+                LightText(title, LightTextVariant.Detail, lighten = true, align = TextAlign.Center)
                 BasicText(
-                    text = speedLabel(speed),
+                    text = value,
                     style = LightThemeTokens.typography.copy.copy(
                         fontSize = 64f.designVerticalPxToSp(),
                         lineHeight = 70f.designVerticalPxToSp(),
@@ -85,12 +87,11 @@ internal fun SpeedOverlay(
                         color = colors.content,
                     ),
                 )
-                Spacer(Modifier.height(0.5f.gridUnitsAsDp()))
-                Row(horizontalArrangement = Arrangement.spacedBy(0.25f.gridUnitsAsDp()), verticalAlignment = Alignment.Bottom) {
+                if (level != null) Spacer(Modifier.height(0.5f.gridUnitsAsDp()))
+                if (level != null) Row(horizontalArrangement = Arrangement.spacedBy(0.25f.gridUnitsAsDp()), verticalAlignment = Alignment.Bottom) {
                     // One bar per whole level; a half step fills the lower half of the next bar.
                     for (i in 0 until ScrollSpeed.MAX_LEVEL) {
-                        val fill = ((speed + ScrollSpeed.TICKS_PER_LEVEL).toFloat() / ScrollSpeed.TICKS_PER_LEVEL - i)
-                            .coerceIn(0f, 1f)
+                        val fill = (level - i).coerceIn(0f, 1f)
                         Box(
                             Modifier
                                 .width(0.5f.gridUnitsAsDp())
