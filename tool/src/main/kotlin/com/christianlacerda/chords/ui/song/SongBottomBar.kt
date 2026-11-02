@@ -40,7 +40,7 @@ internal fun SongBottomBar(
             items = listOf(
                 LightBarButton.LightIcon(if (playing) LightIcons.PAUSE else LightIcons.PLAY, onClick = onPlayPause),
                 if (playing) {
-                    LightBarButton.Text(speedText.uppercase(), onClick = onSpeedTap)
+                    LightBarButton.Text(speedText, onClick = onSpeedTap)
                 } else {
                     LightBarButton.LightIcon(LightIcons.SETTINGS, onClick = onSettings, contentDescription = stringResource(R.string.song_settings))
                 },

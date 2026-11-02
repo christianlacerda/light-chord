@@ -53,6 +53,14 @@ class ScrollSpeedTest {
         assertEquals("10", ScrollSpeed.label(18))
     }
 
+    @Test fun rateLabels() {
+        assertEquals("1x", ScrollSpeed.rateLabel(100))
+        assertEquals("1.05x", ScrollSpeed.rateLabel(105))
+        assertEquals("1.5x", ScrollSpeed.rateLabel(150))
+        assertEquals("0.5x", ScrollSpeed.rateLabel(50))
+        assertEquals("0,95x", ScrollSpeed.rateLabel(95, ','))
+    }
+
     @Test fun pixels() {
         assertEquals(10f, ScrollSpeed.pxPerSecond(ScrollSpeed.tickOf(1), 120f), 1e-4f)
         assertEquals(80f, ScrollSpeed.pxPerSecond(ScrollSpeed.tickOf(10), 120f), 1e-3f)

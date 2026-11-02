@@ -25,6 +25,11 @@ internal const val CONTENT_PADDING_UNITS = 1.5f
 internal fun speedLabel(tick: Int): String =
     ScrollSpeed.label(tick, stringResource(R.string.decimal_separator).first())
 
+/** "1x", "1.05x", "0.5x" ("1,05x" in Portuguese) for a timed playback rate in percent. */
+@Composable
+internal fun rateLabel(percent: Int): String =
+    ScrollSpeed.rateLabel(percent, stringResource(R.string.decimal_separator).first())
+
 /** Localized text for a stored error code, or null when there is no error. */
 @Composable
 internal fun errorText(code: String?): String? = when (code) {

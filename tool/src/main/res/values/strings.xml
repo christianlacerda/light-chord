@@ -18,11 +18,8 @@
     <string name="song_missing">This song is no longer on the phone</string>
     <string name="speed_short">Speed %1$s</string>
     <string name="decimal_separator">.</string>
-    <string name="timing_label">TIMING</string>
-    <string name="timing_short">Timing %1$s</string>
-    <string name="rate_percent">%1$d%%</string>
     <string name="settings_timing">Rehearsed timing</string>
-    <string name="settings_timing_hint">Scrolls as rehearsed in Chord Desk; the wheel changes the rate. Off uses normal speed until the app closes.</string>
+    <string name="settings_timing_hint">Scrolls as rehearsed in Chord Desk (speed 1x); the wheel makes it faster or slower. Off uses normal speed until the app closes.</string>
     <string name="settings_timing_invalid">This song\'s rehearsed timing is out of date, so it scrolls at normal speed.</string>
     <string name="speed_label">SPEED</string>
     <string name="section_verse">Verse</string>

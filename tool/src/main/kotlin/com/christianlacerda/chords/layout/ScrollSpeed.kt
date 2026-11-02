@@ -28,6 +28,13 @@ object ScrollSpeed {
     fun pxPerSecond(tick: Int, linePitchPx: Float): Float =
         (linePitchPx / secondsPerLine(tick)).toFloat()
 
+    /** A timed song's rate: "1x" for 100 %, "1.05x", "0.5x" (with [decimalSeparator]). */
+    fun rateLabel(percent: Int, decimalSeparator: Char = '.'): String {
+        val whole = percent / 100
+        val frac = (percent % 100).toString().padStart(2, '0').trimEnd('0')
+        return if (frac.isEmpty()) "${whole}x" else "$whole$decimalSeparator${frac}x"
+    }
+
     /** "4" or "4.5" (with [decimalSeparator]). */
     fun label(tick: Int, decimalSeparator: Char = '.'): String {
         val t = clamp(tick)

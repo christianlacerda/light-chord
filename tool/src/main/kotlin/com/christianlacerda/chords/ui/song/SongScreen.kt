@@ -57,6 +57,7 @@ import com.christianlacerda.chords.ui.chords.ChordDiagramScreen
 import com.christianlacerda.chords.ui.errorText
 import com.christianlacerda.chords.ui.libraryRepositoryFor
 import com.christianlacerda.chords.ui.lyricStyle
+import com.christianlacerda.chords.ui.rateLabel
 import com.christianlacerda.chords.ui.speedLabel
 import com.thelightphone.sdk.LightScreen
 import com.thelightphone.sdk.SealedLightActivity
@@ -121,9 +122,9 @@ private fun SongContent(
     val speed by vm.speed.collectAsState()
     val timed by vm.timed.collectAsState()
     val rate by vm.rate.collectAsState()
-    // a timed song shows its playback rate where the speed would be
-    val speedText = if (timed != null) stringResource(R.string.rate_percent, rate) else speedLabel(speed)
-    val speedTitle = stringResource(if (timed != null) R.string.timing_label else R.string.speed_label)
+    // a timed song shows its playback rate where the speed would be: 1x = as rehearsed
+    val speedText = if (timed != null) rateLabel(rate) else speedLabel(speed)
+    val speedTitle = stringResource(R.string.speed_label)
     val flashToken by vm.flashToken.collectAsState()
     val speedPanel by vm.speedPanel.collectAsState()
     val countdown by vm.countdown.collectAsState()
@@ -180,7 +181,8 @@ private fun SongContent(
                         progress = progress,
                         // pause (cancel) and the speed show during the countdown, as while playing
                         playState = if (countdown != null) PlayState.Playing else playState,
-                        speedText = if (timed != null) stringResource(R.string.timing_short, speedText) else stringResource(R.string.speed_short, speedText),
+                        // uppercase the label only, so "1.05x" keeps its small x
+                        speedText = stringResource(R.string.speed_short, "§").uppercase().replace("§", speedText),
                         onPlayPause = { vm.togglePlay() },
                         onSpeedTap = { vm.openSpeedPanel() },
                         onSettings = onOpenSettings,

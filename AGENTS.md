@@ -27,7 +27,7 @@ wheel, screen kept awake only in the song view, and guitar chord diagrams.
 - **No pull requests. Commit and push straight to `main`.** Christian is the only developer.
 - CI (`.github/workflows/pr-check.yml`, `./gradlew check`) only runs on PRs, so it will **not** run for pushes to
   main. Run `./gradlew check` locally before or right after pushing and fix anything it reports.
-- **Bump `versionCode` in `tool/lighttool.toml` before every device install** (currently 25).
+- **Bump `versionCode` in `tool/lighttool.toml` before every device install** (currently 26).
   `versionName` stays `1.0.0` unless told otherwise.
 - Never commit real copyrighted song lyrics. Bundled samples are public domain only (Amazing Grace, Home on the
   Range, Wayfaring Stranger, Shenandoah, Peixe Vivo). Test fixtures use invented or public-domain text.
@@ -193,7 +193,7 @@ Chord Desk's `src/rehearsal.rs`; both run `contracts/rehearsal-timing.json`. Cha
   `timeAt` on release and keeps playing (or stays paused). Untimed songs keep constant px/s; explicit timing
   is not the rejected v14 line pacing.
 - For a timed song the wheel/speed panel change the rate (50–150 %, steps of 5, session only) and show
-  "TIMING 105%". Song settings has a session-only Rehearsed timing toggle (`LibraryEvents.timingOff`) and a
+  "SPEED 1.05x" (1x = as rehearsed). Song settings has a session-only Rehearsed timing toggle (`LibraryEvents.timingOff`) and a
   notice when the timing is stale or invalid (then the song scrolls normally).
 - Emulator check (2026-11-01): invented timed song pushed into the app's `files/shared/songs/` with adb (root,
   chown to the app uid). Intro hold, unequal lines, end on the terminal cue, rate change and drag-seek looked right.
