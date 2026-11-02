@@ -273,6 +273,9 @@ private fun SongBodyScroll(
         LaunchedEffect(playState, pxPerSec, timed, geometry, viewportPx) {
             if (playState != PlayState.Playing) return@LaunchedEffect
             var last = withFrameNanos { it }
+            // Sub-pixel position already dispatched. Deltas against the Int ScrollState.value would round each
+            // frame and jitter by up to a pixel; resync when the value moved for another reason (drag, relayout).
+            var shown = scroll.value.toDouble()
             while (isActive) {
                 withFrameNanos { now ->
                     val dt = (now - last) / 1_000_000_000.0
@@ -286,7 +289,9 @@ private fun SongBodyScroll(
                         vm.advance(dt.coerceAtMost(0.25))
                         val ms = vm.timelineMs.toLong()
                         val y = RehearsalTiming.positionAt(ms, timed, positions())
-                        scroll.dispatchRawDelta((y - scroll.value).toFloat())
+                        if (kotlin.math.abs(scroll.value - shown) > 1.5) shown = scroll.value.toDouble()
+                        scroll.dispatchRawDelta((y - shown).toFloat())
+                        shown = y
                         if (ms >= timed.last().ms) vm.onReachedEnd()
                     }
                 }
