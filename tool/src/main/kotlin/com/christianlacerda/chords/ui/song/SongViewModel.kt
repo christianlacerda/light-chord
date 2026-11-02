@@ -88,6 +88,8 @@ class SongViewModel(
     private var loadStarted = false
 
     /** Show TAB sections? From the song's saved settings. */
+    private val _useTiming = MutableStateFlow(true)
+
     private val _showTabs = MutableStateFlow(true)
     val showTabs: StateFlow<Boolean> = _showTabs.asStateFlow()
 
@@ -103,9 +105,9 @@ class SongViewModel(
             }
         }
         viewModelScope.launch {
-            combine(_load, LibraryEvents.timingOff) { load, off ->
+            combine(_load, _useTiming) { load, use ->
                 val timing = ((load as? SongLoad.Ready)?.song?.timing as? RehearsalTiming.Result.Ok)?.timing
-                timing?.cues?.takeIf { fileName !in off }
+                timing?.cues?.takeIf { use }
             }.collect { cues ->
                 if (cues != _timed.value) {
                     _timed.value = cues
@@ -159,6 +161,7 @@ class SongViewModel(
      */
     private fun applySettings(settings: SongSettings) {
         _showTabs.value = settings.showTabs
+        _useTiming.value = settings.useTiming
         val saved = settings.tick
         if (saved != appliedSavedSpeed && _playState.value != PlayState.Playing) {
             _speed.value = saved

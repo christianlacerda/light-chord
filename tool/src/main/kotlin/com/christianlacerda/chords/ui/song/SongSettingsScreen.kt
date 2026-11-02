@@ -21,7 +21,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.lifecycle.viewModelScope
 import com.christianlacerda.chords.R
 import com.christianlacerda.chords.timing.RehearsalTiming
-import com.christianlacerda.chords.library.LibraryEvents
 import com.christianlacerda.chords.layout.ScrollSpeed
 import com.christianlacerda.chords.library.LibraryRepository
 import com.christianlacerda.chords.library.SongSettings
@@ -91,10 +90,9 @@ class SongSettingsViewModel(
         if (next != s.tick || s.speedTick == null) update(s.withTick(next))
     }
 
-    /** Session only: the song keeps its timing; it is just not used until the app process ends. */
     fun toggleTiming() {
-        val off = LibraryEvents.timingOff.value
-        LibraryEvents.timingOff.value = if (fileName in off) off - fileName else off + fileName
+        val s = _state.value?.settings ?: return
+        update(s.copy(useTiming = !s.useTiming))
     }
 
     fun toggleTabs() {
@@ -156,10 +154,9 @@ class SongSettingsScreen(sealedActivity: SealedLightActivity, private val fileNa
                         )
                         when (s.timingValid) {
                             true -> {
-                                val off by LibraryEvents.timingOff.collectAsState()
                                 Spacer(Modifier.height(0.6f.gridUnitsAsDp()))
                                 SettingRow(stringResource(R.string.settings_timing), onClick = { viewModel.toggleTiming() }) {
-                                    LightIcon(icon = if (fileName in off) LightIcons.TOGGLE_STATE_OFF else LightIcons.TOGGLE_STATE_ON)
+                                    LightIcon(icon = if (s.settings.useTiming) LightIcons.TOGGLE_STATE_ON else LightIcons.TOGGLE_STATE_OFF)
                                 }
                                 LightText(stringResource(R.string.settings_timing_hint), LightTextVariant.Detail, lighten = true)
                             }

@@ -21,9 +21,6 @@ object LibraryEvents {
     /** App-wide chord notation; screens collect it so a change shows straight away. */
     val notation = MutableStateFlow(ChordNotation.BRAZILIAN)
 
-    /** Songs whose rehearsed timing is switched off until the app process ends (file names). */
-    val timingOff = MutableStateFlow<Set<String>>(emptySet())
-
     @Volatile
     var voicingCache: VoicingLibrary? = null
 }

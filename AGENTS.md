@@ -193,7 +193,7 @@ Chord Desk's `src/rehearsal.rs`; both run `contracts/rehearsal-timing.json`. Cha
   `timeAt` on release and keeps playing (or stays paused). Untimed songs keep constant px/s; explicit timing
   is not the rejected v14 line pacing.
 - For a timed song the wheel/speed panel change the rate (50–150 %, steps of 5, session only) and show
-  "SPEED 1.05x" (1x = as rehearsed). Song settings has a session-only Rehearsed timing toggle (`LibraryEvents.timingOff`) and a
+  "SPEED 1.05x" (1x = as rehearsed). Song settings has a saved Rehearsed timing toggle (`SongSettings.useTiming`, default on) and a
   notice when the timing is stale or invalid (then the song scrolls normally).
 - Emulator check (2026-11-01): invented timed song pushed into the app's `files/shared/songs/` with adb (root,
   chown to the app uid). Intro hold, unequal lines, end on the terminal cue, rate change and drag-seek looked right.

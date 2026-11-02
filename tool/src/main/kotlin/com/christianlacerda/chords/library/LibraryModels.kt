@@ -46,6 +46,8 @@ data class SongSettings(
     val lastProgress: Float = 0f,
     val showTabs: Boolean = true,
     val speedTick: Int? = null,
+    /** Scroll along the song's rehearsed timing when it has valid timing; off uses the speed. */
+    val useTiming: Boolean = true,
 ) {
     val tick: Int get() = speedTick?.let(ScrollSpeed::clamp) ?: ScrollSpeed.tickOf(speed)
 

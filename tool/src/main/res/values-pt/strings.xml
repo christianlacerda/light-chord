@@ -19,7 +19,7 @@
     <string name="speed_short">Vel. %1$s</string>
     <string name="decimal_separator">,</string>
     <string name="settings_timing">Ritmo ensaiado</string>
-    <string name="settings_timing_hint">Rola como ensaiado no Chord Desk (velocidade 1x); a roda deixa mais rápido ou mais lento. Desligado usa a velocidade normal até fechar o app.</string>
+    <string name="settings_timing_hint">Rola como ensaiado no Chord Desk (velocidade 1x); a roda deixa mais rápido ou mais lento. Desligado usa a velocidade normal.</string>
     <string name="settings_timing_invalid">O ritmo ensaiado desta música está desatualizado; ela rola na velocidade normal.</string>
     <string name="speed_label">VELOCIDADE</string>
     <string name="section_verse">Verso</string>

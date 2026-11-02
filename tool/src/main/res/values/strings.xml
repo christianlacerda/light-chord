@@ -19,7 +19,7 @@
     <string name="speed_short">Speed %1$s</string>
     <string name="decimal_separator">.</string>
     <string name="settings_timing">Rehearsed timing</string>
-    <string name="settings_timing_hint">Scrolls as rehearsed in Chord Desk (speed 1x); the wheel makes it faster or slower. Off uses normal speed until the app closes.</string>
+    <string name="settings_timing_hint">Scrolls as rehearsed in Chord Desk (speed 1x); the wheel makes it faster or slower. Off uses the normal speed.</string>
     <string name="settings_timing_invalid">This song\'s rehearsed timing is out of date, so it scrolls at normal speed.</string>
     <string name="speed_label">SPEED</string>
     <string name="section_verse">Verse</string>

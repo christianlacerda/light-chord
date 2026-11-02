@@ -44,4 +44,10 @@ class SongSettingsJsonTest {
         val s = json.decodeFromString(SongSettings.serializer(), """{"speedTick":40}""")
         assertEquals(18, s.tick)
     }
+
+    @Test fun timingIsOnUnlessSwitchedOff() {
+        assertTrue(json.decodeFromString(SongSettings.serializer(), """{"speed":4}""").useTiming)
+        val text = json.encodeToString(SongSettings.serializer(), SongSettings(useTiming = false))
+        assertFalse(json.decodeFromString(SongSettings.serializer(), text).useTiming)
+    }
 }
